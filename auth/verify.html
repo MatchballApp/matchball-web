@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="sk">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matchball — potvrdenie e-mailu</title>
+<style>
+:root{--bg:#fff;--fg:#16241c;--muted:#5b6b61;--line:#e3e8e4;--accent:#1f6b45}
+@media(prefers-color-scheme:dark){:root{--bg:#101613;--fg:#e8efe9;--muted:#9db0a4;--line:#25322b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+main{max-width:28rem;margin:0 auto;padding:4rem 1.25rem;text-align:center}
+.icon{font-size:2.5rem;line-height:1}
+h1{font-size:1.4rem;margin:1rem 0 .5rem}
+p{margin:0 0 .9rem;color:var(--muted)}
+</style>
+<main>
+  <div id="state">
+    <p>Overujem…</p>
+  </div>
+</main>
+<script type="module">
+// Presná kópia logiky z src/navigation/RootNavigator.tsx (handleAuthDeepLink,
+// vetva „auth/verified") — appka to isté robí sama, keď odkaz otvorí telefón
+// s nainštalovanou appkou. Táto stránka je náhrada pre zariadenia bez appky
+// (notebook, iný telefón), kde mecbal:// odkaz nemá čo otvoriť.
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const supabase = createClient(
+  'https://hpfcyriuitwbwtluaxbu.supabase.co',
+  'sb_publishable_Ywd12xRPKBMQ8a6V7uyLhQ_nvmTabEU',
+);
+
+const TEXT = {
+  sk: {
+    doneTitle: 'Adresa je potvrdená', doneMsg: 'Hotovo. Môžeš sa vrátiť do appky Matchball.',
+    expiredTitle: 'Odkaz už neplatí', expiredMsg: 'Tento odkaz už neplatí. Vypýtaj si nový priamo v appke.',
+  },
+  cs: {
+    doneTitle: 'Adresa je potvrzená', doneMsg: 'Hotovo. Můžeš se vrátit do appky Matchball.',
+    expiredTitle: 'Odkaz už neplatí', expiredMsg: 'Tento odkaz už neplatí. Vyžádej si nový přímo v appce.',
+  },
+  en: {
+    doneTitle: 'Email confirmed', doneMsg: "You're set. You can go back to the Matchball app.",
+    expiredTitle: 'Link no longer valid', expiredMsg: 'This link is no longer valid. Ask for a new one in the app.',
+  },
+};
+const lang = (navigator.language || 'sk').slice(0, 2);
+const t = TEXT[lang] || TEXT.sk;
+
+const el = document.getElementById('state');
+function show(icon, title, msg) {
+  el.innerHTML = `<div class="icon">${icon}</div><h1>${title}</h1><p>${msg}</p>`;
+}
+
+const params = new URLSearchParams(location.hash.slice(1));
+const access_token = params.get('access_token');
+const refresh_token = params.get('refresh_token') || '';
+const linkError = params.get('error') || params.get('error_code');
+
+async function run() {
+  if (linkError || !access_token) {
+    show('⚠️', t.expiredTitle, t.expiredMsg);
+    return;
+  }
+  const { error: sessionError } = await supabase.auth.setSession({ access_token, refresh_token });
+  if (sessionError) {
+    show('⚠️', t.expiredTitle, t.expiredMsg);
+    return;
+  }
+  // mark_email_verified (migrácia 267) si sám overí, že táto relácia vznikla
+  // prihlásením cez odkaz z e-mailu (amr: magiclink) — táto stránka si teda
+  // nič nemôže podvrhnúť, presne ako appka.
+  const { error: rpcError } = await supabase.rpc('mark_email_verified');
+  if (rpcError) {
+    show('⚠️', t.expiredTitle, t.expiredMsg);
+    return;
+  }
+  show('✓', t.doneTitle, t.doneMsg);
+}
+run();
+</script>
+</html>
