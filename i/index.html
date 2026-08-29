@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="sk">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pozvánka do Matchballu</title>
+<meta name="description" content="Máš pozvánku do Matchballu — appky na rezerváciu tenisových tréningov.">
+<meta property="og:title" content="Pozvánka do Matchballu">
+<meta property="og:description" content="Nájdi si trénera, vyber termín a zaplať v appke. Zadaj kód pozvánky a obaja dostanete loptičky.">
+<style>
+:root{--bg:#fff;--fg:#16241c;--muted:#5b6b61;--line:#e3e8e4;--accent:#1f6b45;--card:#f6f9f7}
+@media(prefers-color-scheme:dark){:root{--bg:#101613;--fg:#e8efe9;--muted:#9db0a4;--line:#25322b;--accent:#4fbb84;--card:#16201b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+main{max-width:30rem;margin:0 auto;padding:3rem 1.25rem 4rem;text-align:center}
+.ball{font-size:3.4rem;line-height:1;margin-bottom:.75rem}
+h1{font-size:1.55rem;margin:0 0 .5rem}
+p{margin:0 0 1rem;color:var(--muted)}
+p.lead{color:var(--fg)}
+.code{background:var(--card);border:1.5px solid var(--accent);border-radius:.9rem;padding:1rem;margin:1.5rem 0}
+.code .lbl{display:block;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.code .val{display:block;font-size:2rem;font-weight:800;letter-spacing:.25em;color:var(--accent);margin-top:.15rem}
+.btn{display:block;width:100%;padding:.95rem 1.25rem;border-radius:.85rem;border:0;background:var(--accent);color:#fff;
+     font-size:1rem;font-weight:600;text-decoration:none;cursor:pointer;margin-bottom:.75rem;font-family:inherit}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);font-weight:500}
+.hint{font-size:.85rem;color:var(--muted)}
+form{display:flex;gap:.5rem;margin:.25rem 0 .75rem}
+input{flex:1;min-width:0;padding:.85rem 1rem;border-radius:.85rem;border:1px solid var(--line);
+      background:var(--bg);color:var(--fg);font-size:1rem;font-family:inherit}
+input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+form .btn{width:auto;margin:0;padding:.85rem 1.15rem}
+.note{font-size:.85rem;color:var(--muted);margin-top:.5rem;min-height:1.4rem}
+.note.ok{color:var(--accent);font-weight:600}
+.note.err{color:#c0392b}
+@media(prefers-color-scheme:dark){.note.err{color:#ff8a7a}}
+footer{margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+footer a{color:var(--muted)}
+[hidden]{display:none!important}
+</style>
+<main>
+  <div class="ball">🎾</div>
+  <h1>Máš pozvánku do Matchballu</h1>
+  <p class="lead">Nájdi si trénera, vyber termín a zaplať priamo v appke. Zrušenie 16 hodín vopred je zdarma.</p>
+
+  <div class="code" id="codeBox" hidden>
+    <span class="lbl">Kód pozvánky</span>
+    <span class="val" id="codeVal"></span>
+  </div>
+  <p class="hint" id="codeHint" hidden>Zadaj ho pri registrácii — obaja za to dostanete loptičky navyše.</p>
+
+  <!-- iOS -->
+  <div id="ios" hidden>
+    <a class="btn" id="iosBtn" href="https://apps.apple.com/sk/app/matchball/id6804171137">Stiahnuť z App Store</a>
+    <!-- Skratka namiesto opisovania kódu: po inštalácii appka z obchodu nevie,
+         z ktorého odkazu človek prišiel, ale keď sa sem vráti a otvorí appku
+         odtiaľto, `mecbal://invite?ref=` jej kód odovzdá a registrácia si ho
+         predvyplní sama. -->
+    <p class="hint" id="backHint" hidden>Po inštalácii sa sem vráť a ťukni na „Appku už mám“ — kód sa doplní sám.</p>
+    <a class="btn ghost" id="openApp" href="#">Appku už mám — otvoriť</a>
+  </div>
+
+  <!-- Android: appka je na Play odoslaná, zatiaľ nie je vonku -->
+  <div id="android" hidden>
+    <p class="lead"><strong>Androidová verzia je na ceste.</strong> Nechaj mi e-mail a ozvem sa hneď, ako bude v Obchode Play.</p>
+    <form id="waitForm" novalidate>
+      <input type="email" id="email" placeholder="tvoj@email.sk" autocomplete="email" inputmode="email" aria-label="E-mail">
+      <button class="btn" type="submit" id="waitBtn">Dajte vedieť</button>
+    </form>
+    <p class="note" id="waitNote" role="status" aria-live="polite"></p>
+  </div>
+
+  <!-- Počítač alebo neznáme zariadenie -->
+  <div id="other" hidden>
+    <p class="lead">Otvor tento odkaz v telefóne, alebo si appku nájdi v obchode.</p>
+    <a class="btn" href="https://apps.apple.com/sk/app/matchball/id6804171137">Matchball pre iPhone</a>
+    <p class="hint">Android verzia je na ceste.</p>
+  </div>
+
+  <footer>
+    <strong>Matchball</strong> — rezervácia tenisových tréningov<br>
+    <a href="../">o službe</a> · <a href="../legal/privacy.html">ochrana údajov</a>
+  </footer>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  // Kód nesie iba `?ref=`. Meno pozývajúceho tu zámerne NIE JE — do adresy,
+  // ktorá sa preposiela a končí v histórii prehliadača, cudzie meno nepatrí.
+  // Kto koho pozval, je napísané na obrázku pozvánky, ktorý zdieľa appka.
+  var ref = '';
+  try {
+    var m = location.search.match(/[?&]ref=([^&#]+)/);
+    if (m) ref = decodeURIComponent(m[1]).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32);
+  } catch (e) { /* pokazená adresa nie je dôvod nezobraziť stránku */ }
+
+  if (ref) {
+    document.getElementById('codeVal').textContent = ref;
+    document.getElementById('codeBox').hidden = false;
+    document.getElementById('codeHint').hidden = false;
+    // `mecbal://` otvorí appku len tomu, kto ju už má. Je to schválne odkaz,
+    // na ktorý sa ťuká, nie automatické presmerovanie: keď appka nainštalovaná
+    // nie je, Safari na to odpovie chybovým oknom a to je horšie než nič.
+    document.getElementById('openApp').href = 'mecbal://invite?ref=' + encodeURIComponent(ref);
+    // Bez kódu by tá veta klamala — vracať sa netreba, keď nie je čo doplniť.
+    document.getElementById('backHint').hidden = false;
+  } else {
+    var oa = document.getElementById('openApp');
+    if (oa) oa.href = 'mecbal://invite';
+  }
+
+  var ua = navigator.userAgent || '';
+  var isAndroid = /Android/i.test(ua);
+  // iPadOS 13+ sa hlási ako Macintosh; rozlíši ho len dotyková obrazovka.
+  var isIOS = /iPhone|iPad|iPod/i.test(ua)
+    || (/Macintosh/i.test(ua) && typeof document.ontouchend !== 'undefined');
+
+  document.getElementById(isAndroid ? 'android' : isIOS ? 'ios' : 'other').hidden = false;
+
+  // ── Androidová čakačka (edge funkcia `waitlist`, migrácia 308) ───────────
+  var form = document.getElementById('waitForm');
+  if (!form) return;
+  var note = document.getElementById('waitNote');
+  var btn = document.getElementById('waitBtn');
+  var input = document.getElementById('email');
+  var sent = false;
+
+  function say(text, kind) {
+    note.textContent = text;
+    note.className = 'note' + (kind ? ' ' + kind : '');
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (sent) return;
+
+    var email = (input.value || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/.test(email)) {
+      say('Skontroluj adresu, niečo tam nesedí.', 'err');
+      input.focus();
+      return;
+    }
+
+    btn.disabled = true;
+    say('Posielam…');
+
+    fetch('https://hpfcyriuitwbwtluaxbu.supabase.co/functions/v1/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        ref: ref || null,
+        locale: (navigator.language || '').slice(0, 8) || null
+      })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (b) {
+        return { ok: r.ok, body: b };
+      });
+    }).then(function (res) {
+      if (res.ok && res.body.ok) {
+        sent = true;
+        form.hidden = true;
+        say('Hotovo. Ozvem sa, hneď ako bude Android vonku.', 'ok');
+        return;
+      }
+      btn.disabled = false;
+      if (res.body.error === 'email_invalid') say('Skontroluj adresu, niečo tam nesedí.', 'err');
+      else if (res.body.error === 'rate_limited') say('Skús to o chvíľu znova.', 'err');
+      else say('Nepodarilo sa to odoslať. Skús to o chvíľu znova.', 'err');
+    }).catch(function () {
+      btn.disabled = false;
+      say('Nepodarilo sa to odoslať. Skontroluj pripojenie.', 'err');
+    });
+  });
+})();
+</script>
+</html>
