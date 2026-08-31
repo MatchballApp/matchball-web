@@ -301,14 +301,22 @@ p{margin:0}
    neprekrýva. Dovtedy mala snímka len tenkú linku a zaoblenie, čiže vyzerala
    ako karta s odseknutým obsahom, nie ako telefón. */
 .shot{
-  --bezel:10px;
+  --bezel:12px;
   padding:var(--bezel);
-  border-radius:calc(34px + var(--bezel));
-  background:linear-gradient(160deg,#2A2F2B,#0B100D 42%,#1A201C);
-  box-shadow:var(--shadow-lift),0 0 0 1px rgba(255,255,255,.09) inset;
+  /* Plná tmavá, nie prechod: prechod mal svetlejší koniec a v rohu, kde je
+     rámu najmenej, presvital ako sivý klin. */
+  background:#0B100D;
+  border-radius:44px;
+  /* Poistka proti presvitaniu podkladu na zaoblení pri delení pixelu. */
+  overflow:hidden;
+  box-shadow:var(--shadow-lift);
 }
+/* Zaoblenie snímky je MENŠIE než vnútro rámu (44 − 12 = 32), takže tmavý rám
+   drží hrúbku aj v rohu na uhlopriečke. Keď sa obe zaoblenia rovnajú, rám sa
+   v rohu stenčí na nulu a hrana snímky je zrazu vidieť. */
 .shot img{
-  width:100%;height:auto;border-radius:34px;display:block;
+  width:100%;height:auto;border-radius:26px;display:block;
+  background:#fff;
 }
 .shots-dots{display:flex;gap:8px;justify-content:center;margin-top:18px}
 .shots-dots button{
