@@ -54,25 +54,24 @@ footer a{color:var(--muted)}
          z ktorého odkazu človek prišiel, ale keď sa sem vráti a otvorí appku
          odtiaľto, `mecbal://invite?ref=` jej kód odovzdá a registrácia si ho
          predvyplní sama. -->
-    <p class="hint" id="backHint" hidden>Po inštalácii sa sem vráť a ťukni na „Appku už mám“ — kód sa doplní sám.</p>
-    <a class="btn ghost" id="openApp" href="#">Appku už mám — otvoriť</a>
+    <p class="hint back-hint" hidden>Po inštalácii sa sem vráť a ťukni na „Appku už mám“ — kód sa doplní sám.</p>
+    <a class="btn ghost open-app" href="#">Appku už mám — otvoriť</a>
   </div>
 
-  <!-- Android: appka je na Play odoslaná, zatiaľ nie je vonku -->
+  <!-- Android: od 31. 8. 2026 je appka v Obchode Play, takže tá istá dvojica
+       ako pri iOS. Čakačka odišla; jej obsluha v skripte ostáva pre prípad, že
+       by sa formulár niekedy vrátil — `if (!form) return` ju drží ticho. -->
   <div id="android" hidden>
-    <p class="lead"><strong>Androidová verzia je na ceste.</strong> Nechaj mi e-mail a ozvem sa hneď, ako bude v Obchode Play.</p>
-    <form id="waitForm" novalidate>
-      <input type="email" id="email" placeholder="tvoj@email.sk" autocomplete="email" inputmode="email" aria-label="E-mail">
-      <button class="btn" type="submit" id="waitBtn">Dajte vedieť</button>
-    </form>
-    <p class="note" id="waitNote" role="status" aria-live="polite"></p>
+    <a class="btn" href="https://play.google.com/store/apps/details?id=sk.matchball.app">Stiahnuť z Obchodu Play</a>
+    <p class="hint back-hint" hidden>Po inštalácii sa sem vráť a ťukni na „Appku už mám“ — kód sa doplní sám.</p>
+    <a class="btn ghost open-app" href="#">Appku už mám — otvoriť</a>
   </div>
 
   <!-- Počítač alebo neznáme zariadenie -->
   <div id="other" hidden>
     <p class="lead">Otvor tento odkaz v telefóne, alebo si appku nájdi v obchode.</p>
     <a class="btn" href="https://apps.apple.com/sk/app/matchball/id6804171137">Matchball pre iPhone</a>
-    <p class="hint">Android verzia je na ceste.</p>
+    <a class="btn ghost" href="https://play.google.com/store/apps/details?id=sk.matchball.app">Matchball pre Android</a>
   </div>
 
   <footer>
@@ -94,6 +93,10 @@ footer a{color:var(--muted)}
     if (m) ref = decodeURIComponent(m[1]).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32);
   } catch (e) { /* pokazená adresa nie je dôvod nezobraziť stránku */ }
 
+  function otvorAppku(href) {
+    [].forEach.call(document.querySelectorAll('.open-app'), function (a) { a.href = href; });
+  }
+
   if (ref) {
     document.getElementById('codeVal').textContent = ref;
     document.getElementById('codeBox').hidden = false;
@@ -101,12 +104,13 @@ footer a{color:var(--muted)}
     // `mecbal://` otvorí appku len tomu, kto ju už má. Je to schválne odkaz,
     // na ktorý sa ťuká, nie automatické presmerovanie: keď appka nainštalovaná
     // nie je, Safari na to odpovie chybovým oknom a to je horšie než nič.
-    document.getElementById('openApp').href = 'mecbal://invite?ref=' + encodeURIComponent(ref);
+    // Cez triedu, nie cez id: tú istú dvojicu má odteraz iOS aj Android a
+    // `getElementById` by obslúžil vždy len ten prvý.
+    otvorAppku('mecbal://invite?ref=' + encodeURIComponent(ref));
     // Bez kódu by tá veta klamala — vracať sa netreba, keď nie je čo doplniť.
-    document.getElementById('backHint').hidden = false;
+    [].forEach.call(document.querySelectorAll('.back-hint'), function (el) { el.hidden = false; });
   } else {
-    var oa = document.getElementById('openApp');
-    if (oa) oa.href = 'mecbal://invite';
+    otvorAppku('mecbal://invite');
   }
 
   var ua = navigator.userAgent || '';

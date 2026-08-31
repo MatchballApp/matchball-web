@@ -1,58 +1,1157 @@
 <!doctype html>
 <html lang="sk">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Matchball — rezervácia tenisových tréningov</title>
+<title>Matchball — nájdi trénera a rezervuj tréning</title>
+<meta name="description" content="Matchball spája hráčov tenisu s trénermi na Slovensku a v Česku. Termín vyberieš v appke, platíš kartou až po potvrdení trénerom.">
+<meta name="theme-color" content="#0B100D">
+<meta property="og:title" content="Matchball — nájdi trénera a rezervuj tréning">
+<meta property="og:description" content="Nájdi trénera, kamošov na hranie a komunitu ľudí, ktorých baví to isté čo teba.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://matchballapp.com/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fff;--fg:#16241c;--muted:#5b6b61;--line:#e3e8e4;--accent:#1f6b45}
-@media(prefers-color-scheme:dark){:root{--bg:#101613;--fg:#e8efe9;--muted:#9db0a4;--line:#25322b}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-main{max-width:44rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
-h1{font-size:1.6rem;margin:0 0 .25rem}
-h2{font-size:1.05rem;margin:2rem 0 .4rem}
-p{margin:0 0 .9rem;color:var(--fg)}
-.updated{color:var(--muted);font-size:.9rem;margin-bottom:2rem}
-nav{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem}
-nav a{padding:.35rem .8rem;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--muted);font-size:.9rem}
-nav a[aria-current]{border-color:var(--accent);color:var(--accent)}
-footer{margin-top:3rem;padding-top:1.25rem;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+/* ─────────────────────────────────────────────────────────────
+   Matchball — verejná stránka
+   Farby vychádzajú z appky (src/theme/colors.ts): kurtová zeleň
+   #1A7A4A a loptičková žltozelená. Neónová limetka je farba ikony.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --ink:#0B100D;
+  --ink-soft:#141C17;
+  --paper:#EFF2ED;
+  --card:#FFFFFF;
+  --green:#1A7A4A;
+  --green-dark:#125E38;
+  --green-soft:#E8F3EC;
+  --lime:#C9F24E;
+  --lime-dim:#A7D63B;
+  --fg:#141F1A;
+  --muted:#5E7367;
+  --line:#E0E6DF;
+  --radius-xl:32px;
+  --radius-lg:24px;
+  --radius-md:16px;
+  --shadow-soft:0 1px 2px rgba(20,31,26,.04),0 12px 32px -12px rgba(20,31,26,.14);
+  --shadow-lift:0 2px 4px rgba(20,31,26,.06),0 24px 48px -16px rgba(20,31,26,.22);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --max:1180px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--fg);
+  font-family:"Outfit",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;line-height:1.65;font-weight:400;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+img,svg{max-width:100%;height:auto;display:block}
+a{color:inherit}
+button{font:inherit;color:inherit}
+
+/* ── Typografia ─────────────────────────────────────────────── */
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.03em;line-height:1.04}
+h1{font-size:clamp(2.05rem,5.4vw,4rem);font-weight:800}
+h2{font-size:clamp(2rem,4.6vw,3.4rem)}
+h3{font-size:clamp(1.15rem,2vw,1.45rem);line-height:1.25;letter-spacing:-.02em}
+p{margin:0}
+.lead{font-size:clamp(1.05rem,1.6vw,1.25rem);color:var(--muted);line-height:1.6}
+
+.wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+.section{padding:clamp(72px,10vw,140px) 0}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.8rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--green);margin-bottom:18px;
+}
+.eyebrow::before{content:"";width:20px;height:2px;border-radius:2px;background:var(--green);opacity:.5}
+.section-head{max-width:44rem;margin-bottom:clamp(36px,5vw,64px)}
+.section-head .lead{margin-top:18px}
+
+/* ── Tlačidlá ───────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:15px 28px;border-radius:999px;border:0;cursor:pointer;
+  font-weight:600;font-size:1rem;text-decoration:none;white-space:nowrap;
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .25s;
+}
+.btn-dark{background:var(--ink);color:#fff;box-shadow:0 10px 24px -10px rgba(11,16,13,.7)}
+.btn-dark:hover{transform:translateY(-2px);box-shadow:0 18px 34px -12px rgba(11,16,13,.8)}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 10px 24px -10px rgba(26,122,74,.8)}
+.btn-green:hover{transform:translateY(-2px);background:var(--green-dark)}
+.btn-light{background:#fff;color:var(--fg);box-shadow:var(--shadow-soft)}
+.btn-light:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+.btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22)}
+.btn-ghost:hover{background:rgba(255,255,255,.16)}
+.btn-sm{padding:11px 20px;font-size:.94rem}
+
+/* ── Hlavička ───────────────────────────────────────────────── */
+.nav-shell{position:fixed;top:14px;left:0;right:0;z-index:80;padding:0 20px;pointer-events:none}
+.nav{
+  /* Užšia než obsah stránky — panel má nad ňou plávať, nie ju orámovať. */
+  max-width:min(940px,100%);margin:0 auto;pointer-events:auto;
+  display:flex;align-items:center;gap:20px;
+  padding:10px 10px 10px 22px;border-radius:999px;
+  /* Sklo, nie doska. `saturate` vracia farbám pod ním sýtosť, ktorú im rozmazanie
+     zoberie — bez neho je priesvitný panel len sivý fľak. */
+  background:rgba(255,255,255,.62);
+  backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);
+  border:1px solid rgba(255,255,255,.45);
+  box-shadow:0 1px 2px rgba(20,31,26,.04);
+  transition:box-shadow .4s var(--ease),background .4s var(--ease),transform .4s var(--ease);
+}
+/* Pri rolovaní je priesvitnejší, nie hustejší: nad svetlým obsahom stránky ho
+   netreba presadzovať, stačí, aby sa spod neho dalo čítať. */
+.nav.scrolled{
+  background:rgba(255,255,255,.38);
+  box-shadow:0 2px 4px rgba(20,31,26,.05),0 16px 32px -18px rgba(20,31,26,.18);
+}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:1.12rem;letter-spacing:-.02em;text-decoration:none}
+.brand .mark{width:30px;height:30px;flex:0 0 30px;border-radius:8px}
+.nav-links{display:flex;gap:4px;margin-left:auto}
+.nav-links a{
+  padding:9px 16px;border-radius:999px;text-decoration:none;color:#2A3831;
+  font-size:.95rem;font-weight:500;transition:background .25s,color .25s;
+}
+.nav-links a:hover{background:rgba(26,122,74,.09);color:var(--green)}
+.nav-cta{margin-left:4px}
+.nav-burger{display:none;margin-left:auto;width:44px;height:44px;border-radius:50%;border:0;background:var(--ink);color:#fff;cursor:pointer;align-items:center;justify-content:center}
+.nav-burger span{display:block;width:17px;height:1.8px;background:#fff;border-radius:2px;position:relative;transition:transform .3s var(--ease)}
+.nav-burger span::before,.nav-burger span::after{content:"";position:absolute;left:0;width:17px;height:1.8px;background:#fff;border-radius:2px;transition:transform .3s var(--ease),opacity .2s}
+.nav-burger span::before{top:-6px}
+.nav-burger span::after{top:6px}
+.nav-burger[aria-expanded="true"] span{background:transparent}
+.nav-burger[aria-expanded="true"] span::before{transform:translateY(6px) rotate(45deg)}
+.nav-burger[aria-expanded="true"] span::after{transform:translateY(-6px) rotate(-45deg)}
+.mobile-menu{
+  display:none;position:fixed;inset:0;z-index:70;background:var(--ink);color:#fff;
+  padding:120px 28px 40px;flex-direction:column;gap:6px;
+  opacity:0;visibility:hidden;transition:opacity .35s var(--ease),visibility .35s;
+}
+.mobile-menu.open{opacity:1;visibility:visible}
+.mobile-menu a{
+  text-decoration:none;font-size:1.9rem;font-weight:600;letter-spacing:-.02em;
+  padding:12px 0;border-bottom:1px solid rgba(255,255,255,.12);
+}
+.mobile-menu .btn{margin-top:24px;align-self:flex-start}
+
+/* ── Hero ───────────────────────────────────────────────────── */
+.hero{padding:14px 20px 0}
+.hero-card{
+  position:relative;max-width:1400px;margin:0 auto;
+  border-radius:var(--radius-xl);overflow:hidden;
+  background:var(--ink);color:#fff;
+  min-height:min(94vh,880px);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:clamp(110px,16vh,190px) clamp(24px,5vw,72px) clamp(44px,6vh,72px);
+  isolation:isolate;
+}
+.hero-inner{width:100%;max-width:1180px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.hero-text{max-width:40rem;position:relative}
+/* Tieň pod textom. Loptička svieti presne za nadpisom, bez neho by sa
+   biele písmo na jej svetlej strane stratilo. */
+.hero-text::before{
+  content:"";position:absolute;z-index:-1;inset:-16% -26%;
+  background:radial-gradient(ellipse at 50% 48%,rgba(6,10,7,.58),rgba(6,10,7,.32) 48%,transparent 78%);
+  pointer-events:none;
+}
+.hero-text > *{text-shadow:0 2px 22px rgba(6,10,7,.6)}
+/* Hero stojí na fotke, nie na kreslených kruhoch — je to tá istá loptička ako
+   v ikone appky, len nafotená aj s kurtom a raketou. Tmavý prekryv nad ňou drží
+   biele písmo čitateľné aj tam, kde je fotka najsvetlejšia. */
+.hero-bg{
+  position:absolute;inset:0;z-index:-2;
+  width:100%;height:100%;object-fit:cover;object-position:center 46%;
+}
+.hero-scrim{
+  position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(6,10,7,.78) 0%,rgba(6,10,7,.26) 26%,rgba(6,10,7,.22) 58%,rgba(6,10,7,.88) 100%);
+}
+}
+.hero-grain{
+  position:absolute;inset:0;z-index:-1;opacity:.5;pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.16) .6px,transparent .6px);
+  background-size:4px 4px;mix-blend-mode:overlay;
+}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:.85;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.09)}}
+
+.badge{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:9px 18px 9px 14px;border-radius:999px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  font-size:.9rem;font-weight:500;color:#fff;margin-bottom:26px;
+}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime)}
+.hero h1{color:#fff;max-width:20ch;margin:0 auto;text-wrap:balance}
+.hero h1 .glow{
+  background:linear-gradient(100deg,var(--lime),#7ED957 60%,var(--lime));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-sub{margin:24px auto 0;max-width:34rem;color:rgba(255,255,255,.82);font-size:clamp(1.02rem,1.6vw,1.2rem)}
+/* Tvrdý argument pod mäkkým mottom. Oddelený vlasovou linkou, aby sa čítal ako
+   fakt, nie ako ďalšia veta reklamy. */
+/* ── Prečo hrať ─────────────────────────────────────────────
+   Emocionálny argument stojí pred funkčným: najprv PREČO vôbec hrať,
+   až potom AKO to v appke chodí. */
+/* Pruh o dlhovekosti pred výzvou na stiahnutie. Jedna veta, nie sekcia —
+   preto stred, väčšie písmo než bežný text a zdroj drobným pod ňou. */
+.longevity-line{
+  max-width:44rem;margin:0 auto;text-align:center;
+  font-size:clamp(1.05rem,2.2vw,1.35rem);line-height:1.5;color:var(--ink-soft);
+}
+.longevity-line .num{font-weight:800;color:var(--green);letter-spacing:-.02em}
+.longevity-line .source{
+  display:block;margin-top:10px;font-size:.8rem;line-height:1.55;
+  color:var(--muted);opacity:.75;
+}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:36px}
+.hero-actions .btn-lime{background:var(--lime);color:#0B100D;box-shadow:0 12px 30px -12px rgba(201,242,78,.8)}
+.hero-actions .btn-lime:hover{transform:translateY(-2px);box-shadow:0 20px 40px -14px rgba(201,242,78,.9)}
+.hero-note{margin-top:20px;font-size:1rem;font-weight:600;color:rgba(255,255,255,.82)}
+.scroll-cue{
+  margin-top:auto;padding-top:48px;display:inline-flex;align-items:center;gap:10px;
+  color:rgba(255,255,255,.6);font-size:.88rem;text-decoration:none;
+}
+.scroll-cue .arrow{
+  width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.24);
+  display:grid;place-items:center;animation:bob 2.4s ease-in-out infinite;
+}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+/* ── Bežiaci pás ────────────────────────────────────────────── */
+.marquee{overflow:hidden;padding:26px 0;border-bottom:1px solid var(--line);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.marquee-track{display:flex;gap:0;width:max-content;animation:slide 34s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee-item{display:flex;align-items:center;gap:14px;padding:0 26px;font-weight:500;color:var(--muted);white-space:nowrap}
+.marquee-item::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--lime-dim)}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* ── Čísla ──────────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:var(--line);border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--line)}
+.stat{background:var(--card);padding:30px 26px}
+.stat .num{font-size:clamp(1.9rem,3.4vw,2.6rem);font-weight:700;letter-spacing:-.03em;color:var(--green)}
+.stat .lbl{margin-top:6px;color:var(--muted);font-size:.95rem;line-height:1.45}
+
+/* ── Taby ───────────────────────────────────────────────────── */
+.tabbar{
+  display:inline-flex;gap:4px;padding:5px;border-radius:999px;
+  background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-soft);
+  position:relative;max-width:100%;overflow-x:auto;scrollbar-width:none;
+}
+.tabbar::-webkit-scrollbar{display:none}
+.tabbar .glider{
+  position:absolute;top:5px;bottom:5px;left:0;width:0;border-radius:999px;
+  background:var(--ink);transition:transform .45s var(--ease),width .45s var(--ease);z-index:0;
+}
+.tabbar button{
+  position:relative;z-index:1;border:0;background:transparent;cursor:pointer;
+  padding:11px 22px;border-radius:999px;font-weight:600;font-size:.97rem;
+  color:var(--muted);white-space:nowrap;transition:color .3s var(--ease);
+}
+.tabbar button[aria-selected="true"]{color:#fff}
+.tabpanel[hidden]{display:none}
+.tabpanel{animation:fadeUp .5s var(--ease) both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ── Kroky ──────────────────────────────────────────────────── */
+.how{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(28px,4vw,56px);align-items:start}
+.steps{display:grid;gap:12px}
+.step{
+  display:flex;gap:20px;padding:24px 26px;border-radius:var(--radius-lg);
+  background:var(--card);border:1px solid var(--line);
+  transition:transform .4s var(--ease),box-shadow .4s var(--ease),border-color .4s;
+}
+.step:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift);border-color:transparent}
+.step .no{
+  flex:0 0 42px;height:42px;border-radius:14px;display:grid;place-items:center;
+  background:var(--green-soft);color:var(--green);font-weight:700;font-size:.95rem;
+}
+.step p{color:var(--muted);margin-top:7px;font-size:.99rem}
+
+/* Galéria snímok z appky. Vodorovný posuv so „zapadnutím" na obrázok — na
+   telefóne to je prirodzené ťahanie prstom, na počítači ťah myšou alebo bodky. */
+.phone-col{position:sticky;top:110px}
+.shots{width:min(300px,100%);margin:0 auto}
+.shots-track{
+  display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.shots-track::-webkit-scrollbar{display:none}
+.shot{flex:0 0 100%;margin:0;scroll-snap-align:center}
+.shot img{
+  width:100%;height:auto;border-radius:26px;
+  border:1px solid var(--line);box-shadow:var(--shadow-lift);
+}
+.shots-dots{display:flex;gap:8px;justify-content:center;margin-top:18px}
+.shots-dots button{
+  width:8px;height:8px;padding:0;border:0;border-radius:50%;cursor:pointer;
+  background:var(--line);transition:background .3s var(--ease),transform .3s var(--ease);
+}
+.shots-dots button[aria-current="true"]{background:var(--green);transform:scale(1.35)}
+
+/* ── Rozbaľovacie položky ───────────────────────────────────── */
+.acc{border-top:1px solid var(--line)}
+.acc-item{border-bottom:1px solid var(--line)}
+.acc-btn{
+  width:100%;display:flex;align-items:flex-start;gap:20px;text-align:left;
+  background:transparent;border:0;cursor:pointer;padding:30px 0;
+  transition:padding .4s var(--ease);
+}
+.acc-btn .idx{font-size:.85rem;font-weight:600;color:var(--muted);padding-top:8px;min-width:34px}
+.acc-btn .ttl{font-size:clamp(1.25rem,2.6vw,1.85rem);font-weight:600;letter-spacing:-.02em;line-height:1.2;transition:color .3s}
+.acc-btn:hover .ttl{color:var(--green)}
+.acc-btn .sign{
+  margin-left:auto;flex:0 0 38px;height:38px;border-radius:50%;border:1px solid var(--line);
+  display:grid;place-items:center;position:relative;transition:background .35s var(--ease),border-color .35s,transform .45s var(--ease);
+}
+.acc-btn .sign::before,.acc-btn .sign::after{content:"";position:absolute;background:var(--fg);border-radius:2px;transition:transform .45s var(--ease),background .3s}
+.acc-btn .sign::before{width:13px;height:1.8px}
+.acc-btn .sign::after{width:1.8px;height:13px}
+.acc-item.open .acc-btn .sign{background:var(--ink);border-color:var(--ink);transform:rotate(180deg)}
+.acc-item.open .acc-btn .sign::before,.acc-item.open .acc-btn .sign::after{background:#fff}
+.acc-item.open .acc-btn .sign::after{transform:scaleY(0)}
+.acc-panel{overflow:hidden;height:0;transition:height .5s var(--ease)}
+.acc-inner{padding:0 0 32px 54px;max-width:52rem}
+.acc-inner p{color:var(--muted)}
+.acc-inner p + p{margin-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:999px;
+  background:var(--card);border:1px solid var(--line);font-size:.87rem;font-weight:500;color:var(--fg);
+}
+.chip::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--lime-dim)}
+
+/* ── Výhody (taby s obrázkovým panelom) ─────────────────────── */
+.why{background:var(--ink);color:#fff;border-radius:var(--radius-xl);padding:clamp(40px,6vw,72px);position:relative;overflow:hidden}
+.why::after{
+  content:"";position:absolute;width:620px;height:620px;right:-180px;top:-220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,242,78,.22),transparent 65%);pointer-events:none;
+}
+.why .eyebrow{color:var(--lime)}
+.why .eyebrow::before{background:var(--lime)}
+.why h2{color:#fff;position:relative}
+.why-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:36px 0 34px;position:relative}
+.why-tabs button{
+  border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:rgba(255,255,255,.72);
+  padding:11px 20px;border-radius:999px;cursor:pointer;font-weight:600;font-size:.95rem;
+  transition:background .3s var(--ease),color .3s,border-color .3s,transform .3s var(--ease);
+}
+.why-tabs button:hover{transform:translateY(-2px)}
+.why-tabs button[aria-selected="true"]{background:var(--lime);color:#0B100D;border-color:var(--lime)}
+.why-body{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(24px,4vw,54px);align-items:center;position:relative}
+.why-body h3{font-size:clamp(1.5rem,3vw,2.1rem);color:#fff;font-weight:700}
+.why-body p{margin-top:16px;color:rgba(255,255,255,.7);font-size:1.06rem}
+.why-list{margin:24px 0 0;padding:0;list-style:none;display:grid;gap:11px}
+.why-list li{display:flex;gap:12px;align-items:flex-start;color:rgba(255,255,255,.78);font-size:.99rem}
+.why-list li::before{content:"";flex:0 0 20px;height:20px;margin-top:3px;border-radius:50%;background:rgba(201,242,78,.15);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 10.5l3 3 6-7' fill='none' stroke='%23C9F24E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.why-visual{
+  aspect-ratio:4/3;border-radius:var(--radius-lg);position:relative;overflow:hidden;
+  background:linear-gradient(150deg,rgba(255,255,255,.09),rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.12);display:grid;place-items:center;
+}
+.why-visual .big{font-size:clamp(3rem,7vw,5rem);font-weight:800;letter-spacing:-.04em;color:var(--lime);line-height:1}
+.why-visual .cap{margin-top:10px;color:rgba(255,255,255,.6);font-size:.95rem;text-align:center;padding:0 24px}
+
+/* ── Záverečná výzva ────────────────────────────────────────── */
+.cta{
+  border-radius:var(--radius-xl);padding:clamp(40px,6vw,80px);text-align:center;
+  background:linear-gradient(150deg,var(--green),#0F4C2E 85%);color:#fff;position:relative;overflow:hidden;
+}
+.cta::before{
+  content:"";position:absolute;inset:auto -10% -60% -10%;height:420px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,242,78,.28),transparent 62%);
+}
+.cta h2{color:#fff;position:relative;max-width:20ch;margin:0 auto}
+.cta .lead{color:rgba(255,255,255,.78);margin:20px auto 0;max-width:34rem;position:relative}
+.cta-actions{position:relative;display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:34px}
+/* QR kódy pod výzvou na stiahnutie. Kód je jedna SVG cesta na bielej doske —
+   na tmavom pozadí výzvy by sa čierne moduly stratili a čítačka by ho nechytila.
+   Doska je preto vždy biela, aj v tmavom režime. */
+.qr-row{display:flex;gap:22px;justify-content:center;flex-wrap:wrap;margin:30px 0 0}
+.qr{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none}
+.qr-code{
+  display:block;width:132px;height:132px;padding:6px;border-radius:14px;
+  background:#fff;box-shadow:0 10px 26px -14px rgba(0,0,0,.55);
+  transition:transform .3s var(--ease);
+}
+.qr:hover .qr-code{transform:translateY(-3px)}
+.qr-code svg{display:block;width:100%;height:100%;shape-rendering:crispEdges}
+.qr-code path{fill:#0B100D}
+.qr-label{font-size:.9rem;font-weight:600;color:rgba(255,255,255,.85)}
+@media (max-width:420px){ .qr-code{width:112px;height:112px} }
+.waitlist{position:relative;margin:30px auto 0;max-width:26rem}
+.waitlist form{display:flex;gap:8px}
+.waitlist input{
+  flex:1;min-width:0;padding:14px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.1);color:#fff;font:inherit;font-size:.97rem;
+}
+.waitlist input::placeholder{color:rgba(255,255,255,.55)}
+.waitlist input:focus{outline:2px solid var(--lime);outline-offset:-1px}
+.waitlist .note{min-height:1.5rem;margin-top:10px;font-size:.88rem;color:rgba(255,255,255,.7)}
+.waitlist .note.ok{color:var(--lime);font-weight:600}
+.waitlist .note.err{color:#FFB4A8}
+.waitlist .hint{font-size:.88rem;color:rgba(255,255,255,.65);margin-bottom:12px}
+
+/* ── Pätička ────────────────────────────────────────────────── */
+footer{padding:clamp(56px,7vw,96px) 0 44px}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;padding-bottom:40px;border-bottom:1px solid var(--line)}
+.foot-grid h4{margin:0 0 16px;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.foot-links{display:grid;gap:9px}
+.foot-links a{text-decoration:none;color:var(--fg);font-size:.98rem;transition:color .25s}
+.foot-links a:hover{color:var(--green)}
+.foot-about{color:var(--muted);font-size:.98rem;margin-top:14px;max-width:26rem}
+.foot-bottom{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;padding-top:26px;color:var(--muted);font-size:.9rem}
+
+/* ── Odhalenie pri rolovaní ─────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+
+/* ── Menšie obrazovky ───────────────────────────────────────── */
+@media (max-width:980px){
+  .hero h1{max-width:none}
+  .how{grid-template-columns:1fr}
+  .phone-col{position:static;order:-1;margin-bottom:8px}
+  .why-body{grid-template-columns:1fr}
+  .why-visual{order:-1}
+  .foot-grid{grid-template-columns:1fr 1fr;gap:32px}
+}
+@media (max-width:760px){
+  .nav-links,.nav-cta{display:none}
+  .nav-burger{display:flex}
+  .mobile-menu{display:flex}
+  .nav{padding:8px 8px 8px 18px}
+  .acc-inner{padding-left:0}
+  .acc-btn{gap:14px}
+  .acc-btn .idx{display:none}
+  .foot-grid{grid-template-columns:1fr}
+  .hero-actions .btn{width:100%}
+  .hero-scrim{background:linear-gradient(180deg,
+    rgba(6,10,7,.72) 0%,rgba(6,10,7,.34) 26%,rgba(6,10,7,.34) 58%,rgba(6,10,7,.9) 100%)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  html{scroll-behavior:auto}
+  .reveal{opacity:1;transform:none}
+}
 </style>
-<main>
-<h1>Matchball</h1>
-<p class="updated">Rezervácia tenisových tréningov na Slovensku a v Česku</p>
+</head>
+<body>
 
-<h2>Čo služba robí</h2>
-<p>Matchball spája hráčov tenisu s trénermi. Hráč si v mobilnej aplikácii nájde trénera,
-vyberie termín a pošle žiadosť o tréning. Tréner ju potvrdí alebo odmietne. Platí sa
-kartou v aplikácii až po potvrdení — nie skôr.</p>
+<!-- ── Hlavička ─────────────────────────────────────────────── -->
+<div class="nav-shell">
+  <nav class="nav" id="nav">
+    <a class="brand" href="#top">
+      <img class="mark" src="logo.webp" alt="" width="128" height="128">
+      <span>Matchball</span>
+    </a>
+    <div class="nav-links">
+      <a href="#ako">Ako to funguje</a>
+      <a href="#ceny">Ceny</a>
+      <a href="#preco">Výhody</a>
+      <a href="#kontakt">Kontakt</a>
+    </div>
+    <a class="btn btn-dark btn-sm nav-cta" href="#stiahnut">Stiahnuť</a>
+    <button class="nav-burger" id="burger" aria-label="Menu" aria-expanded="false"><span></span></button>
+  </nav>
+</div>
 
-<h2>Ceny</h2>
-<p>Cenu tréningu si určuje každý tréner sám. K nej sa pripočíta servisný poplatok
-5 % + 0,30 € (7,50 Kč), ktorý je súčasťou sumy zobrazenej pred zaplatením.
-Hráč vždy vidí konečnú sumu vopred; žiadne skryté poplatky neúčtujeme.</p>
-<p>Tréner môže ponúkať aj predplatené balíčky 5, 10 alebo 20 hodín so zľavou.
-Tréning z balíčka ubere presne toľko času, ako trvá — polhodina 30 minút,
-hodina a pol 90. Platnosť balíčka je 12 mesiacov od zakúpenia a viaže sa na
-konkrétneho trénera. Skupinové tréningy sa z balíčka platiť nedajú, tie sa
-platia kartou.</p>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#ako">Ako to funguje</a>
+  <a href="#ceny">Ceny a platby</a>
+  <a href="#preco">Prečo Matchball</a>
+  <a href="#kontakt">Kontakt</a>
+  <a class="btn btn-lime" style="background:var(--lime);color:#0B100D" href="#stiahnut">Stiahnuť appku</a>
+</div>
 
-<h2>Zrušenie a vrátenie peňazí</h2>
-<p>Zrušenie 16 hodín a viac pred tréningom je zdarma a hráčovi vraciame celú sumu.
-Pri zrušení 6 až 16 hodín pred tréningom si tréner ponecháva 50 %
-a zvyšok vraciame. Menej než 6 hodín pred tréningom alebo pri neúčasti si tréner
-ponecháva celú sumu. Do 60 minút od vytvorenia rezervácie ju možno zrušiť zdarma vždy.</p>
-<p>Peniaze držíme, kým sa tréning neuskutoční. Trénerovi ich odosielame 12 hodín po tréningu,
-alebo hneď, ako hráč potvrdí, že prebehol v poriadku. Ak niečo nebolo v poriadku, hráč to
-môže v tejto lehote nahlásiť a peniaze zostanú zadržané do vyriešenia.</p>
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<header class="hero" id="top">
+  <div class="hero-card">
+    <img class="hero-bg" src="hero.webp" alt="" width="1600" height="854" fetchpriority="high">
+    <div class="hero-scrim"></div>
+    <div class="hero-grain"></div>
 
-<h2>Dokumenty</h2>
-<p><a href="./legal/privacy.html">Ochrana osobných údajov</a> · <a href="./legal/terms.html">Podmienky používania</a></p>
+    <div class="hero-inner">
+      <div class="hero-text">
+        <h1>Tvoj najlepší <span class="glow">match</span><br>na kurte aj v živote.</h1>
+        <p class="hero-sub">Nájdi trénera vo svojom okolí, rezervuj tréning na pár ťuknutí a spoznaj ľudí, ktorých baví to isté čo teba.</p>
+        <div class="hero-actions">
+          <a class="btn btn-lime" href="https://apps.apple.com/sk/app/matchball/id6804171137">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.8c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.6.9-.7 0-1.9-.9-3.1-.8-1.6 0-3 .9-3.8 2.4-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3.1-.7 1.4 0 1.8.7 3.1.7 1.3 0 2.1-1.1 2.9-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.6-3.7zM14 5.9c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3z"/></svg>
+            Stiahnuť pre iPhone
+          </a>
+          <a class="btn btn-ghost" href="https://play.google.com/store/apps/details?id=sk.matchball.app"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.3c-.3.3-.5.8-.5 1.4v16.6c0 .6.2 1.1.5 1.4l.1.1 9.3-9.3v-.2L3.7 2.9l-.1-.1zm12.1 6.2L4.9 2.3l8.9 8.9 1.9-1.9zM17.9 9.7l-2.2-1.3-2.1 2.1 2.1 2.1 2.2-1.3c.7-.4.7-1.2 0-1.6zM4.9 21.7l10.8-6.2-1.9-1.9-8.9 8.1z"/></svg> Stiahnuť pre Android</a>
+        </div>
+      </div>
+    </div>
 
-<h2>Kontakt</h2>
-<p><strong>Matchball</strong> — Martin Mucha<br>
-Jilemnického 8, Košice, Slovensko<br>
-IČO 57 799 032<br>
-<a href="mailto:matchball.app@gmail.com">matchball.app@gmail.com</a></p>
-</main>
+    <a class="scroll-cue" href="#ako">
+      Viac nižšie
+      <span class="arrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<!-- ── Bežiaci pás ──────────────────────────────────────────── -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track" id="marquee">
+    <div class="marquee-item">Platba až po potvrdení</div>
+    <div class="marquee-item">Zrušenie 16 h vopred zdarma</div>
+    <div class="marquee-item">Konečná suma vopred</div>
+    <div class="marquee-item">Peniaze trénerovi až po tréningu</div>
+    <div class="marquee-item">Predplatené balíčky hodín</div>
+    <div class="marquee-item">Chat s trénerom</div>
+    <div class="marquee-item">Zľavnené termíny na poslednú chvíľu</div>
+    <div class="marquee-item">Loptičky a odmeny za tréningy</div>
+  </div>
+</div>
+
+<!-- ── Ako to funguje (taby) ────────────────────────────────── -->
+<section class="section" id="ako">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Ako to funguje</span>
+      <h2>Od hľadania po odohraný tréning.</h2>
+      <p class="lead">Tá istá appka, dva pohľady. Prepni si ten svoj.</p>
+    </div>
+
+    <div class="reveal" style="margin-bottom:38px">
+      <div class="tabbar" role="tablist" aria-label="Ako to funguje" data-tabs>
+        <span class="glider" aria-hidden="true"></span>
+        <button role="tab" id="tab-hrac" aria-controls="panel-hrac" data-shots="galHrac" aria-selected="true">Pre hráčov</button>
+        <button role="tab" id="tab-trener" aria-controls="panel-trener" data-shots="galTrener" aria-selected="false">Pre trénerov</button>
+      </div>
+    </div>
+
+    <div class="how">
+      <div>
+        <div class="tabpanel" role="tabpanel" id="panel-hrac" aria-labelledby="tab-hrac">
+          <div class="steps">
+            <article class="step reveal">
+              <div class="no">01</div>
+              <div>
+                <h3>Nájdi trénera vo svojom okolí</h3>
+                <p>Hľadaj podľa mesta, ceny a hodnotení. V profile trénera vidíš kurt, cenník aj voľné termíny.</p>
+              </div>
+            </article>
+            <article class="step reveal">
+              <div class="no">02</div>
+              <div>
+                <h3>Vyber termín a pošli žiadosť</h3>
+                <p>Ťukneš na voľnú hodinu v kalendári trénera a odošleš žiadosť. Zatiaľ neplatíš nič.</p>
+              </div>
+            </article>
+            <article class="step reveal">
+              <div class="no">03</div>
+              <div>
+                <h3>Zaplať až po potvrdení</h3>
+                <p>Keď tréner žiadosť potvrdí, zaplatíš kartou priamo v appke. Konečnú sumu vidíš vopred.</p>
+              </div>
+            </article>
+            <article class="step reveal">
+              <div class="no">04</div>
+              <div>
+                <h3>Hraj a zbieraj odmeny</h3>
+                <p>Za každý odtrénovaný tréning padne loptička. V nej je šanca na nového avatara a posúva ťa na vyšší level.</p>
+              </div>
+            </article>
+            <article class="step reveal">
+              <div class="no">05</div>
+              <div>
+                <h3>Sleduj kalendár trénera</h3>
+                <p>Nikdy nevieš, kedy sa mu uvoľní termín — a uvoľnené hodiny na poslednú chvíľu ponúka so zľavou.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="panel-trener" aria-labelledby="tab-trener" hidden>
+          <div class="steps">
+            <article class="step">
+              <div class="no">01</div>
+              <div>
+                <h3>Založ si trénerský profil</h3>
+                <p>Cena, kurt, jazyky a hodiny, kedy máš voľno. Hráči ťa nájdu podľa mesta aj podľa ceny.</p>
+              </div>
+            </article>
+            <article class="step">
+              <div class="no">02</div>
+              <div>
+                <h3>Potvrď alebo odmietni žiadosť</h3>
+                <p>Kalendár, rezervácie aj chat s hráčom máš na jednom mieste. Potvrdenie je jedno ťuknutie.</p>
+              </div>
+            </article>
+            <article class="step">
+              <div class="no">03</div>
+              <div>
+                <h3>Z tvojej ceny si neberieme nič</h3>
+                <p>Servisný poplatok platí hráč navyše. Platbu uvoľňujeme 12 hodín po tréningu a peniaze máš na výber do týždňa od zaplatenia — kedy si ich pošleš na účet, je na tebe.</p>
+              </div>
+            </article>
+            <article class="step">
+              <div class="no">04</div>
+              <div>
+                <h3>Sleduj, ako sa ti darí</h3>
+                <p>Štatistiky zárobkov, obsadenosti a najaktívnejších hráčov. Plus predplatené balíčky hodín so zľavou.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skutočné snímky z appky. Posúvajú sa prstom; na počítači bodkami
+           alebo tiež ťahom, `scroll-snap` sa postará o zastavenie na obrázku. -->
+      <div class="phone-col reveal">
+        <div class="shots">
+          <div class="shots-gal" id="galHrac">
+            <div class="shots-track" id="shotsPlayer">
+              <figure class="shot">
+                <img src="app-hladanie.webp" alt="Zoznam trénerov vo vyhľadávaní s cenou a hodnotením" width="600" height="1304" loading="lazy">
+              </figure>
+              <figure class="shot">
+                <img src="app-profil.webp" alt="Profil trénerky s cenníkom a predplatenými balíčkami" width="600" height="1304" loading="lazy">
+              </figure>
+              <figure class="shot">
+                <img src="app-kalendar.webp" alt="Výber dňa a času v kalendári trénera" width="600" height="1304" loading="lazy">
+              </figure>
+            </div>
+            <div class="shots-dots" id="shotsDots"></div>
+          </div>
+
+          <!-- Trénerská sada. Je skrytá, kým sa neprepne tab „Pre trénerov" —
+               ten istý stĺpec, len iný pohľad na tú istú appku. -->
+          <div class="shots-gal" id="galTrener" hidden>
+            <div class="shots-track" id="shotsCoach">
+              <figure class="shot">
+                <img src="app-trener-upozornenie.webp" alt="Upozornenie o zrušenom tréningu nad trénerským prehľadom so zostatkom na výber" width="600" height="1304" loading="lazy">
+              </figure>
+              <figure class="shot">
+                <img src="app-trener-statistiky.webp" alt="Štatistiky zárobkov trénera za mesiac" width="600" height="1304" loading="lazy">
+              </figure>
+              <figure class="shot">
+                <img src="app-trener-kalendar.webp" alt="Týždenný kalendár trénera s rozpisom hodín" width="600" height="1304" loading="lazy">
+              </figure>
+            </div>
+            <div class="shots-dots" id="shotsCoachDots"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Čísla ────────────────────────────────────────────────── -->
+<section class="wrap reveal" style="padding-bottom:clamp(40px,6vw,80px)">
+  <div class="stats">
+    <div class="stat"><div class="num">0 €</div><div class="lbl">Zaplatíš, kým tréner termín nepotvrdí</div></div>
+    <div class="stat"><div class="num">16 h</div><div class="lbl">Dovtedy pred tréningom zrušíš zdarma a dostaneš celú sumu späť</div></div>
+    <div class="stat"><div class="num">5–20 h</div><div class="lbl">Predplatené balíčky so zľavou, platné rok</div></div>
+    <div class="stat"><div class="num">−%</div><div class="lbl">Uvoľnené termíny na poslednú chvíľu bývajú lacnejšie</div></div>
+  </div>
+</section>
+
+<!-- ── Prečo Matchball (taby) ───────────────────────────────── -->
+<section class="section" id="preco" style="padding-top:0">
+  <div class="wrap">
+    <div class="why reveal">
+      <span class="eyebrow">Prečo Matchball</span>
+      <h2>Tenis bez dohadovania cez správy.</h2>
+
+      <div class="why-tabs" role="tablist" aria-label="Prečo Matchball" data-why>
+        <button role="tab" aria-selected="true" aria-controls="why-1">Bez dohadovania</button>
+        <button role="tab" aria-selected="false" aria-controls="why-2">Peniaze v bezpečí</button>
+        <button role="tab" aria-selected="false" aria-controls="why-3">Jasné pravidlá</button>
+        <button role="tab" aria-selected="false" aria-controls="why-4">Pripravujeme</button>
+      </div>
+
+      <div class="why-body tabpanel" role="tabpanel" id="why-1">
+        <div>
+          <h3>Kalendár namiesto desiatich správ</h3>
+          <p>Voľné hodiny trénera vidíš rovno v appke. Vyberieš termín, odošleš žiadosť a máš pokoj — žiadne dohadovanie, kedy kto môže.</p>
+          <ul class="why-list">
+            <li>Hľadanie podľa mesta, ceny a hodnotenia</li>
+            <li>Chat s trénerom priamo pri rezervácii</li>
+            <li>Pripomienka pred tréningom</li>
+          </ul>
+        </div>
+        <div class="why-visual"><div><div class="big">4</div><div class="cap">ťuknutia od hľadania po odoslanú žiadosť</div></div></div>
+      </div>
+
+      <div class="why-body tabpanel" role="tabpanel" id="why-2" hidden>
+        <div>
+          <h3>Platíš až vtedy, keď je isté, že sa hrá</h3>
+          <p>Žiadosť nič nestojí. Karta sa strhne až po potvrdení trénerom a peniaze držíme, kým tréning neprebehne.</p>
+          <ul class="why-list">
+            <li>Platba kartou priamo v appke</li>
+            <li>Peniaze zadržané do konca tréningu</li>
+            <li>Problém nahlásiš a výplata počká na vyriešenie</li>
+          </ul>
+        </div>
+        <div class="why-visual"><div><div class="big">0 €</div><div class="cap">zaplatíš, kým tréner žiadosť nepotvrdí</div></div></div>
+      </div>
+
+      <div class="why-body tabpanel" role="tabpanel" id="why-3" hidden>
+        <div>
+          <h3>Poplatok aj zrušenie sú napísané dopredu</h3>
+          <p>Servisný poplatok je súčasťou sumy, ktorú vidíš pred zaplatením. Lehoty na zrušenie platia pre každého rovnako — pre hráča aj pre trénera.</p>
+          <ul class="why-list">
+            <li>5 % + 0,30 € (7,50 Kč) servisný poplatok</li>
+            <li>Konečná suma pred potvrdením platby</li>
+            <li>Rovnaké pravidlá zrušenia pre všetkých</li>
+          </ul>
+        </div>
+        <div class="why-visual"><div><div class="big">16 h</div><div class="cap">pred tréningom zrušíš zdarma a dostaneš celú sumu</div></div></div>
+      </div>
+
+      <div class="why-body tabpanel" role="tabpanel" id="why-4" hidden>
+        <div>
+          <h3>Sparing a turnaje pripravujeme</h3>
+          <p>Partner na hranie v tvojom meste a na tvojej úrovni a amatérske turnaje. Zatiaľ zbierame záujem — v appke ťukni na <strong>Mám záujem</strong> a ozveme sa, keď to v tvojom meste spustíme.</p>
+          <ul class="why-list">
+            <li>Sparing podľa mesta a úrovne</li>
+            <li>Amatérske turnaje podľa úrovne</li>
+            <li>Spustíme tam, kde je záujem</li>
+          </ul>
+        </div>
+        <div class="why-visual"><div><div class="big">čoskoro</div><div class="cap">funkcia ešte nie je spustená, zbierame záujem</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Ceny a platby (rozbaľovacie) ─────────────────────────── -->
+<section class="section" id="ceny">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Ceny a platby</span>
+      <h2>Napísané dopredu, platí pre všetkých rovnako.</h2>
+    </div>
+
+    <div class="acc reveal" data-acc>
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false">
+          <span class="idx">(01)</span>
+          <span class="ttl">Cena tréningu a servisný poplatok</span>
+          <span class="sign" aria-hidden="true"></span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-inner">
+            <p>Cenu tréningu si určuje každý tréner sám. K nej sa pripočíta servisný poplatok 5 % + 0,30 € (7,50 Kč), ktorý je súčasťou sumy zobrazenej pred zaplatením.</p>
+            <p>Hráč vždy vidí konečnú sumu vopred; žiadne skryté poplatky neúčtujeme.</p>
+            <div class="chips">
+              <span class="chip">Konečná suma vopred</span>
+              <span class="chip">Platba kartou v appke</span>
+              <span class="chip">Bez skrytých poplatkov</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false">
+          <span class="idx">(02)</span>
+          <span class="ttl">Predplatené balíčky hodín</span>
+          <span class="sign" aria-hidden="true"></span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-inner">
+            <p>Tréner môže ponúkať predplatené balíčky 5, 10 alebo 20 hodín so zľavou. Tréning z balíčka ubere presne toľko času, ako trvá — polhodina 30 minút, hodina a pol 90.</p>
+            <p>Platnosť balíčka je 12 mesiacov od zakúpenia a viaže sa na konkrétneho trénera. Skupinové tréningy sa z balíčka platiť nedajú, tie sa platia kartou.</p>
+            <div class="chips">
+              <span class="chip">5, 10 alebo 20 hodín</span>
+              <span class="chip">Platnosť 12 mesiacov</span>
+              <span class="chip">Jeden tréner</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false">
+          <span class="idx">(03)</span>
+          <span class="ttl">Zrušenie a vrátenie peňazí</span>
+          <span class="sign" aria-hidden="true"></span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-inner">
+            <p>Zrušenie 16 hodín a viac pred tréningom je zdarma a hráčovi vraciame celú sumu. Pri zrušení 6 až 16 hodín pred tréningom si tréner ponecháva 50 % a zvyšok vraciame. Menej než 6 hodín pred tréningom alebo pri neúčasti si tréner ponecháva celú sumu.</p>
+            <p>Do 60 minút od vytvorenia rezervácie ju možno zrušiť zdarma vždy.</p>
+            <div class="chips">
+              <span class="chip">16 h a viac — celá suma späť</span>
+              <span class="chip">6–16 h — polovica</span>
+              <span class="chip">Do 60 minút vždy zdarma</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false">
+          <span class="idx">(04)</span>
+          <span class="ttl">Kedy tréner dostane peniaze</span>
+          <span class="sign" aria-hidden="true"></span>
+        </button>
+        <div class="acc-panel">
+          <div class="acc-inner">
+            <p>Peniaze držíme, kým sa tréning neuskutoční. Trénerovi ich uvoľňujeme 12 hodín po tréningu, alebo hneď, ako hráč potvrdí, že prebehol v poriadku.</p>
+            <p>Ak niečo nebolo v poriadku, hráč to môže v tejto lehote nahlásiť a peniaze zostanú zadržané do vyriešenia.</p>
+            <p>Tréner má sumu na výber do týždňa od zaplatenia a na svoj účet si ju pošle, keď chce. Zo svojej ceny neplatí nič — servisný poplatok je nad ňu a platí ho hráč.</p>
+            <div class="chips">
+              <span class="chip">Výplaty cez Stripe</span>
+              <span class="chip">Uvoľnenie 12 hodín po tréningu</span>
+              <span class="chip">Výber na účet kedykoľvek</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Prečo tenis ──────────────────────────────────────────────
+     Úzky pruh tesne pred výzvou na stiahnutie, nie vlastná sekcia hore.
+     Stránka predáva Matchball, nie tenis: kto sem prišiel, už hrá alebo o tom
+     uvažuje, a dánska štúdia mu nepovie nič o tom, ako si nájde trénera. Ako
+     posledná veta pred tlačidlom ale funguje — je to jediné číslo na stránke,
+     ktoré si človek zapamätá. Preto zostáva, len bez nadpisu, bez tlačidla
+     a bez položky v menu. -->
+<section class="wrap" id="preco-tenis" style="padding-bottom:clamp(24px,4vw,44px)">
+  <p class="longevity-line reveal">
+    Tenisti žijú v priemere o <span class="num">10 rokov</span> dlhšie —
+    viac než pri bedmintone, futbale aj behu.
+    <span class="source">Copenhagen City Heart Study, Mayo Clinic Proceedings 2018;
+      8 577 ľudí sledovaných dvadsaťpäť rokov. Tenis +9,7 roka oproti ľuďom bez pohybu.</span>
+  </p>
+</section>
+
+
+<!-- ── Stiahnutie ───────────────────────────────────────────── -->
+<section class="wrap" id="stiahnut" style="padding-bottom:clamp(40px,6vw,80px)">
+  <div class="cta reveal">
+    <h2>Nájdi si trénera ešte dnes.</h2>
+    <p class="lead">Matchball je zadarmo. Platíš len za tréning, ktorý si rezervuješ.</p>
+    <div class="cta-actions">
+      <a class="btn btn-light" href="https://apps.apple.com/sk/app/matchball/id6804171137">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.8c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.6.9-.7 0-1.9-.9-3.1-.8-1.6 0-3 .9-3.8 2.4-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3.1-.7 1.4 0 1.8.7 3.1.7 1.3 0 2.1-1.1 2.9-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.6-3.7zM14 5.9c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3z"/></svg>
+        Stiahnuť z App Store
+      </a>
+      <a class="btn btn-light" href="https://play.google.com/store/apps/details?id=sk.matchball.app">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.3c-.3.3-.5.8-.5 1.4v16.6c0 .6.2 1.1.5 1.4l.1.1 9.3-9.3v-.2L3.7 2.9l-.1-.1zm12.1 6.2L4.9 2.3l8.9 8.9 1.9-1.9zM17.9 9.7l-2.2-1.3-2.1 2.1 2.1 2.1 2.2-1.3c.7-.4.7-1.2 0-1.6zM4.9 21.7l10.8-6.2-1.9-1.9-8.9 8.1z"/></svg>
+        Stiahnuť z Google Play
+      </a>
+    </div>
+
+    <!-- QR kódy. Stránku si ľudia otvárajú aj na počítači, kde je tlačidlo do
+         obchodu na nič — telefón ho namieri a má appku. Kódy sú vykreslené
+         priamo v HTML ako cesta, nie obrázok z cudzej služby: nič sa
+         nedosťahováva a fungujú aj bez pripojenia k tretej strane. -->
+    <div class="qr-row">
+        <a class="qr qr-ios" href="https://apps.apple.com/sk/app/matchball/id6804171137">
+          <span class="qr-code" aria-hidden="true">
+            <svg viewBox="0 0 41 41" role="img"><path transform="translate(4 4)" d="M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM10 0h1v1h-1zM11 0h1v1h-1zM13 0h1v1h-1zM17 0h1v1h-1zM18 0h1v1h-1zM19 0h1v1h-1zM20 0h1v1h-1zM21 0h1v1h-1zM23 0h1v1h-1zM26 0h1v1h-1zM27 0h1v1h-1zM28 0h1v1h-1zM29 0h1v1h-1zM30 0h1v1h-1zM31 0h1v1h-1zM32 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h1v1h-1zM13 1h1v1h-1zM14 1h1v1h-1zM15 1h1v1h-1zM17 1h1v1h-1zM20 1h1v1h-1zM21 1h1v1h-1zM24 1h1v1h-1zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM8 2h1v1h-1zM9 2h1v1h-1zM12 2h1v1h-1zM13 2h1v1h-1zM15 2h1v1h-1zM17 2h1v1h-1zM18 2h1v1h-1zM19 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM23 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM8 3h1v1h-1zM11 3h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM15 3h1v1h-1zM16 3h1v1h-1zM19 3h1v1h-1zM23 3h1v1h-1zM26 3h1v1h-1zM28 3h1v1h-1zM29 3h1v1h-1zM30 3h1v1h-1zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM11 4h1v1h-1zM13 4h1v1h-1zM15 4h1v1h-1zM17 4h1v1h-1zM18 4h1v1h-1zM21 4h1v1h-1zM22 4h1v1h-1zM23 4h1v1h-1zM24 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM29 4h1v1h-1zM30 4h1v1h-1zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM11 5h1v1h-1zM13 5h1v1h-1zM14 5h1v1h-1zM15 5h1v1h-1zM16 5h1v1h-1zM20 5h1v1h-1zM21 5h1v1h-1zM24 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM27 6h1v1h-1zM28 6h1v1h-1zM29 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM8 7h1v1h-1zM10 7h1v1h-1zM12 7h1v1h-1zM14 7h1v1h-1zM15 7h1v1h-1zM19 7h1v1h-1zM20 7h1v1h-1zM21 7h1v1h-1zM22 7h1v1h-1zM24 7h1v1h-1zM0 8h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM9 8h1v1h-1zM11 8h1v1h-1zM12 8h1v1h-1zM13 8h1v1h-1zM14 8h1v1h-1zM15 8h1v1h-1zM16 8h1v1h-1zM17 8h1v1h-1zM18 8h1v1h-1zM22 8h1v1h-1zM23 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM27 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM30 8h1v1h-1zM0 9h1v1h-1zM1 9h1v1h-1zM2 9h1v1h-1zM5 9h1v1h-1zM10 9h1v1h-1zM11 9h1v1h-1zM12 9h1v1h-1zM16 9h1v1h-1zM18 9h1v1h-1zM19 9h1v1h-1zM20 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM24 9h1v1h-1zM26 9h1v1h-1zM27 9h1v1h-1zM29 9h1v1h-1zM30 9h1v1h-1zM32 9h1v1h-1zM0 10h1v1h-1zM1 10h1v1h-1zM2 10h1v1h-1zM3 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM8 10h1v1h-1zM15 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM21 10h1v1h-1zM22 10h1v1h-1zM25 10h1v1h-1zM26 10h1v1h-1zM28 10h1v1h-1zM30 10h1v1h-1zM31 10h1v1h-1zM2 11h1v1h-1zM4 11h1v1h-1zM5 11h1v1h-1zM7 11h1v1h-1zM8 11h1v1h-1zM10 11h1v1h-1zM11 11h1v1h-1zM12 11h1v1h-1zM14 11h1v1h-1zM15 11h1v1h-1zM19 11h1v1h-1zM21 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM28 11h1v1h-1zM29 11h1v1h-1zM30 11h1v1h-1zM0 12h1v1h-1zM1 12h1v1h-1zM5 12h1v1h-1zM6 12h1v1h-1zM8 12h1v1h-1zM9 12h1v1h-1zM15 12h1v1h-1zM18 12h1v1h-1zM20 12h1v1h-1zM27 12h1v1h-1zM28 12h1v1h-1zM29 12h1v1h-1zM31 12h1v1h-1zM0 13h1v1h-1zM1 13h1v1h-1zM5 13h1v1h-1zM8 13h1v1h-1zM11 13h1v1h-1zM12 13h1v1h-1zM14 13h1v1h-1zM15 13h1v1h-1zM16 13h1v1h-1zM17 13h1v1h-1zM19 13h1v1h-1zM21 13h1v1h-1zM22 13h1v1h-1zM23 13h1v1h-1zM24 13h1v1h-1zM26 13h1v1h-1zM30 13h1v1h-1zM31 13h1v1h-1zM32 13h1v1h-1zM1 14h1v1h-1zM3 14h1v1h-1zM4 14h1v1h-1zM5 14h1v1h-1zM6 14h1v1h-1zM8 14h1v1h-1zM9 14h1v1h-1zM11 14h1v1h-1zM13 14h1v1h-1zM14 14h1v1h-1zM17 14h1v1h-1zM20 14h1v1h-1zM21 14h1v1h-1zM24 14h1v1h-1zM25 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM29 14h1v1h-1zM31 14h1v1h-1zM7 15h1v1h-1zM14 15h1v1h-1zM16 15h1v1h-1zM19 15h1v1h-1zM21 15h1v1h-1zM23 15h1v1h-1zM25 15h1v1h-1zM26 15h1v1h-1zM28 15h1v1h-1zM29 15h1v1h-1zM30 15h1v1h-1zM2 16h1v1h-1zM3 16h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM10 16h1v1h-1zM11 16h1v1h-1zM12 16h1v1h-1zM13 16h1v1h-1zM16 16h1v1h-1zM17 16h1v1h-1zM22 16h1v1h-1zM25 16h1v1h-1zM27 16h1v1h-1zM28 16h1v1h-1zM32 16h1v1h-1zM0 17h1v1h-1zM1 17h1v1h-1zM4 17h1v1h-1zM5 17h1v1h-1zM8 17h1v1h-1zM10 17h1v1h-1zM11 17h1v1h-1zM12 17h1v1h-1zM13 17h1v1h-1zM14 17h1v1h-1zM16 17h1v1h-1zM17 17h1v1h-1zM19 17h1v1h-1zM20 17h1v1h-1zM21 17h1v1h-1zM22 17h1v1h-1zM23 17h1v1h-1zM26 17h1v1h-1zM27 17h1v1h-1zM29 17h1v1h-1zM30 17h1v1h-1zM31 17h1v1h-1zM32 17h1v1h-1zM0 18h1v1h-1zM1 18h1v1h-1zM2 18h1v1h-1zM3 18h1v1h-1zM4 18h1v1h-1zM6 18h1v1h-1zM7 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM11 18h1v1h-1zM12 18h1v1h-1zM13 18h1v1h-1zM14 18h1v1h-1zM15 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM21 18h1v1h-1zM24 18h1v1h-1zM25 18h1v1h-1zM26 18h1v1h-1zM27 18h1v1h-1zM28 18h1v1h-1zM30 18h1v1h-1zM31 18h1v1h-1zM0 19h1v1h-1zM1 19h1v1h-1zM3 19h1v1h-1zM7 19h1v1h-1zM8 19h1v1h-1zM11 19h1v1h-1zM12 19h1v1h-1zM15 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM24 19h1v1h-1zM25 19h1v1h-1zM26 19h1v1h-1zM27 19h1v1h-1zM28 19h1v1h-1zM29 19h1v1h-1zM30 19h1v1h-1zM31 19h1v1h-1zM0 20h1v1h-1zM2 20h1v1h-1zM5 20h1v1h-1zM6 20h1v1h-1zM7 20h1v1h-1zM8 20h1v1h-1zM9 20h1v1h-1zM11 20h1v1h-1zM12 20h1v1h-1zM13 20h1v1h-1zM14 20h1v1h-1zM15 20h1v1h-1zM16 20h1v1h-1zM19 20h1v1h-1zM20 20h1v1h-1zM25 20h1v1h-1zM27 20h1v1h-1zM28 20h1v1h-1zM29 20h1v1h-1zM0 21h1v1h-1zM2 21h1v1h-1zM3 21h1v1h-1zM4 21h1v1h-1zM7 21h1v1h-1zM10 21h1v1h-1zM12 21h1v1h-1zM13 21h1v1h-1zM14 21h1v1h-1zM15 21h1v1h-1zM18 21h1v1h-1zM19 21h1v1h-1zM21 21h1v1h-1zM22 21h1v1h-1zM23 21h1v1h-1zM24 21h1v1h-1zM26 21h1v1h-1zM32 21h1v1h-1zM0 22h1v1h-1zM5 22h1v1h-1zM6 22h1v1h-1zM7 22h1v1h-1zM10 22h1v1h-1zM14 22h1v1h-1zM15 22h1v1h-1zM16 22h1v1h-1zM17 22h1v1h-1zM18 22h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM24 22h1v1h-1zM30 22h1v1h-1zM31 22h1v1h-1zM0 23h1v1h-1zM2 23h1v1h-1zM3 23h1v1h-1zM5 23h1v1h-1zM9 23h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM13 23h1v1h-1zM14 23h1v1h-1zM15 23h1v1h-1zM21 23h1v1h-1zM25 23h1v1h-1zM27 23h1v1h-1zM29 23h1v1h-1zM30 23h1v1h-1zM0 24h1v1h-1zM2 24h1v1h-1zM6 24h1v1h-1zM8 24h1v1h-1zM9 24h1v1h-1zM11 24h1v1h-1zM13 24h1v1h-1zM15 24h1v1h-1zM17 24h1v1h-1zM22 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM26 24h1v1h-1zM27 24h1v1h-1zM28 24h1v1h-1zM31 24h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM11 25h1v1h-1zM12 25h1v1h-1zM14 25h1v1h-1zM16 25h1v1h-1zM18 25h1v1h-1zM19 25h1v1h-1zM21 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM28 25h1v1h-1zM30 25h1v1h-1zM32 25h1v1h-1zM0 26h1v1h-1zM1 26h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM5 26h1v1h-1zM6 26h1v1h-1zM13 26h1v1h-1zM14 26h1v1h-1zM15 26h1v1h-1zM16 26h1v1h-1zM18 26h1v1h-1zM20 26h1v1h-1zM22 26h1v1h-1zM23 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM28 26h1v1h-1zM30 26h1v1h-1zM31 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM8 27h1v1h-1zM9 27h1v1h-1zM10 27h1v1h-1zM11 27h1v1h-1zM12 27h1v1h-1zM13 27h1v1h-1zM16 27h1v1h-1zM20 27h1v1h-1zM21 27h1v1h-1zM22 27h1v1h-1zM23 27h1v1h-1zM24 27h1v1h-1zM28 27h1v1h-1zM29 27h1v1h-1zM30 27h1v1h-1zM31 27h1v1h-1zM0 28h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM9 28h1v1h-1zM10 28h1v1h-1zM11 28h1v1h-1zM18 28h1v1h-1zM20 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM27 28h1v1h-1zM28 28h1v1h-1zM29 28h1v1h-1zM31 28h1v1h-1zM32 28h1v1h-1zM0 29h1v1h-1zM2 29h1v1h-1zM3 29h1v1h-1zM4 29h1v1h-1zM6 29h1v1h-1zM8 29h1v1h-1zM11 29h1v1h-1zM15 29h1v1h-1zM16 29h1v1h-1zM17 29h1v1h-1zM19 29h1v1h-1zM22 29h1v1h-1zM24 29h1v1h-1zM25 29h1v1h-1zM28 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM32 29h1v1h-1zM0 30h1v1h-1zM2 30h1v1h-1zM3 30h1v1h-1zM4 30h1v1h-1zM6 30h1v1h-1zM8 30h1v1h-1zM9 30h1v1h-1zM10 30h1v1h-1zM11 30h1v1h-1zM12 30h1v1h-1zM13 30h1v1h-1zM17 30h1v1h-1zM18 30h1v1h-1zM20 30h1v1h-1zM21 30h1v1h-1zM22 30h1v1h-1zM24 30h1v1h-1zM25 30h1v1h-1zM26 30h1v1h-1zM27 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM9 31h1v1h-1zM16 31h1v1h-1zM21 31h1v1h-1zM26 31h1v1h-1zM28 31h1v1h-1zM29 31h1v1h-1zM30 31h1v1h-1zM0 32h1v1h-1zM1 32h1v1h-1zM2 32h1v1h-1zM3 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM9 32h1v1h-1zM11 32h1v1h-1zM12 32h1v1h-1zM13 32h1v1h-1zM17 32h1v1h-1zM18 32h1v1h-1zM22 32h1v1h-1zM23 32h1v1h-1zM24 32h1v1h-1zM25 32h1v1h-1zM27 32h1v1h-1zM31 32h1v1h-1z"/></svg>
+          </span>
+          <span class="qr-label">iPhone</span>
+        </a>
+        <a class="qr qr-android" href="https://play.google.com/store/apps/details?id=sk.matchball.app">
+          <span class="qr-code" aria-hidden="true">
+            <svg viewBox="0 0 41 41" role="img"><path transform="translate(4 4)" d="M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM8 0h1v1h-1zM9 0h1v1h-1zM10 0h1v1h-1zM11 0h1v1h-1zM12 0h1v1h-1zM13 0h1v1h-1zM14 0h1v1h-1zM16 0h1v1h-1zM17 0h1v1h-1zM18 0h1v1h-1zM21 0h1v1h-1zM22 0h1v1h-1zM26 0h1v1h-1zM27 0h1v1h-1zM28 0h1v1h-1zM29 0h1v1h-1zM30 0h1v1h-1zM31 0h1v1h-1zM32 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM9 1h1v1h-1zM12 1h1v1h-1zM13 1h1v1h-1zM14 1h1v1h-1zM16 1h1v1h-1zM17 1h1v1h-1zM18 1h1v1h-1zM19 1h1v1h-1zM22 1h1v1h-1zM24 1h1v1h-1zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM8 2h1v1h-1zM9 2h1v1h-1zM10 2h1v1h-1zM13 2h1v1h-1zM15 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM23 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM13 3h1v1h-1zM17 3h1v1h-1zM20 3h1v1h-1zM21 3h1v1h-1zM22 3h1v1h-1zM23 3h1v1h-1zM24 3h1v1h-1zM26 3h1v1h-1zM28 3h1v1h-1zM29 3h1v1h-1zM30 3h1v1h-1zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM9 4h1v1h-1zM10 4h1v1h-1zM11 4h1v1h-1zM13 4h1v1h-1zM16 4h1v1h-1zM18 4h1v1h-1zM19 4h1v1h-1zM21 4h1v1h-1zM22 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM29 4h1v1h-1zM30 4h1v1h-1zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM9 5h1v1h-1zM11 5h1v1h-1zM13 5h1v1h-1zM14 5h1v1h-1zM21 5h1v1h-1zM23 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM27 6h1v1h-1zM28 6h1v1h-1zM29 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM10 7h1v1h-1zM13 7h1v1h-1zM19 7h1v1h-1zM22 7h1v1h-1zM24 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM9 8h1v1h-1zM10 8h1v1h-1zM11 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM15 8h1v1h-1zM16 8h1v1h-1zM17 8h1v1h-1zM19 8h1v1h-1zM23 8h1v1h-1zM24 8h1v1h-1zM25 8h1v1h-1zM28 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM0 9h1v1h-1zM1 9h1v1h-1zM2 9h1v1h-1zM3 9h1v1h-1zM4 9h1v1h-1zM8 9h1v1h-1zM10 9h1v1h-1zM14 9h1v1h-1zM15 9h1v1h-1zM17 9h1v1h-1zM18 9h1v1h-1zM19 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM24 9h1v1h-1zM28 9h1v1h-1zM29 9h1v1h-1zM30 9h1v1h-1zM31 9h1v1h-1zM1 10h1v1h-1zM2 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM9 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM15 10h1v1h-1zM17 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM21 10h1v1h-1zM22 10h1v1h-1zM23 10h1v1h-1zM26 10h1v1h-1zM28 10h1v1h-1zM29 10h1v1h-1zM30 10h1v1h-1zM31 10h1v1h-1zM32 10h1v1h-1zM0 11h1v1h-1zM1 11h1v1h-1zM2 11h1v1h-1zM4 11h1v1h-1zM5 11h1v1h-1zM9 11h1v1h-1zM11 11h1v1h-1zM15 11h1v1h-1zM16 11h1v1h-1zM17 11h1v1h-1zM18 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM25 11h1v1h-1zM27 11h1v1h-1zM30 11h1v1h-1zM0 12h1v1h-1zM2 12h1v1h-1zM6 12h1v1h-1zM10 12h1v1h-1zM11 12h1v1h-1zM12 12h1v1h-1zM13 12h1v1h-1zM14 12h1v1h-1zM15 12h1v1h-1zM16 12h1v1h-1zM24 12h1v1h-1zM26 12h1v1h-1zM27 12h1v1h-1zM31 12h1v1h-1zM32 12h1v1h-1zM0 13h1v1h-1zM1 13h1v1h-1zM2 13h1v1h-1zM4 13h1v1h-1zM8 13h1v1h-1zM9 13h1v1h-1zM12 13h1v1h-1zM13 13h1v1h-1zM14 13h1v1h-1zM15 13h1v1h-1zM16 13h1v1h-1zM17 13h1v1h-1zM18 13h1v1h-1zM21 13h1v1h-1zM22 13h1v1h-1zM23 13h1v1h-1zM25 13h1v1h-1zM27 13h1v1h-1zM30 13h1v1h-1zM1 14h1v1h-1zM2 14h1v1h-1zM5 14h1v1h-1zM6 14h1v1h-1zM8 14h1v1h-1zM9 14h1v1h-1zM11 14h1v1h-1zM15 14h1v1h-1zM16 14h1v1h-1zM19 14h1v1h-1zM20 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM28 14h1v1h-1zM29 14h1v1h-1zM0 15h1v1h-1zM4 15h1v1h-1zM8 15h1v1h-1zM9 15h1v1h-1zM14 15h1v1h-1zM15 15h1v1h-1zM20 15h1v1h-1zM23 15h1v1h-1zM25 15h1v1h-1zM27 15h1v1h-1zM28 15h1v1h-1zM30 15h1v1h-1zM32 15h1v1h-1zM0 16h1v1h-1zM1 16h1v1h-1zM4 16h1v1h-1zM5 16h1v1h-1zM6 16h1v1h-1zM8 16h1v1h-1zM11 16h1v1h-1zM12 16h1v1h-1zM14 16h1v1h-1zM16 16h1v1h-1zM18 16h1v1h-1zM20 16h1v1h-1zM22 16h1v1h-1zM25 16h1v1h-1zM26 16h1v1h-1zM27 16h1v1h-1zM28 16h1v1h-1zM29 16h1v1h-1zM1 17h1v1h-1zM3 17h1v1h-1zM5 17h1v1h-1zM9 17h1v1h-1zM11 17h1v1h-1zM12 17h1v1h-1zM15 17h1v1h-1zM17 17h1v1h-1zM18 17h1v1h-1zM19 17h1v1h-1zM22 17h1v1h-1zM25 17h1v1h-1zM26 17h1v1h-1zM28 17h1v1h-1zM30 17h1v1h-1zM31 17h1v1h-1zM32 17h1v1h-1zM0 18h1v1h-1zM3 18h1v1h-1zM6 18h1v1h-1zM7 18h1v1h-1zM8 18h1v1h-1zM10 18h1v1h-1zM11 18h1v1h-1zM13 18h1v1h-1zM14 18h1v1h-1zM15 18h1v1h-1zM18 18h1v1h-1zM19 18h1v1h-1zM22 18h1v1h-1zM23 18h1v1h-1zM25 18h1v1h-1zM27 18h1v1h-1zM29 18h1v1h-1zM30 18h1v1h-1zM32 18h1v1h-1zM0 19h1v1h-1zM3 19h1v1h-1zM13 19h1v1h-1zM14 19h1v1h-1zM15 19h1v1h-1zM16 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM22 19h1v1h-1zM24 19h1v1h-1zM26 19h1v1h-1zM28 19h1v1h-1zM29 19h1v1h-1zM30 19h1v1h-1zM31 19h1v1h-1zM32 19h1v1h-1zM0 20h1v1h-1zM1 20h1v1h-1zM3 20h1v1h-1zM4 20h1v1h-1zM5 20h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM12 20h1v1h-1zM16 20h1v1h-1zM17 20h1v1h-1zM19 20h1v1h-1zM29 20h1v1h-1zM31 20h1v1h-1zM0 21h1v1h-1zM2 21h1v1h-1zM7 21h1v1h-1zM9 21h1v1h-1zM10 21h1v1h-1zM15 21h1v1h-1zM16 21h1v1h-1zM17 21h1v1h-1zM18 21h1v1h-1zM19 21h1v1h-1zM21 21h1v1h-1zM22 21h1v1h-1zM23 21h1v1h-1zM24 21h1v1h-1zM27 21h1v1h-1zM28 21h1v1h-1zM29 21h1v1h-1zM0 22h1v1h-1zM2 22h1v1h-1zM5 22h1v1h-1zM6 22h1v1h-1zM10 22h1v1h-1zM12 22h1v1h-1zM14 22h1v1h-1zM15 22h1v1h-1zM22 22h1v1h-1zM23 22h1v1h-1zM26 22h1v1h-1zM31 22h1v1h-1zM32 22h1v1h-1zM0 23h1v1h-1zM5 23h1v1h-1zM7 23h1v1h-1zM8 23h1v1h-1zM9 23h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM14 23h1v1h-1zM17 23h1v1h-1zM20 23h1v1h-1zM24 23h1v1h-1zM27 23h1v1h-1zM28 23h1v1h-1zM30 23h1v1h-1zM32 23h1v1h-1zM0 24h1v1h-1zM1 24h1v1h-1zM2 24h1v1h-1zM5 24h1v1h-1zM6 24h1v1h-1zM7 24h1v1h-1zM10 24h1v1h-1zM11 24h1v1h-1zM12 24h1v1h-1zM14 24h1v1h-1zM16 24h1v1h-1zM20 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM26 24h1v1h-1zM27 24h1v1h-1zM28 24h1v1h-1zM29 24h1v1h-1zM8 25h1v1h-1zM11 25h1v1h-1zM12 25h1v1h-1zM13 25h1v1h-1zM15 25h1v1h-1zM16 25h1v1h-1zM21 25h1v1h-1zM24 25h1v1h-1zM28 25h1v1h-1zM30 25h1v1h-1zM0 26h1v1h-1zM1 26h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM5 26h1v1h-1zM6 26h1v1h-1zM8 26h1v1h-1zM11 26h1v1h-1zM12 26h1v1h-1zM14 26h1v1h-1zM15 26h1v1h-1zM16 26h1v1h-1zM18 26h1v1h-1zM19 26h1v1h-1zM22 26h1v1h-1zM23 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM28 26h1v1h-1zM30 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM8 27h1v1h-1zM10 27h1v1h-1zM11 27h1v1h-1zM23 27h1v1h-1zM24 27h1v1h-1zM28 27h1v1h-1zM29 27h1v1h-1zM30 27h1v1h-1zM31 27h1v1h-1zM32 27h1v1h-1zM0 28h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM10 28h1v1h-1zM11 28h1v1h-1zM12 28h1v1h-1zM14 28h1v1h-1zM15 28h1v1h-1zM19 28h1v1h-1zM20 28h1v1h-1zM23 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM27 28h1v1h-1zM28 28h1v1h-1zM32 28h1v1h-1zM0 29h1v1h-1zM2 29h1v1h-1zM3 29h1v1h-1zM4 29h1v1h-1zM6 29h1v1h-1zM8 29h1v1h-1zM9 29h1v1h-1zM11 29h1v1h-1zM15 29h1v1h-1zM17 29h1v1h-1zM18 29h1v1h-1zM19 29h1v1h-1zM20 29h1v1h-1zM22 29h1v1h-1zM23 29h1v1h-1zM24 29h1v1h-1zM25 29h1v1h-1zM27 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM32 29h1v1h-1zM0 30h1v1h-1zM2 30h1v1h-1zM3 30h1v1h-1zM4 30h1v1h-1zM6 30h1v1h-1zM13 30h1v1h-1zM15 30h1v1h-1zM16 30h1v1h-1zM18 30h1v1h-1zM19 30h1v1h-1zM20 30h1v1h-1zM25 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM29 30h1v1h-1zM30 30h1v1h-1zM31 30h1v1h-1zM32 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM9 31h1v1h-1zM11 31h1v1h-1zM13 31h1v1h-1zM14 31h1v1h-1zM16 31h1v1h-1zM22 31h1v1h-1zM23 31h1v1h-1zM27 31h1v1h-1zM28 31h1v1h-1zM29 31h1v1h-1zM30 31h1v1h-1zM31 31h1v1h-1zM32 31h1v1h-1zM0 32h1v1h-1zM1 32h1v1h-1zM2 32h1v1h-1zM3 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM10 32h1v1h-1zM12 32h1v1h-1zM17 32h1v1h-1zM23 32h1v1h-1zM24 32h1v1h-1zM25 32h1v1h-1zM27 32h1v1h-1zM28 32h1v1h-1z"/></svg>
+          </span>
+          <span class="qr-label">Android</span>
+        </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pätička ──────────────────────────────────────────────── -->
+<footer id="kontakt">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="#top" style="font-size:1.25rem">
+          <img class="mark" src="logo.webp" alt="" width="128" height="128">
+          <span>Matchball</span>
+        </a>
+        <p class="foot-about">Rezervácia tenisových tréningov na Slovensku a v Česku. Hráč si nájde trénera, vyberie termín a zaplatí kartou až po potvrdení.</p>
+      </div>
+      <div>
+        <h4>Stránka</h4>
+        <div class="foot-links">
+          <a href="#ako">Ako to funguje</a>
+          <a href="#ceny">Ceny a platby</a>
+          <a href="#preco">Prečo Matchball</a>
+          <a href="https://apps.apple.com/sk/app/matchball/id6804171137">Stiahnuť pre iPhone</a>
+          <a href="https://play.google.com/store/apps/details?id=sk.matchball.app">Stiahnuť pre Android</a>
+        </div>
+      </div>
+      <div>
+        <h4>Dokumenty a kontakt</h4>
+        <div class="foot-links">
+          <a href="./legal/privacy.html">Ochrana osobných údajov</a>
+          <a href="./legal/terms.html">Podmienky používania</a>
+          <a href="mailto:matchball.app@gmail.com">matchball.app@gmail.com</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>Matchball — Martin Mucha · Jilemnického 8, Košice, Slovensko · IČO 57 799 032</span>
+      <span>© <span id="year">2026</span> Matchball</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── Hlavička: tieň po odrolovaní ──────────────────────── */
+  var nav = document.getElementById('nav');
+  function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 12); }
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ── Mobilné menu ──────────────────────────────────────── */
+  var burger = document.getElementById('burger');
+  var menu = document.getElementById('mobileMenu');
+  function closeMenu() {
+    burger.setAttribute('aria-expanded', 'false');
+    menu.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  burger.addEventListener('click', function () {
+    var open = burger.getAttribute('aria-expanded') === 'true';
+    if (open) { closeMenu(); return; }
+    burger.setAttribute('aria-expanded', 'true');
+    menu.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+  menu.addEventListener('click', function (e) { if (e.target.tagName === 'A') closeMenu(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+
+  /* ── Taby s posuvným podkladom ─────────────────────────
+     Podklad („glider") sa nepočíta z CSS, ale z reálnej šírky
+     tlačidla — inak by pri dlhších názvoch sedel len náhodou. */
+  document.querySelectorAll('[data-tabs]').forEach(function (bar) {
+    var glider = bar.querySelector('.glider');
+    var tabs = [].slice.call(bar.querySelectorAll('[role="tab"]'));
+
+    function move(btn) {
+      glider.style.width = btn.offsetWidth + 'px';
+      glider.style.transform = 'translateX(' + (btn.offsetLeft - bar.scrollLeft - 5) + 'px)';
+    }
+    function select(btn) {
+      tabs.forEach(function (t) {
+        var on = t === btn;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        var panel = document.getElementById(t.getAttribute('aria-controls'));
+        if (panel) panel.hidden = !on;
+      });
+      // Vedľa krokov sa vymení aj sada snímok — hráč a tréner vidia v appke
+      // iné obrazovky, takže rovnaké obrázky pre obe strany by klamali.
+      var gal = btn.getAttribute('data-shots');
+      if (gal) {
+        document.querySelectorAll('.shots-gal').forEach(function (g) {
+          g.hidden = g.id !== gal;
+        });
+      }
+      move(btn);
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(t); });
+      t.addEventListener('keydown', function (e) {
+        var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        var next = tabs[(i + d + tabs.length) % tabs.length];
+        next.focus(); select(next);
+      });
+    });
+    // Prvé umiestnenie až po načítaní písma — inak sa meria užšie tlačidlo.
+    var init = function () { move(bar.querySelector('[aria-selected="true"]')); };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(init); else init();
+    window.addEventListener('resize', init);
+    bar.addEventListener('scroll', init, { passive: true });
+  });
+
+  /* ── Taby „Prečo Matchball" ────────────────────────────── */
+  document.querySelectorAll('[data-why]').forEach(function (bar) {
+    var tabs = [].slice.call(bar.querySelectorAll('[role="tab"]'));
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (o) {
+          var on = o === t;
+          o.setAttribute('aria-selected', on ? 'true' : 'false');
+          var p = document.getElementById(o.getAttribute('aria-controls'));
+          if (p) p.hidden = !on;
+        });
+      });
+      t.addEventListener('keydown', function (e) {
+        var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        tabs[(i + d + tabs.length) % tabs.length].focus();
+        tabs[(i + d + tabs.length) % tabs.length].click();
+      });
+    });
+  });
+
+  /* ── Rozbaľovacie položky ──────────────────────────────
+     Výška sa nastavuje v pixeloch, aby sa dala animovať; po
+     otvorení sa uvoľní na auto, nech dlhší text nepretečie. */
+  document.querySelectorAll('[data-acc]').forEach(function (acc) {
+    var items = [].slice.call(acc.querySelectorAll('.acc-item'));
+    items.forEach(function (item) {
+      var btn = item.querySelector('.acc-btn');
+      var panel = item.querySelector('.acc-panel');
+      btn.addEventListener('click', function () {
+        var open = item.classList.contains('open');
+        items.forEach(function (o) {
+          if (o === item) return;
+          o.classList.remove('open');
+          o.querySelector('.acc-btn').setAttribute('aria-expanded', 'false');
+          o.querySelector('.acc-panel').style.height = '0px';
+        });
+        if (open) {
+          panel.style.height = panel.scrollHeight + 'px';
+          requestAnimationFrame(function () { panel.style.height = '0px'; });
+          item.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        } else {
+          item.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+          panel.style.height = panel.scrollHeight + 'px';
+          panel.addEventListener('transitionend', function once(e) {
+            if (e.propertyName !== 'height') return;
+            panel.removeEventListener('transitionend', once);
+            if (item.classList.contains('open')) panel.style.height = 'auto';
+          });
+        }
+      });
+    });
+    // Prvá položka otvorená — prázdny zoznam nadpisov nepovie nič.
+    if (items[0]) items[0].querySelector('.acc-btn').click();
+  });
+
+  /* ── Odhalenie pri rolovaní ────────────────────────────── */
+  var revealables = [].slice.call(document.querySelectorAll('.reveal'));
+  if (reduce || !('IntersectionObserver' in window)) {
+    revealables.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('in');
+        io.unobserve(en.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: .08 });
+    revealables.forEach(function (el, i) {
+      el.style.transitionDelay = (Math.min(i % 4, 3) * 70) + 'ms';
+      io.observe(el);
+    });
+  }
+
+  /* ── Galéria snímok: bodky ukazujú, kde si ────────────────
+     Bodky sa dopĺňajú z JavaScriptu podľa počtu obrázkov — v HTML by boli
+     ďalšie miesto, kde sa dá zabudnúť pri pridaní štvrtej snímky. */
+  function galeria(trackId, dotsId) {
+    var track = document.getElementById(trackId);
+    var dots = document.getElementById(dotsId);
+    if (!track || !dots) return;
+    var shots = [].slice.call(track.querySelectorAll('.shot'));
+    shots.forEach(function (shot, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Snímka ' + (i + 1) + ' z ' + shots.length);
+      b.setAttribute('aria-current', i === 0 ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        track.scrollTo({ left: shot.offsetLeft - track.offsetLeft, behavior: reduce ? 'auto' : 'smooth' });
+      });
+      dots.appendChild(b);
+    });
+    var marks = [].slice.call(dots.children);
+    track.addEventListener('scroll', function () {
+      // Ktorý obrázok je najbližšie k stredu okna — nie „ktorý začal", inak
+      // bodka preskočí už v polovici ťahu.
+      var mid = track.scrollLeft + track.clientWidth / 2;
+      var near = 0, best = Infinity;
+      shots.forEach(function (sh, i) {
+        var d = Math.abs((sh.offsetLeft - track.offsetLeft) + sh.clientWidth / 2 - mid);
+        if (d < best) { best = d; near = i; }
+      });
+      marks.forEach(function (m, i) { m.setAttribute('aria-current', i === near ? 'true' : 'false'); });
+    }, { passive: true });
+  }
+  galeria('shotsPlayer', 'shotsDots');
+  galeria('shotsCoach', 'shotsCoachDots');
+
+  /* ── Bežiaci pás: zdvojenie, nech sa slučka nezasekne ──── */
+  var track = document.getElementById('marquee');
+  if (track && !reduce) track.innerHTML += track.innerHTML;
+
+  /* ── Androidová čakačka (edge funkcia `waitlist`) ──────────
+     Od vydania na Play formulár na stránke NIE JE — ostáva len kód, lebo tú
+     istú obsluhu si berie pozvánková stránka. Bez tejto poistky spadol celý
+     skript na `null.addEventListener` a s ním aj taby, akordeón a galéria:
+     jeden odstránený formulár by potichu vypol polovicu stránky. */
+  var form = document.getElementById('waitForm');
+  var note = document.getElementById('waitNote');
+  var btn = document.getElementById('waitBtn');
+  var input = document.getElementById('email');
+  var sent = false;
+
+  function say(text, kind) {
+    if (!note) return;
+    note.textContent = text;
+    note.className = 'note' + (kind ? ' ' + kind : '');
+  }
+
+  if (form) form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (sent) return;
+    var email = (input.value || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/.test(email)) {
+      say('Skontroluj adresu, niečo tam nesedí.', 'err');
+      input.focus();
+      return;
+    }
+    btn.disabled = true;
+    say('Posielam…');
+    fetch('https://hpfcyriuitwbwtluaxbu.supabase.co/functions/v1/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        ref: null,
+        locale: (navigator.language || '').slice(0, 8) || null
+      })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (b) { return { ok: r.ok, body: b }; });
+    }).then(function (res) {
+      if (res.ok && res.body.ok) {
+        sent = true;
+        form.hidden = true;
+        say('Hotovo. Ozvem sa, hneď ako bude Android vonku.', 'ok');
+        return;
+      }
+      btn.disabled = false;
+      if (res.body.error === 'email_invalid') say('Skontroluj adresu, niečo tam nesedí.', 'err');
+      else if (res.body.error === 'rate_limited') say('Skús to o chvíľu znova.', 'err');
+      else say('Nepodarilo sa to odoslať. Skús to o chvíľu znova.', 'err');
+    }).catch(function () {
+      btn.disabled = false;
+      say('Nepodarilo sa to odoslať. Skontroluj pripojenie.', 'err');
+    });
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
 </html>
