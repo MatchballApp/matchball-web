@@ -222,15 +222,6 @@ p{margin:0}
    až potom AKO to v appke chodí. */
 /* Pruh o dlhovekosti pred výzvou na stiahnutie. Jedna veta, nie sekcia —
    preto stred, väčšie písmo než bežný text a zdroj drobným pod ňou. */
-.longevity-line{
-  max-width:44rem;margin:0 auto;text-align:center;
-  font-size:clamp(1.05rem,2.2vw,1.35rem);line-height:1.5;color:var(--ink-soft);
-}
-.longevity-line .num{font-weight:800;color:var(--green);letter-spacing:-.02em}
-.longevity-line .source{
-  display:block;margin-top:10px;font-size:.8rem;line-height:1.55;
-  color:var(--muted);opacity:.75;
-}
 .hero-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:36px}
 .hero-actions .btn-lime{background:var(--lime);color:#0B100D;box-shadow:0 12px 30px -12px rgba(201,242,78,.8)}
 .hero-actions .btn-lime:hover{transform:translateY(-2px);box-shadow:0 20px 40px -14px rgba(201,242,78,.9)}
@@ -409,6 +400,26 @@ p{margin:0}
   pointer-events:none;
 }
 .why-visual > div{position:relative;z-index:1}
+
+/* ── Zaujímavosti ───────────────────────────────────────────── */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.fact{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  padding:clamp(24px,3vw,32px);display:grid;gap:12px;align-content:start;
+  box-shadow:var(--shadow-soft);
+}
+.fact-num{
+  font-size:clamp(2.1rem,4vw,2.9rem);font-weight:800;letter-spacing:-.03em;
+  word-spacing:.06em;color:var(--green);line-height:1;
+}
+.fact h3{font-size:1.06rem;line-height:1.3}
+.fact p{color:var(--muted);font-size:1rem;line-height:1.6;margin:0}
+/* Zdroj drobným písmom a oddelený linkou. Bez neho by číslo znelo ako reklama;
+   s ním je to tvrdenie, ktoré si vie človek overiť. */
+.fact-src{
+  font-size:.82rem;line-height:1.5;color:var(--muted);opacity:.8;
+  border-top:1px solid var(--line);padding-top:14px;margin-top:2px;
+}
 
 /* ── Záverečná výzva ────────────────────────────────────────── */
 .cta{
@@ -916,22 +927,45 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   </div>
 </section>
 
-<!-- ── Prečo tenis ──────────────────────────────────────────────
-     Úzky pruh tesne pred výzvou na stiahnutie, nie vlastná sekcia hore.
-     Stránka predáva Matchball, nie tenis: kto sem prišiel, už hrá alebo o tom
-     uvažuje, a dánska štúdia mu nepovie nič o tom, ako si nájde trénera. Ako
-     posledná veta pred tlačidlom ale funguje — je to jediné číslo na stránke,
-     ktoré si človek zapamätá. Preto zostáva, len bez nadpisu, bez tlačidla
-     a bez položky v menu. -->
-<section class="wrap" id="preco-tenis" style="padding-bottom:clamp(24px,4vw,44px)">
-  <p class="longevity-line reveal">
-    Tenisti žijú v priemere o <span class="num">10 rokov</span> dlhšie —
-    viac než pri bedmintone, futbale aj behu.
-    <span class="source">Copenhagen City Heart Study, Mayo Clinic Proceedings 2018;
-      8 577 ľudí sledovaných dvadsaťpäť rokov. Tenis +9,7 roka oproti ľuďom bez pohybu.</span>
-  </p>
-</section>
+<!-- ── Zaujímavosti ─────────────────────────────────────────────
+     Tri zistenia z výskumu, nie jedno číslo do vzduchu. Prvé je tu preto, že
+     nehovorí len „tenis je zdravý", ale prečo — a je to ten istý dôvod, na
+     ktorom stojí Matchball: hrá sa s niekým. Zdroj je pri každom, lebo bez
+     neho by to boli reklamné čísla. -->
+<section class="section" id="zaujimavosti" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Zaujímavosti</span>
+      <h2>Čo o tenise hovoria štúdie.</h2>
+    </div>
 
+    <div class="facts">
+      <article class="fact reveal">
+        <div class="fact-num">+9,7 roka</div>
+        <h3>Najviac zo všetkých sledovaných športov</h3>
+        <p>Toľko rokov života navyše mali v dánskej štúdii tenisti oproti ľuďom bez pohybu. Bedminton pridal 6,2 roka a futbal 4,7 — ale cyklistika 3,7, plávanie 3,4 a beh 3,2.</p>
+        <p>Prvé tri majú spoločné to, že sa nedajú hrať sám. Vedúci autor štúdie to pripisuje práve tomu: pravidelná skupina dáva okrem pohybu aj ľudí, na ktorých sa dá spoľahnúť.</p>
+        <p class="fact-src">Copenhagen City Heart Study, Mayo Clinic Proceedings 2018. 8 577 ľudí sledovaných dvadsaťpäť rokov; výsledok platí aj po zohľadnení veku, príjmu a vzdelania.</p>
+      </article>
+
+      <article class="fact reveal">
+        <div class="fact-num">−47 %</div>
+        <h3>Nižšie riziko úmrtia u hráčov raketových športov</h3>
+        <p>O toľko nižšie riziko úmrtia z akejkoľvek príčiny mali ľudia, ktorí hrávajú tenis, squash alebo bedminton. Pri chorobách srdca a ciev je rozdiel ešte väčší — 56 %.</p>
+        <p>Iná krajina a iná vzorka než pri dánskej štúdii, výsledok rovnaký. To je na tom to podstatné: nejde o jedno meranie, ktoré vyšlo náhodou.</p>
+        <p class="fact-src">Oja a kol., British Journal of Sports Medicine 2017. 80 306 dospelých v Anglicku a Škótsku, sledovaní v priemere deväť rokov.</p>
+      </article>
+
+      <article class="fact reveal">
+        <div class="fact-num">+15 %</div>
+        <h3>Pevnejšie kosti, nielen lepšia kondícia</h3>
+        <p>O toľko vyššiu hustotu kostí v driekovej chrbtici namerali profesionálnym tenistom oproti ľuďom, ktorí nešportujú.</p>
+        <p>V hrajúcej ruke majú asi o pätinu viac kostnej hmoty než v druhej — kosť sa prispôsobí záťaži, ktorú dostáva. Preto sa tenis odporúča aj ako prevencia rednutia kostí.</p>
+        <p class="fact-src">Bone mineral content and density in professional tennis players, 1998; novšia metaanalýza v PLOS One 2025 dochádza k rovnakému záveru.</p>
+      </article>
+    </div>
+  </div>
+</section>
 
 <!-- ── Stiahnutie ───────────────────────────────────────────── -->
 <section class="wrap" id="stiahnut" style="padding-bottom:clamp(40px,6vw,80px)">
