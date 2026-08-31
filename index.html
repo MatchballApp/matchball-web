@@ -388,8 +388,21 @@ p{margin:0}
 /* Fotka namiesto čísla — v prvom tabe, kde by číslo aj tak len opakovalo text. */
 .why-photo{padding:0;overflow:hidden}
 .why-photo img{width:100%;height:100%;object-fit:cover;display:block}
+/* Číslo aj popis na stred. Popis mal `text-align:center` a číslo nie, takže
+   dedilo zarovnanie doľava zo `.why-body` — v prázdnej karte to vyzeralo,
+   akoby sa tie dva riadky minuli. */
+.why-visual > div{display:grid;justify-items:center;text-align:center;padding:0 8px}
 .why-visual .big{font-size:clamp(3rem,7vw,5rem);font-weight:800;letter-spacing:-.04em;color:var(--lime);line-height:1}
-.why-visual .cap{margin-top:10px;color:rgba(255,255,255,.6);font-size:.95rem;text-align:center;padding:0 24px}
+.why-visual .cap{margin-top:10px;color:rgba(255,255,255,.6);font-size:.95rem;max-width:26ch}
+/* Jemná žiara za číslom, nech karta nie je len veľký prázdny obdĺžnik.
+   Fotka ju nemá — tá si vystačí sama. */
+.why-visual:not(.why-photo)::before{
+  content:"";position:absolute;z-index:0;
+  width:min(78%,340px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,242,78,.15),transparent 66%);
+  pointer-events:none;
+}
+.why-visual > div{position:relative;z-index:1}
 
 /* ── Záverečná výzva ────────────────────────────────────────── */
 .cta{
