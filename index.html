@@ -307,19 +307,8 @@ p{margin:0}
   background:linear-gradient(160deg,#2A2F2B,#0B100D 42%,#1A201C);
   box-shadow:var(--shadow-lift),0 0 0 1px rgba(255,255,255,.09) inset;
 }
-.shot{position:relative}
 .shot img{
   width:100%;height:auto;border-radius:34px;display:block;
-}
-/* Čiarka domov. Snímky majú dole 40–53 px prázdneho bieleho pruhu — na
-   telefóne je to miesto pre ňu, ale na snímke sa nezachytáva. Bez nej ten pruh
-   vyzerá ako odseknutý spodok obrázka, nie ako spodok obrazovky. Dokreslí sa
-   teda tu; na farbu pod ňou sa nespoliehame, tá je vo všetkých snímkach biela. */
-.shot::after{
-  content:"";position:absolute;left:50%;transform:translateX(-50%);
-  bottom:calc(var(--bezel) + 1.35%);
-  width:34%;height:4px;border-radius:999px;
-  background:rgba(11,16,13,.32);
 }
 .shots-dots{display:flex;gap:8px;justify-content:center;margin-top:18px}
 .shots-dots button{
