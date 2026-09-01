@@ -498,6 +498,15 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   .why-visual{order:-1}
   .foot-grid{grid-template-columns:1fr 1fr;gap:32px}
 }
+/* Odkazy sa skrývajú skôr než zvyšok mobilného rozloženia. Piatym odkazom
+   (Zaujímavosti) sa lišta natiahla tak, že medzi 760 a 900 px sa už päť
+   odkazov, značka aj tlačidlo do 940 px nezmestili. Pod 900 px teda
+   preberá menu pod ikonou — je v ňom to isté. */
+@media (max-width:900px){
+  .nav-links,.nav-cta{display:none}
+  .nav-burger{display:flex}
+  .mobile-menu{display:flex}
+}
 @media (max-width:760px){
   .nav-links,.nav-cta{display:none}
   .nav-burger{display:flex}
