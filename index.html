@@ -319,10 +319,16 @@ p{margin:0}
 .shot img, .shot video{
   width:100%;height:auto;border-radius:34px;display:block;background:#fff;
 }
-/* Tlačidlo sedí na videu; `position` na ráme je kvôli nemu. */
+/* Tlačidlá sedia na videu; `position` na ráme je kvôli nim. */
 .shot{position:relative}
+/* Vrstva na ťuknutie kryje presne obraz, nie rám telefónu. */
+.shot-tap{
+  position:absolute;inset:var(--bezel);border:0;padding:0;margin:0;
+  background:transparent;border-radius:34px;cursor:pointer;z-index:1;
+  -webkit-tap-highlight-color:transparent;
+}
 .shot-play{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;
   width:74px;height:74px;border-radius:50%;border:0;cursor:pointer;
   display:grid;place-items:center;padding:0;padding-left:4px;
   background:rgba(12,18,14,.62);color:#D9F27A;
@@ -772,6 +778,10 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
                      „nikdy neprehrávať automaticky" je autoplay zakázaný a bez
                      tohto by návštevník pozeral na nehybný obrázok a nemal by
                      ho ako pustiť. -->
+                <!-- Priehľadná vrstva na ťuknutie. Ťuknutie do samotného `<video>`
+                     iOS Safari neposiela ďalej ako `click`, takže handler na
+                     videu tam mlčí; obyčajné tlačidlo ho dostane vždy. -->
+                <button type="button" class="shot-tap" id="klipTap" aria-label="Zastaviť video"></button>
                 <button type="button" class="shot-play" id="klipPlay" hidden aria-label="Prehrať video">
                   <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true">
                     <path d="M8 5.5v13l11-6.5z" fill="currentColor"/>
@@ -1274,49 +1284,79 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   galeria('shotsPlayer', 'shotsDots');
   galeria('shotsCoach', 'shotsCoachDots');
 
-  /* ── Video z appky: vždy odznova a naozaj sa pustí ────────
-     Prehrá sa, keď je vidieť, a zakaždým od začiatku — kto sa k nemu vráti,
-     nemá pozerať na zamrznutý koniec z minula.
+  /* ── Video z appky: ťuknutím zastaviť, ťuknutím pustiť ────
+     Prehrá sa samo, keď je vidieť, a zakaždým od začiatku — kto sa k nemu
+     vráti, nemá pozerať na zamrznutý koniec z minula.
+
+     Ťuknutie na video zastaví a ďalšie ho pustí od toho istého miesta. Bez
+     toho sa nedalo zastaviť na kroku, ktorý si chce človek prezrieť: obraz
+     utiekol a ostávalo prehrať celých 47 sekúnd znova. Že stojí, hovorí
+     tlačidlo uprostred — inak by to vyzeralo, že sa to pokazilo.
+
+     `controls` sme nedali zámerne: v ukážke appky nemá čo robiť lišta
+     s časom a hlasitosťou, ktorá vyzerá ako súčasť telefónu na obrázku.
 
      Prehliadače púšťajú video samo LEN keď je bez zvuku, a ani vtedy nie
      vždy: iPhone v šetriacom režime a Safari s nastavením „nikdy
      neprehrávať automaticky" odmietnu aj to. `play()` vtedy vráti odmietnutý
-     sľub. Preto tri poistky: skúsime znova pri prvom dotyku stránky (vtedy
-     už povolenie máme), a keď ani to nepomôže, ukážeme tlačidlo. Nikdy
-     nesmie zostať nehybný obrázok bez vysvetlenia. */
+     sľub, ukáže sa to isté tlačidlo a ide sa ďalej. */
   var klip = document.getElementById('klipHrac');
   var klipBtn = document.getElementById('klipPlay');
+  var klipTap = document.getElementById('klipTap');
   if (klip) {
-    var chceme = false;
+    // Je video na obrazovke? Kým nie je, nemá čo hrať ani sa nemá ukazovať
+    // tlačidlo — inak by preblikávalo pri každom rolovaní okolo.
+    var naObrazovke = false;
+    // Zastavil ho človek? Vtedy sa mu doň nemá miešať nič iné.
+    var rucneStop = false;
+    // Rozbehlo sa to už niekedy? Podľa toho vieme, či je pauza zákaz
+    // prehliadača, alebo vôľa človeka.
+    var uzHralo = false;
+
+    function ukazTlacidlo(ano) {
+      if (klipBtn) klipBtn.hidden = !ano;
+    }
 
     function pustit() {
-      if (!chceme) return;
+      if (!naObrazovke || rucneStop) return;
       var sl = klip.play();
       if (sl && sl.catch) {
-        sl.then(function () {
-          if (klipBtn) klipBtn.hidden = true;
-        }).catch(function () {
-          // Zakázané. Tlačidlo ukážeme len ak je video na obrazovke — inak by
-          // preblikávalo pri každom scrollovaní okolo.
-          if (klipBtn && chceme) klipBtn.hidden = false;
-        });
+        sl.then(function () { ukazTlacidlo(false); })
+          .catch(function () { if (naObrazovke) ukazTlacidlo(true); });
       }
     }
 
-    if (klipBtn) {
-      klipBtn.addEventListener('click', function () {
-        klip.currentTime = 0;
+    klip.addEventListener('playing', function () { uzHralo = true; });
+
+    // Ťuknutie: stop / pokračuj. Zámerne NIE `currentTime = 0` — kto zastavil,
+    // chce vidieť práve to miesto, na ktorom zastavil.
+    function prepnut() {
+      if (klip.paused) {
+        rucneStop = false;
+        ukazTlacidlo(false);
         klip.play();
-        klipBtn.hidden = true;
-      });
+      } else {
+        rucneStop = true;
+        klip.pause();
+        ukazTlacidlo(true);
+      }
+      if (klipTap) {
+        klipTap.setAttribute('aria-label', klip.paused ? 'Pustiť video' : 'Zastaviť video');
+      }
     }
 
+    if (klipTap) klipTap.addEventListener('click', prepnut);
+    // Tlačidlo uprostred robí to isté; leží nad vrstvou, tak si klik zoberie samo.
+    if (klipBtn) klipBtn.addEventListener('click', prepnut);
+
     // Prvý dotyk kdekoľvek na stránke je pre prehliadač „používateľ si to
-    // praje" — dovtedy zakázané prehrávanie odvtedy prejde.
+    // praje" — dovtedy zakázané prehrávanie odvtedy prejde. Platí to len
+    // dovtedy, kým sa video ani raz nerozbehlo; inak by tento poslucháč
+    // zrušil pauzu, ktorú si človek práve vyťukal.
     ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
       document.addEventListener(ev, function raz() {
         document.removeEventListener(ev, raz);
-        if (klip.paused) pustit();
+        if (!uzHralo && klip.paused) pustit();
       }, { once: true, passive: true });
     });
 
@@ -1324,12 +1364,14 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       var vio = new IntersectionObserver(function (zaznamy) {
         zaznamy.forEach(function (z) {
           if (z.isIntersecting) {
-            chceme = true;
+            naObrazovke = true;
+            // Nový príchod = nový začiatok, aj keď bolo predtým zastavené ručne.
+            rucneStop = false;
             klip.currentTime = 0;
             pustit();
           } else {
-            chceme = false;
-            if (klipBtn) klipBtn.hidden = true;
+            naObrazovke = false;
+            ukazTlacidlo(false);
             klip.pause();
           }
         });
@@ -1339,13 +1381,14 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       }, { threshold: .25 });
       vio.observe(klip);
     } else {
-      chceme = true;
+      naObrazovke = true;
       pustit();
     }
 
-    // Keď sa človek vráti na kartu prehliadača, video pokračuje od začiatku.
+    // Návrat na kartu prehliadača. Kto si video zastavil sám, nájde ho
+    // zastavené — prehliadač mu ho nemá pustiť za chrbtom.
     document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'visible' && chceme) {
+      if (document.visibilityState === 'visible' && naObrazovke && !rucneStop) {
         klip.currentTime = 0;
         pustit();
       }
