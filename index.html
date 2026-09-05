@@ -770,13 +770,13 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
           <div class="shots-gal" id="galTrener" hidden>
             <div class="shots-track" id="shotsCoach">
               <figure class="shot">
-                <img src="app-trener-upozornenie.webp" alt="Upozornenie o zrušenom tréningu nad trénerským prehľadom so zostatkom na výber" width="600" height="1304" loading="lazy">
-              </figure>
-              <figure class="shot">
-                <img src="app-trener-statistiky.webp" alt="Štatistiky zárobkov trénera za mesiac" width="600" height="1304" loading="lazy">
-              </figure>
-              <figure class="shot">
-                <img src="app-trener-kalendar.webp" alt="Týždenný kalendár trénera s rozpisom hodín" width="600" height="1304" loading="lazy">
+                <!-- Bez `autoplay`: galéria je pri načítaní skrytá (tab „Pre
+                     hráčov"), takže by video bežalo do prázdna. Púšťa ho
+                     prepnutie tabu a sledovanie viditeľnosti nižšie. -->
+                <video id="klipTrener" src="app-video-trener.mp4" poster="app-video-trener-poster.webp"
+                       width="600" height="1340"
+                       muted playsinline loop preload="metadata"
+                       aria-label="Záznam z aplikácie: tréner potvrdí žiadosť a založí tréning"></video>
               </figure>
             </div>
             <div class="shots-dots" id="shotsCoachDots"></div>
@@ -1122,6 +1122,17 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       if (gal) {
         document.querySelectorAll('.shots-gal').forEach(function (g) {
           g.hidden = g.id !== gal;
+          // Video v skrytej galérii nemá čo hrať; to v otvorenej má začať od
+          // začiatku. Samotné sledovanie viditeľnosti na to nestačí —
+          // prvok schovaný cez `hidden` nemá plochu, takže sa jeho stav pri
+          // prepnutí tabu nemusí ohlásiť a video by pokračovalo v polovici,
+          // prípadne by ticho stálo.
+          g.querySelectorAll('video').forEach(function (v) {
+            if (g.hidden) { v.pause(); return; }
+            v.currentTime = 0;
+            var sl = v.play();
+            if (sl && sl.catch) sl.catch(function () {});
+          });
         });
       }
       move(btn);
@@ -1257,18 +1268,21 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   galeria('shotsPlayer', 'shotsDots');
   galeria('shotsCoach', 'shotsCoachDots');
 
-  /* ── Video z appky: beží samo dokola ──────────────────────
-     Ukážka appky, nie prehrávač. Nedá sa zastaviť ani pretočiť — ťuknutie do
-     nej video zastavovalo a návštevník potom pozeral na zamrznutý obraz bez
+  /* ── Videá z appky: bežia samy dokola ─────────────────────
+     Ukážky appky, nie prehrávače. Nedajú sa zastaviť ani pretočiť — ťuknutie
+     ich zastavovalo a návštevník potom pozeral na zamrznutý obraz bez
      vysvetlenia, čo vyzeralo ako porucha stránky.
 
-     Prehrá sa, keď je vidieť, a pri každom objavení od začiatku. Prehliadače
-     púšťajú video samo len bez zvuku, a ani vtedy vždy: iPhone v šetriacom
-     režime a Safari s nastavením „nikdy neprehrávať automaticky" odmietnu aj
-     to. Vtedy `play()` vráti odmietnutý sľub a skúsi sa to znova pri prvom
-     dotyku stránky — vtedy už povolenie máme. */
-  var klip = document.getElementById('klipHrac');
-  if (klip) {
+     Každé sa prehrá, keď je vidieť, a pri každom objavení od začiatku. To
+     platí aj pri prepnutí tabu „Pre trénerov": skrytá galéria nie je na
+     obrazovke, takže jej video stojí a začne až vtedy, keď sa tab otvorí.
+
+     Prehliadače púšťajú video samo len bez zvuku, a ani vtedy vždy: iPhone
+     v šetriacom režime a Safari s nastavením „nikdy neprehrávať automaticky"
+     odmietnu aj to. Vtedy `play()` vráti odmietnutý sľub a skúsi sa to znova
+     pri prvom dotyku stránky — vtedy už povolenie máme. */
+  var klipy = [].slice.call(document.querySelectorAll('.shot video'));
+  klipy.forEach(function (klip) {
     var naObrazovke = false;
     var uzHralo = false;
 
@@ -1315,7 +1329,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         pustit();
       }
     });
-  }
+  });
 
   /* ── Bežiaci pás: zdvojenie, nech sa slučka nezasekne ──── */
   var track = document.getElementById('marquee');
