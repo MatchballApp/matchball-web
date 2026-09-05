@@ -316,9 +316,21 @@ p{margin:0}
      výreze to vyzeralo, akoby za telefónom trčal okraj snímky. Okolo telefónu
      má byť obyčajné pozadie stránky a nič iné. */
 }
-.shot img{
+.shot img, .shot video{
   width:100%;height:auto;border-radius:34px;display:block;background:#fff;
 }
+/* Tlačidlo sedí na videu; `position` na ráme je kvôli nemu. */
+.shot{position:relative}
+.shot-play{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:74px;height:74px;border-radius:50%;border:0;cursor:pointer;
+  display:grid;place-items:center;padding:0;padding-left:4px;
+  background:rgba(12,18,14,.62);color:#D9F27A;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  transition:transform .25s var(--ease),background .25s var(--ease);
+}
+.shot-play:hover{transform:translate(-50%,-50%) scale(1.06);background:rgba(12,18,14,.78)}
+.shot-play[hidden]{display:none}
 .shots-dots{display:flex;gap:8px;justify-content:center;margin-top:18px}
 .shots-dots button{
   width:8px;height:8px;padding:0;border:0;border-radius:50%;cursor:pointer;
@@ -741,14 +753,30 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         <div class="shots">
           <div class="shots-gal" id="galHrac">
             <div class="shots-track" id="shotsPlayer">
+              <!-- Záznam z appky. Bez zvuku a `playsinline`, aby sa na iPhone
+                   prehral v stránke a nie na celú obrazovku; `loop` ho pustí
+                   znova, keď dobehne. Poster drží rozmer, kým sa video načíta,
+                   takže sa galéria pri načítaní netrhne.
+
+                   `autoplay` je tu aj napriek skriptu nižšie: ten video púšťa
+                   odznova pri každom objavení, ale keby zlyhal alebo prehliadač
+                   nepoznal IntersectionObserver, návštevník by pozeral na
+                   nehybný obrázok. Bez zvuku to prehliadače púšťať smú. -->
               <figure class="shot">
-                <img src="app-hladanie.webp" alt="Zoznam trénerov vo vyhľadávaní s cenou a hodnotením" width="600" height="1304" loading="lazy">
-              </figure>
-              <figure class="shot">
-                <img src="app-profil.webp" alt="Profil trénerky s cenníkom a predplatenými balíčkami" width="600" height="1304" loading="lazy">
-              </figure>
-              <figure class="shot">
-                <img src="app-kalendar.webp" alt="Výber dňa a času v kalendári trénera" width="600" height="1304" loading="lazy">
+                <video id="klipHrac" src="app-video.mp4" poster="app-video-poster.webp"
+                       width="600" height="1304"
+                       autoplay muted playsinline loop preload="auto"
+                       aria-label="Záznam z aplikácie: hráč si nájde trénera a rezervuje tréning"></video>
+                <!-- Núdzové tlačidlo. Ukáže sa LEN vtedy, keď prehrávanie
+                     nezačalo — v šetriacom režime iPhonu a pri nastavení
+                     „nikdy neprehrávať automaticky" je autoplay zakázaný a bez
+                     tohto by návštevník pozeral na nehybný obrázok a nemal by
+                     ho ako pustiť. -->
+                <button type="button" class="shot-play" id="klipPlay" hidden aria-label="Prehrať video">
+                  <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true">
+                    <path d="M8 5.5v13l11-6.5z" fill="currentColor"/>
+                  </svg>
+                </button>
               </figure>
             </div>
             <div class="shots-dots" id="shotsDots"></div>
@@ -1217,6 +1245,9 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
     var dots = document.getElementById(dotsId);
     if (!track || !dots) return;
     var shots = [].slice.call(track.querySelectorAll('.shot'));
+    // Jedna snímka = nie je kam posúvať. Jediná bodka by vyzerala ako
+    // rozbitá galéria, z ktorej sa stratil zvyšok.
+    if (shots.length < 2) { dots.hidden = true; return; }
     shots.forEach(function (shot, i) {
       var b = document.createElement('button');
       b.type = 'button';
@@ -1242,6 +1273,84 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   }
   galeria('shotsPlayer', 'shotsDots');
   galeria('shotsCoach', 'shotsCoachDots');
+
+  /* ── Video z appky: vždy odznova a naozaj sa pustí ────────
+     Prehrá sa, keď je vidieť, a zakaždým od začiatku — kto sa k nemu vráti,
+     nemá pozerať na zamrznutý koniec z minula.
+
+     Prehliadače púšťajú video samo LEN keď je bez zvuku, a ani vtedy nie
+     vždy: iPhone v šetriacom režime a Safari s nastavením „nikdy
+     neprehrávať automaticky" odmietnu aj to. `play()` vtedy vráti odmietnutý
+     sľub. Preto tri poistky: skúsime znova pri prvom dotyku stránky (vtedy
+     už povolenie máme), a keď ani to nepomôže, ukážeme tlačidlo. Nikdy
+     nesmie zostať nehybný obrázok bez vysvetlenia. */
+  var klip = document.getElementById('klipHrac');
+  var klipBtn = document.getElementById('klipPlay');
+  if (klip) {
+    var chceme = false;
+
+    function pustit() {
+      if (!chceme) return;
+      var sl = klip.play();
+      if (sl && sl.catch) {
+        sl.then(function () {
+          if (klipBtn) klipBtn.hidden = true;
+        }).catch(function () {
+          // Zakázané. Tlačidlo ukážeme len ak je video na obrazovke — inak by
+          // preblikávalo pri každom scrollovaní okolo.
+          if (klipBtn && chceme) klipBtn.hidden = false;
+        });
+      }
+    }
+
+    if (klipBtn) {
+      klipBtn.addEventListener('click', function () {
+        klip.currentTime = 0;
+        klip.play();
+        klipBtn.hidden = true;
+      });
+    }
+
+    // Prvý dotyk kdekoľvek na stránke je pre prehliadač „používateľ si to
+    // praje" — dovtedy zakázané prehrávanie odvtedy prejde.
+    ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+      document.addEventListener(ev, function raz() {
+        document.removeEventListener(ev, raz);
+        if (klip.paused) pustit();
+      }, { once: true, passive: true });
+    });
+
+    if ('IntersectionObserver' in window) {
+      var vio = new IntersectionObserver(function (zaznamy) {
+        zaznamy.forEach(function (z) {
+          if (z.isIntersecting) {
+            chceme = true;
+            klip.currentTime = 0;
+            pustit();
+          } else {
+            chceme = false;
+            if (klipBtn) klipBtn.hidden = true;
+            klip.pause();
+          }
+        });
+      // Štvrtina stačí. Pri vyššom prahu by sa video na nízkom okne (notebook
+      // na šírku) nespustilo nikdy — je vysoké ako telefón a do výšky
+      // obrazovky sa väčšou časťou nezmestí.
+      }, { threshold: .25 });
+      vio.observe(klip);
+    } else {
+      chceme = true;
+      pustit();
+    }
+
+    // Keď sa človek vráti na kartu prehliadača, video pokračuje od začiatku.
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible' && chceme) {
+        klip.currentTime = 0;
+        pustit();
+      }
+    });
+  }
 
   /* ── Bežiaci pás: zdvojenie, nech sa slučka nezasekne ──── */
   var track = document.getElementById('marquee');
