@@ -241,14 +241,6 @@ p{margin:0}
 }
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
 
-/* ── Bežiaci pás ────────────────────────────────────────────── */
-.marquee{overflow:hidden;padding:26px 0;border-bottom:1px solid var(--line);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-.marquee-track{display:flex;gap:0;width:max-content;animation:slide 34s linear infinite}
-.marquee:hover .marquee-track{animation-play-state:paused}
-.marquee-item{display:flex;align-items:center;gap:14px;padding:0 26px;font-weight:500;color:var(--muted);white-space:nowrap}
-.marquee-item::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--lime-dim)}
-@keyframes slide{to{transform:translateX(-50%)}}
-
 /* ── Čísla ──────────────────────────────────────────────────── */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:var(--line);border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--line)}
 .stat{background:var(--card);padding:30px 26px}
@@ -356,12 +348,6 @@ p{margin:0}
 .acc-inner{padding:0 0 32px 54px;max-width:52rem}
 .acc-inner p{color:var(--muted)}
 .acc-inner p + p{margin-top:14px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
-.chip{
-  display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:999px;
-  background:var(--card);border:1px solid var(--line);font-size:.87rem;font-weight:500;color:var(--fg);
-}
-.chip::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--lime-dim)}
 
 /* ── Výhody (taby s obrázkovým panelom) ─────────────────────── */
 .why{background:var(--ink);color:#fff;border-radius:var(--radius-xl);padding:clamp(40px,6vw,72px);position:relative;overflow:hidden}
@@ -381,6 +367,9 @@ p{margin:0}
 .why-tabs button:hover{transform:translateY(-2px)}
 .why-tabs button[aria-selected="true"]{background:var(--lime);color:#0B100D;border-color:var(--lime)}
 .why-body{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(24px,4vw,54px);align-items:center;position:relative}
+/* Balíčky nemajú vedľa textu ani fotku, ani číslo — panel je preto jeden
+   stĺpec. Šírka je zastavená, nech riadok neprebehne cez celú kartu. */
+#why-3{grid-template-columns:minmax(0,46rem)}
 .why-body h3{font-size:clamp(1.5rem,3vw,2.1rem);color:#fff;font-weight:700}
 .why-body p{margin-top:16px;color:rgba(255,255,255,.7);font-size:1.06rem}
 .why-list{margin:24px 0 0;padding:0;list-style:none;display:grid;gap:11px}
@@ -412,12 +401,16 @@ p{margin:0}
 .why-visual > div{position:relative;z-index:1}
 
 /* ── Zaujímavosti ───────────────────────────────────────────── */
-.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+/* Jedna karta, nie mriežka. Aby to nevyzeralo ako zvyšok po dvoch zmazaných,
+   karta končí na šírke obsahu a číslo stojí vedľa textu, nie nad ním. */
+.facts{display:grid;grid-template-columns:minmax(0,54rem);gap:16px}
 .fact{
   background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
   padding:clamp(24px,3vw,32px);display:grid;gap:12px;align-content:start;
   box-shadow:var(--shadow-soft);
+  grid-template-columns:auto minmax(0,1fr);column-gap:clamp(24px,3vw,38px);
 }
+.fact > :not(.fact-num){grid-column:2}
 .fact-num{
   font-size:clamp(2.1rem,4vw,2.9rem);font-weight:800;letter-spacing:-.03em;
   word-spacing:.06em;color:var(--green);line-height:1;
@@ -454,20 +447,6 @@ p{margin:0}
   transition:transform .3s var(--ease);
 }
 .qr:hover .qr-code{transform:translateY(-3px)}
-/* QR v heroi. Zámerne LEN na širokej obrazovke: na telefóne je kód na nič —
-   vlastný displej si nikto nenaskenuje — a v prvom pohľade by zabral miesto
-   tlačidlám, ktoré tam naozaj fungujú. */
-.hero-qr{display:none}
-@media (min-width:920px){
-  .hero-qr{display:block;margin-top:34px}
-  .hero-qr .qr-row{margin-top:12px;gap:18px}
-  .hero-qr .qr-code{width:104px;height:104px}
-  .hero-qr .qr-label{color:rgba(255,255,255,.78)}
-}
-.hero-qr-hint{
-  display:block;font-size:.86rem;letter-spacing:.14em;text-transform:uppercase;
-  color:rgba(255,255,255,.55);
-}
 .qr-code svg{display:block;width:100%;height:100%;shape-rendering:crispEdges}
 .qr-code path{fill:#0B100D}
 .qr-label{font-size:.9rem;font-weight:600;color:rgba(255,255,255,.85)}
@@ -508,10 +487,9 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   .why-visual{order:-1}
   .foot-grid{grid-template-columns:1fr 1fr;gap:32px}
 }
-/* Odkazy sa skrývajú skôr než zvyšok mobilného rozloženia. Piatym odkazom
-   (Zaujímavosti) sa lišta natiahla tak, že medzi 760 a 900 px sa už päť
-   odkazov, značka aj tlačidlo do 940 px nezmestili. Pod 900 px teda
-   preberá menu pod ikonou — je v ňom to isté. */
+/* Odkazy sa skrývajú skôr než zvyšok mobilného rozloženia: medzi 760 a 900 px
+   sa odkazy, značka aj tlačidlo do 940 px nezmestili. Pod 900 px teda preberá
+   menu pod ikonou — je v ňom to isté. */
 @media (max-width:900px){
   .nav-links,.nav-cta{display:none}
   .nav-burger{display:flex}
@@ -525,6 +503,9 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   .acc-inner{padding-left:0}
   .acc-btn{gap:14px}
   .acc-btn .idx{display:none}
+  /* Na úzkej obrazovke by veľké číslo vedľa textu nechalo na text pár znakov. */
+  .fact{grid-template-columns:1fr}
+  .fact > :not(.fact-num){grid-column:auto}
   .foot-grid{grid-template-columns:1fr}
   .hero-actions .btn{width:100%}
   .hero-scrim{background:linear-gradient(180deg,
@@ -551,7 +532,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       <a href="#ako">Ako to funguje</a>
       <a href="#preco">Výhody</a>
       <a href="#ceny">Ceny</a>
-      <a href="#zaujimavosti">Zaujímavosti</a>
       <a href="#kontakt">Kontakt</a>
     </div>
     <a class="btn btn-dark btn-sm nav-cta" href="#stiahnut">Stiahnuť</a>
@@ -561,9 +541,8 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 
 <div class="mobile-menu" id="mobileMenu">
   <a href="#ako">Ako to funguje</a>
-  <a href="#preco">Prečo Matchball</a>
-  <a href="#ceny">Ceny a platby</a>
-  <a href="#zaujimavosti">Zaujímavosti</a>
+  <a href="#preco">Výhody</a>
+  <a href="#ceny">Ceny</a>
   <a href="#kontakt">Kontakt</a>
   <a class="btn btn-lime" style="background:var(--lime);color:#0B100D" href="#stiahnut">Stiahnuť appku</a>
 </div>
@@ -588,14 +567,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         </div>
         <p class="hero-note">Appka je zadarmo. Platíš až vtedy, keď tréner termín potvrdí.</p>
       </div>
-
-        <div class="hero-qr">
-          <span class="hero-qr-hint">Naskenuj a stiahni</span>
-          <div class="qr-row">
-            <a class="qr" href="https://apps.apple.com/sk/app/matchball/id6804171137"><span class="qr-code" aria-hidden="true"><svg viewBox="0 0 41 41" role="img"><use href="#qrIos"/></svg></span><span class="qr-label">iPhone</span></a>
-            <a class="qr" href="https://play.google.com/store/apps/details?id=sk.matchball.app"><span class="qr-code" aria-hidden="true"><svg viewBox="0 0 41 41" role="img"><use href="#qrAndroid"/></svg></span><span class="qr-label">Android</span></a>
-          </div>
-        </div>
     </div>
 
     <a class="scroll-cue" href="#ako">
@@ -604,20 +575,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
     </a>
   </div>
 </header>
-
-<!-- ── Bežiaci pás ──────────────────────────────────────────── -->
-<div class="marquee" aria-hidden="true">
-  <div class="marquee-track" id="marquee">
-    <div class="marquee-item">Platba až po potvrdení</div>
-    <div class="marquee-item">Zrušenie 16 h vopred zadarma</div>
-    <div class="marquee-item">Konečná suma vopred</div>
-    <div class="marquee-item">Peniaze trénerovi až po tréningu</div>
-    <div class="marquee-item">Predplatené balíčky hodín</div>
-    <div class="marquee-item">Chat s trénerom</div>
-    <div class="marquee-item">Zľavnené termíny na poslednú chvíľu</div>
-    <div class="marquee-item">Loptičky a odmeny za tréningy</div>
-  </div>
-</div>
 
 <!-- ── Ako to funguje (taby) ────────────────────────────────── -->
 <section class="section" id="ako">
@@ -661,28 +618,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
                 <p>Keď tréner žiadosť potvrdí, zaplatíš kartou priamo v appke. Konečnú sumu vidíš vopred.</p>
               </div>
             </article>
-            <article class="step reveal">
-              <div class="no">04</div>
-              <div>
-                <h3>Sleduj kalendár trénera</h3>
-                <p>Nikdy nevieš, kedy sa mu uvoľní termín — a uvoľnené hodiny na poslednú chvíľu ponúka so zľavou.</p>
-              </div>
-            </article>
-            <article class="step reveal">
-              <div class="no">05</div>
-              <div>
-                <h3>Hraj a zbieraj odmeny</h3>
-                <p>Za každý odtrénovaný tréning padne loptička. V nej je šanca na nového avatara a posúva ťa na vyšší level.</p>
-              </div>
-            </article>
-            <article class="step reveal">
-              <div class="no">06</div>
-              <div>
-                <h3>Staň sa trénerom aj ty</h3>
-                <p>Ak vieš hrať a baví ťa to ukázať ďalším, prepneš sa v profile na trénera. Licenciu na to nepotrebuješ — stačí cena a hodiny, kedy máš voľno.</p>
-              </div>
-            </article>
-</div>
+          </div>
         </div>
 
         <div class="tabpanel" role="tabpanel" id="panel-trener" aria-labelledby="tab-trener" hidden>
@@ -690,53 +626,25 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
             <article class="step">
               <div class="no">01</div>
               <div>
-                <h3>Hráčov ti hľadáme my</h3>
-                <p>Ľudia ťa nájdu podľa mesta, ceny a hodnotení, aj keď o tebe dovtedy nepočuli. Nemusíš si zháňať klientov ani inzerovať — stačí mať voľné hodiny v kalendári.</p>
+                <h3>Založ si trénerský profil</h3>
+                <p>Cena, kurt, jazyky a hodiny, kedy máš voľno. Hráči ťa nájdu podľa mesta, ceny a hodnotení — klientov si zháňať nemusíš.</p>
               </div>
             </article>
             <article class="step">
               <div class="no">02</div>
-              <div>
-                <h3>Z tvojej ceny si neberieme nič</h3>
-                <p>Servisný poplatok je súčasťou ceny, ktorú uvedieš — hráč ju zaplatí celú a ty k nej nič nedoplácaš. Platbu uvoľňujeme 12 hodín po tréningu a peniaze máš na výber do týždňa od zaplatenia — kedy si ich pošleš na účet, je na tebe.</p>
-              </div>
-            </article>
-            <article class="step">
-              <div class="no">03</div>
-              <div>
-                <h3>Zrušenie na poslednú chvíľu ti neprepadne</h3>
-                <p>Keď hráč zruší menej než 6 hodín pred tréningom alebo nepríde, celá suma zostáva tebe. Pri zrušení 6 až 16 hodín vopred ti zostáva polovica. Čas, ktorý si si na neho vyhradil, ti teda nikto nezoberie zadarmo.</p>
-              </div>
-            </article>
-            <article class="step">
-              <div class="no">04</div>
-              <div>
-                <h3>Uvoľnil sa ti kurt? Vypíš tréning hneď</h3>
-                <p>Vypíšeš voľnú hodinu, pokojne so zľavou, a hráči ju uvidia okamžite. Prázdne miesto v kalendári sa tak zaplní aj na poslednú chvíľu.</p>
-              </div>
-            </article>
-            <article class="step">
-              <div class="no">05</div>
-              <div>
-                <h3>Založ si trénerský profil</h3>
-                <p>Cena, kurt, jazyky a hodiny, kedy máš voľno. Hráči ťa nájdu podľa mesta aj podľa ceny.</p>
-              </div>
-            </article>
-            <article class="step">
-              <div class="no">06</div>
               <div>
                 <h3>Potvrď alebo odmietni žiadosť</h3>
                 <p>Kalendár, rezervácie aj chat s hráčom máš na jednom mieste. Potvrdenie je jedno ťuknutie.</p>
               </div>
             </article>
             <article class="step">
-              <div class="no">07</div>
+              <div class="no">03</div>
               <div>
-                <h3>Sleduj, ako sa ti darí</h3>
-                <p>Štatistiky zárobkov, obsadenosti a najaktívnejších hráčov. A k tomu predplatené balíčky hodín so zľavou.</p>
+                <h3>Peniaze máš po tréningu</h3>
+                <p>Hráč platí kartou vopred, tebe sumu uvoľníme 12 hodín po tréningu. Z tvojej ceny si neberieme nič.</p>
               </div>
             </article>
-</div>
+          </div>
         </div>
       </div>
 
@@ -802,7 +710,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         <button role="tab" aria-selected="true" aria-controls="why-1">Nájdeš si svojho trénera</button>
         <button role="tab" aria-selected="false" aria-controls="why-2">Trénuj a zarábaj</button>
         <button role="tab" aria-selected="false" aria-controls="why-3">Balíčky a odmeny</button>
-        <button role="tab" aria-selected="false" aria-controls="why-4">Pripravujeme</button>
       </div>
 
       <div class="why-body tabpanel" role="tabpanel" id="why-1">
@@ -825,8 +732,8 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
           <h3>Trénovať môžeš aj bez licencie</h3>
           <p>Ak vieš hrať a baví ťa to ukázať ďalším, staň sa trénerom. Licenciu na to nepotrebuješ — stačí profil, cena a voľné hodiny. Nájdeš si hráčov vo svojom okolí a zarobíš si tým, čo aj tak robíš rád.</p>
           <ul class="why-list">
-            <li>Žiadny mesačný ani vstupný poplatok, výber od 100 € zadarmo</li>
-            <li>Vypíšeš tréning na poslednú chvíľu a hráči ho hneď vidia</li>
+            <li>Žiadny mesačný ani vstupný poplatok</li>
+            <li>Uvoľnenú hodinu vypíšeš aj na poslednú chvíľu, hráči ju hneď vidia</li>
             <li>Prehľad príjmov a odtrénovaných hodín máš v appke</li>
           </ul>
         </div>
@@ -839,24 +746,9 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
           <p>U trénera, ku ktorému chodíš, si kúpiš balíček hodín so zľavou. Dá sa aj darovať: obdarovaný dostane hodiny na svoje meno a chodí, kedy mu to vyhovuje. A za každý odtrénovaný tréning zbieraš loptičky a odmeny.</p>
           <ul class="why-list">
             <li>Balíčky 5, 10 alebo 20 hodín so zľavou od trénera</li>
-            <li>Kúpou ďalšieho balíčka sa predĺži platnosť všetkých — aj u iného trénera</li>
             <li>Za každý odtrénovaný tréning padne loptička a posúva ťa na vyšší level</li>
           </ul>
         </div>
-        <div class="why-visual"><div><div class="big">12</div><div class="cap">mesiacov platí balíček — a kúpou ďalšieho sa obnoví</div></div></div>
-      </div>
-
-      <div class="why-body tabpanel" role="tabpanel" id="why-4" hidden>
-        <div>
-          <h3>Sparing a turnaje pripravujeme</h3>
-          <p>Chceme, aby si tu našiel nielen trénera, ale aj parťáka na tenis na tvojej úrovni — a aby sa dalo čoskoro hrávať aj turnaje. Zatiaľ zbierame záujem: v appke ťukni na <strong>Mám záujem</strong> a ozveme sa, keď to v tvojom meste spustíme.</p>
-          <ul class="why-list">
-            <li>Sparing podľa mesta a úrovne</li>
-            <li>Amatérske turnaje podľa úrovne</li>
-            <li>Spustíme tam, kde je záujem</li>
-          </ul>
-        </div>
-        <div class="why-visual"><div><div class="big">čoskoro</div><div class="cap">funkcia ešte nie je spustená, zbierame záujem</div></div></div>
       </div>
     </div>
   </div>
@@ -881,11 +773,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
           <div class="acc-inner">
             <p>Cenu tréningu si určuje každý tréner sám. K nej sa pripočíta servisný poplatok 5 % + 0,30 €, ktorý je súčasťou sumy zobrazenej pred zaplatením.</p>
             <p>Hráč vždy vidí konečnú sumu vopred; žiadne skryté poplatky neúčtujeme.</p>
-            <div class="chips">
-              <span class="chip">Konečná suma vopred</span>
-              <span class="chip">Platba kartou v appke</span>
-              <span class="chip">Bez skrytých poplatkov</span>
-            </div>
           </div>
         </div>
       </div>
@@ -901,12 +788,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
             <p>Tréner môže ponúkať predplatené balíčky 5, 10 alebo 20 hodín so zľavou. Tréning z balíčka zoberie presne toľko času, ako trvá.</p>
             <p>Balíček sa viaže na konkrétneho trénera a platí 12 mesiacov. Keď si kúpiš ďalší, predĺži sa platnosť všetkých tvojich balíčkov na 12 mesiacov — aj tých u iného trénera.</p>
             <p>Balíček sa dá aj darovať. Skupinové tréningy sa z neho platiť nedajú, tie sa platia kartou.</p>
-            <div class="chips">
-              <span class="chip">5, 10 alebo 20 hodín</span>
-              <span class="chip">Platnosť 12 mesiacov</span>
-              <span class="chip">Ďalší balíček predĺži všetky</span>
-              <span class="chip">Dá sa darovať</span>
-            </div>
           </div>
         </div>
       </div>
@@ -921,11 +802,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
           <div class="acc-inner">
             <p>Zrušenie 16 hodín a viac pred tréningom je zadarma a hráčovi vraciame celú sumu. Pri zrušení 6 až 16 hodín pred tréningom si tréner ponecháva 50 % a zvyšok vraciame. Menej než 6 hodín pred tréningom alebo pri neúčasti si tréner ponecháva celú sumu.</p>
             <p>Do 60 minút od vytvorenia rezervácie ju možno zrušiť vždy zadarmo.</p>
-            <div class="chips">
-              <span class="chip">16 h a viac — celá suma späť</span>
-              <span class="chip">6–16 h — polovica</span>
-              <span class="chip">Do 60 minút vždy zadarma</span>
-            </div>
           </div>
         </div>
       </div>
@@ -940,13 +816,8 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
           <div class="acc-inner">
             <p>Peniaze držíme, kým sa tréning neuskutoční. Trénerovi ich uvoľňujeme 12 hodín po tréningu, alebo hneď, ako hráč potvrdí, že prebehol v poriadku.</p>
             <p>Ak niečo nebolo v poriadku, hráč to môže v tejto lehote nahlásiť a peniaze zostanú zadržané do vyriešenia.</p>
-            <p>Tréner má sumu na výber do týždňa od zaplatenia a na svoj účet si ju pošle, keď chce. Zo svojej ceny neplatí nič — servisný poplatok je nad ňu a platí ho hráč. Žiadny mesačný ani vstupný poplatok neexistuje.</p>
+            <p>Tréner má sumu na výber do týždňa od zaplatenia a na svoj účet si ju pošle, keď chce.</p>
             <p>Výber od 100 € je zadarmo — poplatok za výber uhradíme za teba. Menší výber stojí 2 €, a to len ten prvý v mesiaci: po ňom je každý ďalší výber v tom mesiaci zadarmo, nech je akokoľvek veľký.</p>
-            <div class="chips">
-              <span class="chip">Žiadne poplatky pre trénera</span>
-              <span class="chip">Výber od 100 € zadarmo</span>
-              <span class="chip">Uvoľnenie 12 hodín po tréningu</span>
-            </div>
           </div>
         </div>
       </div>
@@ -955,15 +826,15 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 </section>
 
 <!-- ── Zaujímavosti ─────────────────────────────────────────────
-     Tri zistenia z výskumu, nie jedno číslo do vzduchu. Prvé je tu preto, že
-     nehovorí len „tenis je zdravý", ale prečo — a je to ten istý dôvod, na
-     ktorom stojí Matchball: hrá sa s niekým. Zdroj je pri každom, lebo bez
-     neho by to boli reklamné čísla. -->
+     Jedno zistenie z výskumu, nie zoznam čísel. Je tu preto, že nehovorí len
+     „tenis je zdravý", ale prečo — a je to ten istý dôvod, na ktorom stojí
+     Matchball: hrá sa s niekým. Zdroj patrí k nemu, bez neho by to bolo
+     reklamné číslo. -->
 <section class="section" id="zaujimavosti" style="padding-top:0">
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Zaujímavosti</span>
-      <h2>Čo o tenise hovoria štúdie.</h2>
+      <h2>Čo o tenise hovorí veda.</h2>
     </div>
 
     <div class="facts">
@@ -974,22 +845,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         <p>Prvé tri majú spoločné to, že sa nedajú hrať sám. Vedúci autor štúdie to pripisuje práve tomu: pravidelná skupina dáva okrem pohybu aj ľudí, na ktorých sa dá spoľahnúť.</p>
         <p class="fact-src">Copenhagen City Heart Study, Mayo Clinic Proceedings 2018. 8 577 ľudí sledovaných dvadsaťpäť rokov; výsledok platí aj po zohľadnení veku, príjmu a vzdelania.</p>
       </article>
-
-      <article class="fact reveal">
-        <div class="fact-num">−47 %</div>
-        <h3>Nižšie riziko úmrtia u hráčov raketových športov</h3>
-        <p>O toľko nižšie riziko úmrtia z akejkoľvek príčiny mali ľudia, ktorí hrávajú tenis, squash alebo bedminton. Pri chorobách srdca a ciev je rozdiel ešte väčší — 56 %.</p>
-        <p>Iná krajina a iná vzorka než pri dánskej štúdii, výsledok rovnaký. To je na tom to podstatné: nejde o jedno meranie, ktoré vyšlo náhodou.</p>
-        <p class="fact-src">Oja a kol., British Journal of Sports Medicine 2017. 80 306 dospelých v Anglicku a Škótsku, sledovaní v priemere deväť rokov.</p>
-      </article>
-
-      <article class="fact reveal">
-        <div class="fact-num">+15 %</div>
-        <h3>Pevnejšie kosti, nielen lepšia kondícia</h3>
-        <p>O toľko vyššiu hustotu kostí v driekovej chrbtici namerali profesionálnym tenistom oproti ľuďom, ktorí nešportujú.</p>
-        <p>V hrajúcej ruke majú asi o pätinu viac kostnej hmoty než v druhej — kosť sa prispôsobí záťaži, ktorú dostáva. Preto sa tenis odporúča aj ako prevencia rednutia kostí.</p>
-        <p class="fact-src">Bone mineral content and density in professional tennis players, 1998; novšia metaanalýza v PLOS One 2025 dochádza k rovnakému záveru.</p>
-      </article>
     </div>
   </div>
 </section>
@@ -998,7 +853,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 <section class="wrap" id="stiahnut" style="padding-bottom:clamp(40px,6vw,80px)">
   <div class="cta reveal">
     <h2>Nájdi si trénera ešte dnes.</h2>
-    <p class="lead">Tenis je hra, ktorú nehráš sám. Matchball je miesto, kde nájdeš trénera, parťáka aj dôvod vrátiť sa na kurt. Appka je zadarmo, platíš len za tréning.</p>
+    <p class="lead">Tenis je hra, ktorú nehráš sám. Appka je zadarmo, platíš len za tréning.</p>
     <div class="cta-actions">
       <a class="btn btn-light" href="https://apps.apple.com/sk/app/matchball/id6804171137">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.8c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.6.9-.7 0-1.9-.9-3.1-.8-1.6 0-3 .9-3.8 2.4-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3.1-.7 1.4 0 1.8.7 3.1.7 1.3 0 2.1-1.1 2.9-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.6-3.7zM14 5.9c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3z"/></svg>
@@ -1040,17 +895,14 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
           <img class="mark" src="logo.webp" alt="" width="128" height="128">
           <span>Matchball</span>
         </a>
-        <p class="foot-about">Rezervácia tenisových tréningov. Hráč si nájde trénera, vyberie termín a zaplatí kartou až po potvrdení.</p>
+        <p class="foot-about">Rezervácia tenisových tréningov — hráč si nájde trénera, tréner hráčov.</p>
       </div>
       <div>
         <h4>Stránka</h4>
         <div class="foot-links">
           <a href="#ako">Ako to funguje</a>
-          <a href="#preco">Prečo Matchball</a>
-          <a href="#ceny">Ceny a platby</a>
-          <a href="#zaujimavosti">Zaujímavosti</a>
-          <a href="https://apps.apple.com/sk/app/matchball/id6804171137">Stiahnuť pre iPhone</a>
-          <a href="https://play.google.com/store/apps/details?id=sk.matchball.app">Stiahnuť pre Android</a>
+          <a href="#preco">Výhody</a>
+          <a href="#ceny">Ceny</a>
         </div>
       </div>
       <div>
@@ -1330,10 +1182,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       }
     });
   });
-
-  /* ── Bežiaci pás: zdvojenie, nech sa slučka nezasekne ──── */
-  var track = document.getElementById('marquee');
-  if (track && !reduce) track.innerHTML += track.innerHTML;
 
   /* ── Androidová čakačka (edge funkcia `waitlist`) ──────────
      Od vydania na Play formulár na stránke NIE JE — ostáva len kód, lebo tú
