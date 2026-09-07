@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "GMG42P2BPM.sk.matchball.app",
+        "paths": [
+          "/t/*"
+        ]
+      }
+    ]
+  }
+}

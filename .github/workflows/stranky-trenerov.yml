@@ -1,0 +1,50 @@
+# Verejné stránky trénerov sa generujú v noci, nie pri každom uložení profilu.
+#
+# Tréner zmenu na svojej stránke uvidí najneskôr do rána. Je to zámerný
+# kompromis: webhook z databázy by znamenal commit pri každom ťuknutí do
+# cenníka a história repa by sa utopila v „Stránky trénerov" commitoch.
+name: Stránky trénerov
+
+on:
+  schedule:
+    # 03:00 UTC — v noci, keď sa profily nemenia a nikto na web nepozerá.
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+# Bez tohto nemá `GITHUB_TOKEN` právo pushnúť vygenerované súbory späť.
+permissions:
+  contents: write
+
+# Dva behy naraz by si prepísali `t/` pod rukami a druhý push by spadol.
+concurrency:
+  group: stranky-trenerov
+  cancel-in-progress: false
+
+jobs:
+  generuj:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Vygenerovať stránky
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node scripts/generuj-stranky-trenerov.mjs
+
+      - name: Commitnúť, ak sa niečo zmenilo
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -A t treneri sitemap.xml .well-known .nojekyll
+          # Generátor je idempotentný, takže vo väčšine nocí niet čo commitnúť —
+          # bez tejto poistky by `git commit` spadol na prázdnom indexe a celý
+          # beh by sa tváril ako chyba.
+          git diff --cached --quiet || {
+            git commit -m "Stránky trénerov — $(date +%F)"
+            git push
+          }

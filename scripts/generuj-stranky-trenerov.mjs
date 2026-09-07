@@ -1,0 +1,1893 @@
+#!/usr/bin/env node
+//
+// Generátor verejných stránok trénerov (matchballapp.com/t/<slug>).
+//
+// Beží v GitHub Action raz denne: vytiahne trénerov zo Supabase, stiahne fotky
+// z privátneho bucketu a vygeneruje statické HTML, ktoré GitHub Pages servíruje.
+//
+// Spustenie ručne:
+//   SUPABASE_URL=... SUPABASE_SERVICE_KEY=... node scripts/generuj-stranky-trenerov.mjs
+//   node scripts/generuj-stranky-trenerov.mjs --fixture scripts/fixture-treneri.json
+//
+// Bez závislostí (Node 20: fetch, fs, path). `qrcode.js` je kópia balíka
+// qrcode-generator (MIT) z appky — QR sa kreslí TU, pri generovaní, aby
+// stránka nemusela volať cudziu službu. Návštevník verejnej stránky trénera
+// nemá byť ohlásený tretej strane len preto, že si pozrel cenník.
+//
+// Skript je zámerne idempotentný a deterministický: rovnaký vstup dá bajt na
+// bajt rovnaký výstup, inak by Action robil prázdne commity každú noc.
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const qrcode = require('./qrcode.js');
+// Slug je síce ASCII, ale mesto ani meno v QR nikdy nebudú — UTF-8 kodér je
+// súčasťou toho istého súboru, stačí ho zapnúť.
+qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
+
+const SCRIPTS_DIR = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(SCRIPTS_DIR, '..');
+
+const WEB_ORIGIN = 'https://matchballapp.com';
+const APP_STORE = 'https://apps.apple.com/sk/app/matchball/id6804171137';
+const PLAY_STORE = 'https://play.google.com/store/apps/details?id=sk.matchball.app';
+const APPLE_APP_ID = 'GMG42P2BPM.sk.matchball.app';
+const ANDROID_PACKAGE = 'sk.matchball.app';
+const BUCKET = 'profile-photos';
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CENY — prevzaté 1:1 zo `src/utils/pricing.ts` v repe appky.
+//
+//  Nie je to duplicita z lenivosti: web musí ukázať PRESNE tú cenu, akú hráč
+//  uvidí v appke a akú mu server strhne (`expected_booking_price`). Keby sa
+//  web počítal „približne", stránka by sľubovala inú sumu než rezervácia —
+//  a to je horšie než cenu neukázať vôbec.
+//
+//  Pri každej zmene v `pricing.ts` treba prepísať aj toto. Zdroj:
+//  Matchball/src/utils/pricing.ts (PLATFORM_PCT … minTierRate).
+// ═══════════════════════════════════════════════════════════════════════════
+
+const PLATFORM_PCT = 0.05;
+const PLATFORM_FIXED = { EUR: 0.30, CZK: 7.50 };
+const SPLIT_PAYMENT_COST = { EUR: 0.25, CZK: 6.00 };
+const GROUP_TIERS = [1, 2, 3, 4];
+const OPEN_TIER = 4;
+const MAX_GROUP_PLAYERS = 12;
+const TIME_BAND_KEYS = ['morning', 'afternoon', 'evening', 'custom'];
+const MAX_TIME_BANDS = 4;
+const TIME_BAND_STEP_MIN = 30;
+const TIME_BAND_MAX_PCT = 50;
+const DAY_MINUTES = 24 * 60;
+
+// `Math.round(n*100)/100` sa pri polovičnom cente rozchádza s Postgresom;
+// `toPrecision(12)` tú stopu po plávajúcej čiarke zmaže. (pricing.ts:round2)
+function round2(n) {
+  const scaled = Number((Math.abs(n) * 100).toPrecision(12));
+  return Math.sign(n) * Math.round(scaled) / 100;
+}
+
+function fixedFor(currency) {
+  return PLATFORM_FIXED[currency] ?? PLATFORM_FIXED.EUR;
+}
+
+function serviceFee(coachPrice, currency = 'EUR', courtFee = 0) {
+  if (coachPrice <= 0) return 0;
+  return round2(PLATFORM_PCT * (coachPrice + Math.max(courtFee, 0)) + fixedFor(currency));
+}
+
+// Každý účastník platí vlastnou kartou, takže pevná časť poplatku sa účtuje za
+// KAŽDÚ platbu — násobí sa počtom hláv, nedelí sa medzi ne.
+function groupServiceFee(groupCoachTotal, players, currency = 'EUR', courtFee = 0) {
+  if (groupCoachTotal <= 0 || players <= 0) return 0;
+  const extra = SPLIT_PAYMENT_COST[currency] ?? SPLIT_PAYMENT_COST.EUR;
+  return round2(PLATFORM_PCT * (groupCoachTotal + Math.max(courtFee, 0))
+    + fixedFor(currency) + extra * (players - 1));
+}
+
+function customerTotal(coachPrice, currency = 'EUR', courtFee = 0) {
+  const court = Math.max(courtFee, 0);
+  return round2(coachPrice + court + serviceFee(coachPrice, currency, court));
+}
+
+function groupCustomerTotal(groupCoachTotal, players, currency = 'EUR', courtFee = 0) {
+  const court = Math.max(courtFee, 0);
+  return round2(groupCoachTotal + court + groupServiceFee(groupCoachTotal, players, currency, court));
+}
+
+function groupCoachTotalFromCustomerTotal(total, players, currency = 'EUR') {
+  const extra = (SPLIT_PAYMENT_COST[currency] ?? SPLIT_PAYMENT_COST.EUR) * Math.max(players - 1, 0);
+  const raw = (total - fixedFor(currency) - extra) / (1 + PLATFORM_PCT);
+  if (raw <= 0) return 0;
+  let rate = Math.floor(raw * 100) / 100;
+  for (let i = 0; i < 3 && groupCustomerTotal(round2(rate + 0.01), players, currency) <= total; i++) {
+    rate = round2(rate + 0.01);
+  }
+  return rate;
+}
+
+// Jeden platiaci je skupina o jednom. (pricing.ts:coachPriceFromCustomerTotal)
+function coachPriceFromCustomerTotal(total, currency = 'EUR') {
+  return groupCoachTotalFromCustomerTotal(total, 1, currency);
+}
+
+function numAt(map, key) {
+  const v = map[key];
+  return typeof v === 'number' && v > 0 ? v : 0;
+}
+
+function perPersonRate(pricing, players) {
+  const map = pricing ?? {};
+  const tier = Math.min(Math.max(Math.trunc(players), 2), OPEN_TIER);
+  const pp = map.per_person;
+  if (pp && typeof pp === 'object') {
+    const v = pp[String(tier)];
+    if (typeof v === 'number' && v > 0) return v;
+  }
+  const total = numAt(map, String(tier));
+  return total > 0 ? round2(total / tier) : 0;
+}
+
+// Do štvorky sa berie ULOŽENÝ celok, nie súčin ceny za osobu — delenie a spätné
+// násobenie sa o cent rozíde. Nad štvorkou sa násobí, tam žiadny celok nie je.
+function groupRateFor(pricing, hourlyRate, players) {
+  const map = pricing ?? {};
+  const n = Math.trunc(players);
+  if (n <= 1) {
+    const one = numAt(map, '1');
+    return one > 0 ? one : Math.max(hourlyRate, 0);
+  }
+  if (n > MAX_GROUP_PLAYERS) return 0;
+  if (n <= OPEN_TIER) return numAt(map, String(n));
+  const per = perPersonRate(map, OPEN_TIER);
+  return per > 0 ? round2(per * n) : 0;
+}
+
+// Ponúkané pásma tak, ako ich má vidieť hráč — `price` je cena TRÉNERA za celú
+// skupinu danej veľkosti. (pricing.ts:getTiers)
+function getTiers(pricing, hourlyRate) {
+  const map = pricing ?? {};
+  const tiers = [];
+  for (const p of GROUP_TIERS) {
+    if (p === 1) {
+      const price = numAt(map, '1') || hourlyRate;
+      if (price > 0) tiers.push({ players: 1, price });
+    } else {
+      const price = groupRateFor(map, hourlyRate, p);
+      if (price > 0) tiers.push({ players: p, price });
+    }
+  }
+  return tiers;
+}
+
+// Koľko z toho zaplatí JEDEN hráč. Delí sa CELÁ suma vrátane skupinového
+// poplatku — inak by cenník sľuboval menej, než sa naozaj strhne.
+function customerPerPerson(groupTotal, players, currency = 'EUR') {
+  if (players <= 0) return customerTotal(groupTotal, currency);
+  return round2(groupCustomerTotal(groupTotal, players, currency) / players);
+}
+
+function isStepMinute(v) {
+  return typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= DAY_MINUTES
+    && v % TIME_BAND_STEP_MIN === 0;
+}
+
+// Prísne zámerne: pásma musia na seba nadväzovať bez dier a prekrytí. Server má
+// tú istú kontrolu v `time_bands_problem()` (migrácia 334).
+function validTimeBands(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const raw = value;
+  if (typeof raw.enabled !== 'boolean') return null;
+  if (raw.weekend !== 'same' && raw.weekend !== 'base') return null;
+  if (!Array.isArray(raw.bands)) return null;
+  if (raw.bands.length < 1 || raw.bands.length > MAX_TIME_BANDS) return null;
+
+  const bands = [];
+  let prevEnd = -1;
+  for (const item of raw.bands) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return null;
+    const b = item;
+    if (!TIME_BAND_KEYS.includes(b.key)) return null;
+    if (!isStepMinute(b.start_min) || !isStepMinute(b.end_min)) return null;
+    if (b.end_min <= b.start_min) return null;
+    const pct = b.pct;
+    if (typeof pct !== 'number' || !Number.isFinite(pct)) return null;
+    if (Math.abs(pct) > TIME_BAND_MAX_PCT) return null;
+    if (round2(pct) !== pct) return null;
+    if (prevEnd >= 0 && b.start_min !== prevEnd) return null;
+    prevEnd = b.end_min;
+    bands.push({ key: b.key, start_min: b.start_min, end_min: b.end_min, pct });
+  }
+  return { enabled: raw.enabled, weekend: raw.weekend, bands };
+}
+
+function timeBandsOf(pricing) {
+  const tb = validTimeBands((pricing ?? {}).time_bands);
+  return tb && tb.enabled ? tb : null;
+}
+
+// Pri nulovom percente sa NENÁSOBÍ — server preskakuje výpočet rovnako, takže
+// sa tie dve cesty nemôžu rozísť ani o zaokrúhlenie.
+function applyBandPct(rate, pct) {
+  if (!pct) return rate;
+  return round2(rate * (1 + pct / 100));
+}
+
+// Najnižšia sadzba individuálneho tréningu naprieč pásmami — pre „od X €".
+function minTierRate(pricing, hourlyRate) {
+  const base = groupRateFor(pricing, hourlyRate, 1);
+  const bands = timeBandsOf(pricing);
+  if (!bands || !(base > 0)) return base;
+  const pcts = bands.bands.map((b) => b.pct);
+  if (bands.weekend === 'base') pcts.push(0);
+  return applyBandPct(base, Math.min(...pcts));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Texty a formátovanie
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Zameranie sa v appke od UX kola 9/2026 nezbiera a `sk.json` k nemu preto
+// nemá kľúče (`search.filters.specializations` je prázdny objekt). Názvy sú tu
+// napísané tak, ako ich appka používala predtým; keď sa kľúče do sk.json
+// vrátia, treba ich zosúladiť.
+const ZAMERANIE = {
+  beginners: 'Začiatočníci',
+  children: 'Deti',
+  kids: 'Deti',
+  juniors: 'Juniori',
+  adults: 'Dospelí',
+  competitive: 'Závodní hráči',
+  seniors: 'Seniori',
+  fitness: 'Kondícia',
+};
+
+// `profile.lang_*` v sk.json pokrýva len sk/cs/en; zvyšok je dopísaný v tom
+// istom tvare (názov jazyka po slovensky, prvé písmeno veľké).
+const JAZYKY = {
+  sk: 'Slovenčina',
+  cs: 'Čeština',
+  en: 'Angličtina',
+  de: 'Nemčina',
+  hu: 'Maďarčina',
+  uk: 'Ukrajinčina',
+  ru: 'Ruština',
+  pl: 'Poľština',
+};
+
+// sk.json: coach_pricing.court_included / court.on_site_note / court.in_app_note
+const KURT = {
+  included: () => 'Kurt je v cene',
+  on_site: () => 'Kurt sa platí na mieste',
+  in_app: (suma) => `Kurt ${suma} navyše, platí sa v appke`,
+};
+
+const MESIACE = [
+  'január', 'február', 'marec', 'apríl', 'máj', 'jún',
+  'júl', 'august', 'september', 'október', 'november', 'december',
+];
+
+// sk.json: booking.band_morning / _afternoon / _evening
+const PASMA = { morning: 'Ráno', afternoon: 'Poobede', evening: 'Večer', custom: 'Vlastný čas' };
+
+/** Slovenské číslo: desatinná čiarka, celé sumy bez „,00". */
+function cislo(n) {
+  const v = round2(n);
+  const s = Number.isInteger(v) ? String(v) : v.toFixed(2);
+  return s.replace('.', ',');
+}
+
+/** Hodnotenie sa píše na jedno desatinné miesto — „4,7“, nie „4,70“. */
+function hodnotenie(n) {
+  return (Math.round(Number(n) * 10) / 10).toFixed(1).replace('.', ',');
+}
+
+function suma(n, currency) {
+  // Nezalomiteľná medzera pred menou — „20 €" sa nesmie rozpadnúť na dva riadky.
+  return currency === 'CZK' ? `${cislo(n)}\u00a0Kč` : `${cislo(n)}\u00a0€`;
+}
+
+function cas(min) {
+  const h = Math.floor(min / 60) % 24;
+  const m = min % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function mesiacRok(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${MESIACE[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+}
+
+/**
+ * Meno hodnotiaceho hráča tak, ako smie stáť na verejnej, Googlom indexovanej
+ * stránke: krstné meno a z priezviska len začiatočné písmeno („Peter N.").
+ *
+ * Hráč súhlasil s tým, že jeho hodnotenie uvidí iný hráč v appke — nie s tým,
+ * že sa jeho celé meno dá vygoogliť. RPC dnes vracia u niektorých hráčov celé
+ * meno, takže sa skracuje tu; keď ho začne skracovať server, je to nečinná
+ * operácia (meno bez priezviska prejde nezmenené).
+ */
+function menoRecenzenta(raw) {
+  const casti = String(raw ?? '').trim().split(/\s+/).filter(Boolean);
+  if (casti.length === 0) return 'Hráč';
+  if (casti.length === 1) return casti[0];
+  return `${casti[0]} ${[...casti[1]][0].toUpperCase()}.`;
+}
+
+/** Slovenské skloňovanie počtu hodnotení / trénerov. */
+function pocet(n, one, few, other) {
+  if (n === 1) return one;
+  if (n >= 2 && n <= 4) return few;
+  return other;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  HTML pomôcky
+// ═══════════════════════════════════════════════════════════════════════════
+
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/** Text do JSON-LD aj do JS reťazca — `</script>` musí zostať neškodný. */
+function json(value) {
+  return JSON.stringify(value).replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
+}
+
+/** Diakritika preč, medzery na pomlčky — z `city_key` na kus adresy. */
+function slugify(s) {
+  return String(s ?? '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  QR kód → inline SVG
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * QR ako SVG bez externého obrázka. Jeden `<path>` zo všetkých tmavých modulov:
+ * `<rect>` na modul by pri 29×29 znamenal stovky uzlov navyše.
+ */
+function qrSvg(text, { size, label }) {
+  const qr = qrcode(0, 'M');
+  qr.addData(text);
+  qr.make();
+  const n = qr.getModuleCount();
+  const parts = [];
+  for (let r = 0; r < n; r++) {
+    let c = 0;
+    while (c < n) {
+      if (!qr.isDark(r, c)) { c++; continue; }
+      let end = c;
+      while (end < n && qr.isDark(r, end)) end++;
+      parts.push(`M${c} ${r}h${end - c}v1h-${end - c}z`);
+      c = end;
+    }
+  }
+  return `<svg viewBox="0 0 ${n} ${n}" width="${size}" height="${size}" shape-rendering="crispEdges" role="img" aria-label="${esc(label)}">`
+    + `<rect width="${n}" height="${n}" fill="#fff"></rect>`
+    + `<path fill="#0B100D" d="${parts.join('')}"></path></svg>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Ikony (inline SVG, rovnaké ako v návrhu)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const IKONA = {
+  hviezda: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 5.9 6.5.95-4.7 4.6 1.1 6.5L12 17.4 6.2 20.45l1.1-6.5-4.7-4.6 6.5-.95z"/></svg>',
+  fajka: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l4.5 4.5 10.5-10.5"></path></svg>',
+  kalendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"></rect><path d="M8 2.8v4M16 2.8v4M3.5 10h17"></path></svg>',
+  sprava: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.8a8.3 8.3 0 0 1-11.9 7.5L4 21l1.8-4.9A8.3 8.3 0 1 1 21 11.8z"></path></svg>',
+  zdielat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5V3.5"></path><path d="M8 7.2L12 3.2l4 4"></path><path d="M5 13.5v6a1.6 1.6 0 0 0 1.6 1.6h10.8a1.6 1.6 0 0 0 1.6-1.6v-6"></path></svg>',
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.5s7-5.9 7-11.4a7 7 0 1 0-14 0c0 5.5 7 11.4 7 11.4z"></path><circle cx="12" cy="10" r="2.6"></circle></svg>',
+  slnko: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.6v2.2M12 19.2v2.2M4.3 4.3l1.6 1.6M18.1 18.1l1.6 1.6M2.6 12h2.2M19.2 12h2.2M4.3 19.7l1.6-1.6M18.1 5.9l1.6-1.6"></path></svg>',
+  mesiac: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.4 14.3A8.6 8.6 0 0 1 9.7 3.6a8.6 8.6 0 1 0 10.7 10.7z"></path></svg>',
+  hodiny: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"></circle><path d="M12 7.2V12l3.2 2"></path></svg>',
+  sipka: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12h15M13.5 6l6 6-6 6"></path></svg>',
+  zavriet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>',
+  apple: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.8c0-2.2 1.8-3.3 1.9-3.35-1-1.5-2.6-1.7-3.2-1.72-1.4-.14-2.7.8-3.4.8-.7 0-1.8-.78-2.9-.76-1.5.02-2.9.87-3.7 2.2-1.6 2.7-.4 6.8 1.1 9.02.8 1.1 1.7 2.3 2.8 2.26 1.1-.04 1.5-.7 2.9-.7 1.3 0 1.7.7 2.9.68 1.2-.02 2-1.1 2.7-2.2.85-1.26 1.2-2.5 1.22-2.56-.03-.01-2.34-.9-2.36-3.57z"/><path d="M14.2 6.3c.6-.75 1-1.78.9-2.8-.87.03-1.93.58-2.56 1.32-.56.65-1.05 1.7-.92 2.7.97.07 1.96-.5 2.58-1.22z"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.6 2.4v19.2c0 .62.68 1 1.2.68l14.5-9.6a.8.8 0 0 0 0-1.36L5.8 1.72a.8.8 0 0 0-1.2.68z"/></svg>',
+};
+
+function hviezdy(rating, triedaOff = 'off') {
+  const plne = Math.round(rating);
+  let out = '';
+  for (let i = 1; i <= 5; i++) {
+    out += i <= plne
+      ? IKONA.hviezda
+      : IKONA.hviezda.replace('<svg ', `<svg class="${triedaOff}" `);
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Spoločné časti stránky (hlavička, pätička, hlava dokumentu)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Ikony sú tie isté ako v `index.html`, len absolútnou cestou — stránky trénerov
+// sedia o dva priečinky hlbšie a relatívne cesty by hľadali `t/katka/favicon.ico`.
+const FAVICONY = `<link rel="icon" href="/favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=2">
+<meta name="theme-color" content="#0B100D">`;
+
+const PISMO = `<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">`;
+
+function hlavicka(aktivna) {
+  const odkaz = (href, text, on) =>
+    `<a${on ? ' class="on" aria-current="page"' : ''} href="${href}">${text}</a>`;
+  return `<div class="nav-shell">
+  <nav class="nav">
+    <a class="brand" href="/">
+      <img class="mark" src="/logo.webp" alt="" width="128" height="128">
+      <span>Matchball</span>
+    </a>
+    <div class="nav-links">
+      ${odkaz('/treneri/', 'Tréneri', aktivna === 'treneri')}
+      ${odkaz('/#ako', 'Ako to funguje')}
+      ${odkaz('/#preco', 'Výhody')}
+      ${odkaz('/#ceny', 'Ceny')}
+    </div>
+    <a class="btn btn-dark btn-sm nav-cta" href="/#stiahnut">Stiahnuť</a>
+  </nav>
+</div>`;
+}
+
+const PATICKA = `<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="/" style="font-size:1.25rem">
+          <img class="mark" src="/logo.webp" alt="" width="128" height="128">
+          <span>Matchball</span>
+        </a>
+        <p class="foot-about">Rezervácia tenisových tréningov. Hráč si nájde trénera, vyberie termín a zaplatí kartou až po potvrdení.</p>
+      </div>
+      <div>
+        <h4>Stránka</h4>
+        <div class="foot-links">
+          <a href="/treneri/">Tréneri</a>
+          <a href="/#ako">Ako to funguje</a>
+          <a href="/#preco">Prečo Matchball</a>
+          <a href="/#ceny">Ceny a platby</a>
+          <a href="${APP_STORE}">Stiahnuť pre iPhone</a>
+          <a href="${PLAY_STORE}">Stiahnuť pre Android</a>
+        </div>
+      </div>
+      <div>
+        <h4>Dokumenty a kontakt</h4>
+        <div class="foot-links">
+          <a href="/legal/privacy.html">Ochrana osobných údajov</a>
+          <a href="/legal/terms.html">Podmienky používania</a>
+          <a href="mailto:matchball.app@gmail.com">matchball.app@gmail.com</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>Matchball — Martin Mucha · Košice, Slovensko · IČO 57 799 032</span>
+      <span>© 2026 Matchball</span>
+    </div>
+  </div>
+</footer>`;
+
+/**
+ * Tokeny, typografia, tlačidlá, hlavička a pätička — spoločné pre obe stránky.
+ *
+ * Mobil je základ, desktop je nadstavba v `@media (min-width:900px)`: návrhy
+ * boli dva (Main.dc.html 1440 px, Mobil.dc.html 390 px), stránka je jedna.
+ */
+const CSS_ZAKLAD = `:root{
+  --ink:#0B100D;--ink-soft:#141C17;--paper:#EFF2ED;--card:#FFFFFF;
+  --green:#1A7A4A;--green-dark:#125E38;--green-soft:#E8F3EC;
+  --lime:#C9F24E;--lime-dim:#A7D63B;--fg:#141F1A;--muted:#5E7367;--line:#E0E6DF;
+  --gold:#E8B23A;
+  --radius-xl:32px;--radius-lg:24px;--radius-md:16px;
+  --shadow-soft:0 1px 2px rgba(20,31,26,.04),0 12px 32px -12px rgba(20,31,26,.14);
+  --shadow-lift:0 2px 4px rgba(20,31,26,.06),0 24px 48px -16px rgba(20,31,26,.22);
+  --ease:cubic-bezier(.22,1,.36,1);--max:1180px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--fg);
+  font-family:"Outfit",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;line-height:1.65;font-weight:400;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit}
+[hidden]{display:none!important}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 20px;width:100%}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.03em;word-spacing:.06em;line-height:1.04}
+h1{font-size:clamp(2.4rem,8vw,4.45rem);font-weight:800}
+h2{font-size:clamp(1.75rem,4.4vw,2.6rem)}
+h3{font-size:1.16rem;line-height:1.25;letter-spacing:-.02em}
+p{margin:0}
+.lead{font-size:1.02rem;color:var(--muted);line-height:1.6}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:12px}
+.eyebrow::before{content:"";width:20px;height:2px;border-radius:2px;background:var(--green);opacity:.5}
+.skip{position:absolute;left:-9999px;top:0;padding:12px 18px;background:var(--ink);color:#fff;
+  border-radius:0 0 12px 0;z-index:200}
+.skip:focus{left:0}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:15px 28px;border-radius:999px;border:0;cursor:pointer;line-height:1.2;
+  font-weight:600;font-size:1rem;white-space:nowrap;text-decoration:none;
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .25s}
+.btn-dark{background:var(--ink);color:#fff;box-shadow:0 10px 24px -10px rgba(11,16,13,.7)}
+.btn-dark:hover{transform:translateY(-2px);box-shadow:0 18px 34px -12px rgba(11,16,13,.8)}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 10px 24px -10px rgba(26,122,74,.8)}
+.btn-green:hover{transform:translateY(-2px);background:var(--green-dark)}
+.btn-light{background:#fff;color:var(--fg);box-shadow:var(--shadow-soft);border:1px solid var(--line)}
+.btn-light:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+.btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22)}
+.btn-ghost:hover{background:rgba(255,255,255,.16)}
+.btn-lime{background:var(--lime);color:#0B100D;box-shadow:0 12px 30px -12px rgba(201,242,78,.8)}
+.btn-lime:hover{transform:translateY(-2px);box-shadow:0 20px 40px -14px rgba(201,242,78,.9)}
+.btn-sm{padding:11px 20px;font-size:.94rem}
+.btn svg{width:19px;height:19px;flex:0 0 19px}
+
+.nav-shell{padding:14px 16px 18px}
+.nav{max-width:940px;margin:0 auto;display:flex;align-items:center;gap:12px;
+  padding:8px 8px 8px 16px;border-radius:999px;background:rgba(255,255,255,.72);
+  backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);
+  border:1px solid rgba(255,255,255,.45);
+  box-shadow:0 2px 4px rgba(20,31,26,.05),0 16px 32px -18px rgba(20,31,26,.18)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.06rem;letter-spacing:-.02em}
+.brand .mark{width:28px;height:28px;flex:0 0 28px;border-radius:8px}
+.nav-links{display:none;gap:4px;margin-left:auto}
+.nav-links a{padding:9px 16px;border-radius:999px;color:#2A3831;font-size:.95rem;font-weight:500;
+  transition:background .25s,color .25s}
+.nav-links a:hover,.nav-links a.on{background:rgba(26,122,74,.09);color:var(--green)}
+.nav-cta{margin-left:auto}
+
+footer{margin-top:auto;padding:44px 0 30px}
+footer .brand{font-size:1.14rem}
+.foot-grid{display:grid;gap:28px;padding-bottom:28px;border-bottom:1px solid var(--line)}
+.foot-grid h4{margin:0 0 14px;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);font-weight:600}
+.foot-links{display:grid;gap:9px}
+.foot-links a{font-size:.96rem;transition:color .25s}
+.foot-links a:hover{color:var(--green)}
+.foot-about{color:var(--muted);font-size:.94rem;margin-top:12px;max-width:26rem}
+.foot-bottom{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;padding-top:22px;
+  color:var(--muted);font-size:.88rem}
+
+@media (min-width:900px){
+  .nav-shell{padding:22px 20px 0}
+  .nav{padding:10px 10px 10px 22px;gap:20px}
+  .brand{gap:11px;font-size:1.12rem}
+  .brand .mark{width:30px;height:30px;flex:0 0 30px}
+  .nav-links{display:flex}
+  .nav-cta{margin-left:4px}
+  .lead{font-size:1.15rem}
+  .eyebrow{font-size:.8rem;margin-bottom:18px}
+  h3{font-size:1.3rem}
+  footer{padding:72px 0 44px}
+  .foot-grid{grid-template-columns:1.4fr 1fr 1fr;gap:40px;padding-bottom:40px}
+  .foot-about{font-size:.98rem;margin-top:14px}
+  .foot-links a{font-size:.98rem}
+  .foot-bottom{padding-top:26px;font-size:.9rem}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}`;
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Stránka trénera — CSS
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CSS_TRENER = `main{padding-bottom:96px}
+.crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:.84rem;
+  margin:6px 0 18px}
+.crumbs a:hover{color:var(--green)}
+.crumbs .sep{opacity:.45}
+.crumbs .now{color:var(--fg);font-weight:600}
+
+/* Hero. Na mobile je fotka s prekrytým titulkom (Mobil.dc.html), na desktope
+   dvojstĺpec (Main.dc.html). Jedna značka pre oboje: pri 900 px sa obal fotky
+   zmení na „display:contents“ a jeho deti sa stanú priamymi bunkami mriežky —
+   nadpis tak prejde z vnútra fotky do vedľajšieho stĺpca bez toho, aby bol
+   v dokumente dvakrát. */
+.hero{display:grid;gap:0}
+.hero-photo{position:relative}
+.hero-shot{position:relative;border-radius:24px;overflow:hidden;height:min(360px,86vw);
+  box-shadow:0 3px 6px rgba(20,31,26,.06),0 26px 48px -22px rgba(20,31,26,.34)}
+.hero-shot .foto{width:100%;height:100%;object-fit:cover;object-position:center 22%}
+.hero-shot .foto.placeholder{object-fit:contain;padding:22%;background:var(--green-soft)}
+.hero-veil{position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(6,10,7,0) 34%,rgba(6,10,7,.44) 62%,rgba(6,10,7,.88) 100%)}
+.hero-cap{position:absolute;left:22px;right:22px;bottom:20px;color:#fff}
+.hero-cap .eyebrow{color:var(--lime)}
+.hero-cap .eyebrow::before{background:var(--lime)}
+.hero-cap h1{color:#fff;text-shadow:0 2px 18px rgba(6,10,7,.5)}
+.meta{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin-top:9px;
+  color:rgba(255,255,255,.86);font-size:.92rem}
+.meta .rate{display:inline-flex;align-items:center;gap:6px;color:#fff;font-weight:700}
+.meta .rate svg{width:16px;height:16px;color:var(--lime)}
+.meta .dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.5)}
+.club-line{display:flex;align-items:center;gap:7px;margin-top:16px;color:var(--muted);font-size:.94rem}
+.club-line svg{width:16px;height:16px;flex:0 0 16px;color:var(--green)}
+.verified{display:inline-flex;align-items:center;gap:8px;padding:8px 15px 8px 11px;border-radius:999px;
+  background:var(--green-soft);border:1px solid rgba(26,122,74,.18);color:var(--green-dark);
+  font-size:.86rem;font-weight:600;margin-top:16px}
+.verified svg{width:16px;height:16px;flex:0 0 16px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+  border-radius:20px;overflow:hidden;border:1px solid var(--line);margin-top:16px}
+.stat{background:var(--card);padding:16px 12px}
+.stat .num{font-size:1.42rem;font-weight:700;letter-spacing:-.03em;color:var(--green);line-height:1.2}
+.stat .lbl{margin-top:2px;color:var(--muted);font-size:.76rem;line-height:1.35}
+.actions{display:none;align-items:center;gap:12px;margin-top:26px}
+.icon-btn{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:#fff;
+  display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow-soft);
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease),color .25s}
+.icon-btn svg{width:20px;height:20px}
+.icon-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift);color:var(--green)}
+.note{margin-top:14px;color:var(--muted);font-size:.88rem;line-height:1.55}
+
+.sec{margin-top:38px}
+.bio{font-size:1rem;line-height:1.72;margin-top:14px;white-space:pre-line}
+.sub{font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  margin:26px 0 12px}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{padding:8px 15px;border-radius:999px;background:#fff;border:1px solid var(--line);
+  font-size:.9rem;font-weight:500;box-shadow:0 1px 2px rgba(20,31,26,.04)}
+.pill-soft{background:var(--green-soft);border-color:rgba(26,122,74,.16);color:var(--green-dark);font-weight:600}
+.place{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  overflow:hidden;box-shadow:var(--shadow-soft);display:flex;flex-direction:column}
+.place-map{height:104px;flex:0 0 104px;position:relative;
+  background:
+    linear-gradient(90deg,rgba(26,122,74,.12) 1px,transparent 1px) 0 0/26px 26px,
+    linear-gradient(180deg,rgba(26,122,74,.12) 1px,transparent 1px) 0 0/26px 26px,
+    linear-gradient(140deg,#DDEBE0,#EFF4EC 55%,#E4EFE6)}
+.place-map::after{content:"";position:absolute;left:0;right:0;top:62%;height:14px;
+  background:rgba(201,242,78,.5);transform:rotate(-6deg)}
+.place-map .pinwrap{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+  width:36px;height:36px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;
+  box-shadow:0 8px 18px -6px rgba(26,122,74,.7);z-index:1}
+.place-map .pinwrap svg{width:18px;height:18px}
+.place-body{padding:18px 20px}
+.place-body .name{font-weight:700;font-size:1.04rem;letter-spacing:-.02em}
+.place-body .addr{color:var(--muted);font-size:.92rem;margin-top:2px}
+.place-body .tag{margin-top:10px;display:inline-flex;align-items:center;gap:7px;color:var(--green-dark);
+  font-size:.86rem;font-weight:600}
+.place-body .tag svg{width:14px;height:14px;flex:0 0 14px}
+
+.price{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lift);padding:22px 20px 20px;margin-top:16px}
+.price h3{margin-bottom:2px}
+.price .cap{color:var(--muted);font-size:.88rem;margin-bottom:14px}
+.prow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0}
+.prow+.prow{border-top:1px solid var(--line)}
+.prow .lab{font-weight:600;font-size:.98rem;line-height:1.35}
+.prow .sub2{color:var(--muted);font-size:.8rem;line-height:1.4}
+.prow .val{font-weight:700;font-size:1.06rem;letter-spacing:-.02em;text-align:right;white-space:nowrap;line-height:1.3}
+.prow .val small{display:block;font-weight:500;font-size:.76rem;color:var(--muted);letter-spacing:0;line-height:1.35}
+.price hr{border:0;border-top:1px solid var(--line);margin:14px 0 4px}
+.band{display:flex;align-items:center;gap:11px;padding:10px 0}
+.band .ico{width:34px;height:34px;flex:0 0 34px;border-radius:10px;display:grid;place-items:center;
+  background:var(--green-soft);color:var(--green-dark)}
+.band .ico svg{width:18px;height:18px}
+.band .t{font-weight:600;font-size:.95rem;line-height:1.3}
+.band .h{color:var(--muted);font-size:.82rem;line-height:1.35}
+.band .v{margin-left:auto;font-weight:700;font-size:.98rem;white-space:nowrap}
+.price .btn{width:100%;margin-top:16px}
+.price .foot{margin-top:10px;text-align:center;color:var(--muted);font-size:.82rem}
+
+.rev-head .stars{display:flex;gap:3px;margin-bottom:10px;color:var(--gold)}
+.rev-head .stars svg{width:19px;height:19px}
+.rev-head .lead{margin-top:12px;font-size:.96rem}
+.revs{display:grid;gap:14px;margin-top:20px}
+.rev{background:var(--card);border:1px solid var(--line);border-radius:20px;
+  box-shadow:var(--shadow-soft);padding:18px 20px;
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.rev:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+.rev .top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.rev .ava{width:42px;height:42px;flex:0 0 42px;border-radius:50%;object-fit:cover;background:var(--green-soft)}
+.rev .ava.placeholder{object-fit:contain;padding:8px}
+.rev .who{font-weight:700;letter-spacing:-.02em;font-size:.98rem;line-height:1.3}
+.rev .when{color:var(--muted);font-size:.8rem;line-height:1.35}
+.rev .stars{display:flex;gap:2px;margin-left:auto;color:var(--gold)}
+.rev .stars svg{width:14px;height:14px}
+.rev .stars .off{color:var(--line)}
+.rev p{font-size:.96rem;line-height:1.6}
+.rev-more{margin-top:18px;display:inline-flex;align-items:center;gap:9px;color:var(--green);
+  font-weight:600;font-size:.98rem;background:none;border:0;padding:0;cursor:pointer;
+  transition:gap .25s var(--ease)}
+.rev-more:hover{gap:14px;color:var(--green-dark)}
+.rev-more svg{width:16px;height:16px}
+
+.cta{background:var(--ink);color:#fff;border-radius:var(--radius-xl);padding:30px 26px 28px;
+  margin-top:38px;text-align:center;box-shadow:0 26px 50px -26px rgba(11,16,13,.6)}
+.cta h2{color:#fff}
+.cta .lead{color:rgba(255,255,255,.76);margin-top:12px;font-size:1rem}
+.cta .row{display:grid;gap:10px;margin-top:22px}
+.cta .row .btn{width:100%}
+.qr{margin-top:24px}
+.qr .box{width:152px;height:152px;margin:0 auto;background:#fff;border-radius:18px;padding:10px}
+.qr .box svg{width:100%;height:100%}
+.qr .cap{margin-top:10px;color:rgba(255,255,255,.66);font-size:.82rem}
+
+/* Lepiaca lišta. Len na mobile — na desktope tú istú dvojicu nesie hero. */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:70;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(18px) saturate(160%);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  border-top:1px solid var(--line);box-shadow:0 -6px 26px -10px rgba(20,31,26,.28);
+  padding:12px 20px calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px}
+.dock .btn-green{flex:1;padding:15px 18px}
+.dock .msg{width:54px;height:54px;flex:0 0 54px;border-radius:50%;border:1px solid var(--line);
+  background:#fff;display:grid;place-items:center;box-shadow:var(--shadow-soft);cursor:pointer;
+  font-size:.62rem;font-weight:600;color:var(--muted);gap:1px;line-height:1}
+.dock .msg svg{width:19px;height:19px;color:var(--fg)}
+body{padding-bottom:92px}
+
+@media (min-width:900px){
+  body{padding-bottom:0}
+  .dock{display:none}
+  main{padding-bottom:0}
+  .crumbs{font-size:.86rem;margin:34px 0 26px;gap:9px}
+  .hero{grid-template-columns:440px 1fr;gap:0 56px;padding-bottom:84px;align-items:start}
+  .hero-photo{display:contents}
+  .hero-shot{grid-column:1;grid-row:1 / span 2;height:440px;border-radius:32px;
+    box-shadow:0 3px 6px rgba(20,31,26,.06),0 34px 60px -26px rgba(20,31,26,.34)}
+  .hero-shot .foto{object-position:center 18%}
+  .hero-veil{display:none}
+  .hero-cap{position:static;grid-column:2;grid-row:1;color:inherit;padding-top:6px}
+  .hero-cap .eyebrow{color:var(--green)}
+  .hero-cap .eyebrow::before{background:var(--green)}
+  .hero-cap h1{color:var(--fg);text-shadow:none;margin-bottom:14px}
+  .hero-body{grid-column:2;grid-row:2}
+  .meta{color:var(--muted);font-size:1.02rem;gap:12px}
+  .meta .rate{color:var(--fg);font-weight:600}
+  .meta .rate svg{width:19px;height:19px;color:var(--gold)}
+  .meta .dot{width:4px;height:4px;background:var(--line)}
+  .club-line{margin-top:12px;font-size:1rem}
+  .verified{padding:8px 16px 8px 12px;font-size:.9rem;margin-top:20px}
+  .stats{border-radius:24px;margin-top:26px}
+  .stat{padding:24px 22px}
+  .stat .num{font-size:2.2rem;line-height:1.15}
+  .stat .lbl{margin-top:4px;font-size:.95rem;line-height:1.45}
+  .actions{display:flex}
+  .note{margin-top:18px;font-size:.92rem}
+  .split{display:grid;grid-template-columns:1fr 396px;gap:56px;align-items:start;padding-bottom:96px}
+  .sec{margin-top:0}
+  .bio{font-size:1.06rem;margin-top:18px;max-width:34rem}
+  .sub{font-size:.8rem;margin:36px 0 14px}
+  .pill{padding:9px 17px;font-size:.95rem}
+  .place{flex-direction:row;max-width:34rem}
+  .place-map{width:168px;flex:0 0 168px;height:auto}
+  .place-body{padding:22px 24px}
+  .price{padding:28px 28px 26px;margin-top:0}
+  .price .cap{font-size:.92rem;margin-bottom:20px}
+  .prow{padding:13px 12px;margin:0 -12px;border-radius:14px;transition:background .25s}
+  .prow:hover{background:var(--green-soft)}
+  .prow .lab{font-size:1rem}
+  .prow .sub2{font-size:.86rem}
+  .prow .val{font-size:1.12rem}
+  .prow .val small{font-size:.8rem}
+  .band{padding:12px;margin:0 -12px;border-radius:14px;gap:13px;transition:background .25s}
+  .band:hover{background:var(--green-soft)}
+  .band .ico{width:36px;height:36px;flex:0 0 36px;border-radius:11px}
+  .price .btn{margin-top:20px}
+  .price .foot{font-size:.86rem}
+  .revs{grid-template-columns:repeat(3,1fr);gap:22px;margin-top:34px}
+  .rev{border-radius:var(--radius-lg);padding:24px 24px 22px}
+  .rev .ava{width:46px;height:46px;flex:0 0 46px}
+  .rev .who{font-size:1.02rem}
+  .rev .when{font-size:.85rem}
+  .rev .stars svg{width:15px;height:15px}
+  .rev p{font-size:1rem}
+  .rev-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+  .rev-head .stars svg{width:22px;height:22px}
+  .rev-head .lead{max-width:22rem;text-align:right;margin-top:0}
+  .cta{margin-top:96px;padding:52px 56px;display:grid;grid-template-columns:1fr auto;
+    gap:56px;align-items:center;text-align:left;box-shadow:0 30px 60px -28px rgba(11,16,13,.6)}
+  .cta h2{max-width:16ch}
+  .cta .lead{margin-top:16px;max-width:38rem}
+  .cta .row{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+  .cta .row .btn{width:auto}
+  .qr{margin-top:0}
+  .qr .box{width:184px;height:184px;border-radius:20px;padding:12px;
+    box-shadow:0 20px 40px -18px rgba(0,0,0,.6)}
+  .qr .cap{margin-top:12px;font-size:.86rem}
+}
+
+/* ── Modál (počítač) a panel obchodu (telefón) ─────────────── */
+.ov{position:fixed;inset:0;background:rgba(20,31,26,.5);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.ov.on{display:flex}
+.modal{position:relative;width:100%;max-width:520px;background:var(--card);border-radius:var(--radius-lg);
+  padding:36px 24px 30px;text-align:center;box-shadow:0 40px 80px -24px rgba(11,16,13,.5);
+  max-height:calc(100vh - 40px);overflow:auto}
+.modal h3{font-size:1.4rem;margin-bottom:12px}
+.modal .lead{font-size:1rem;margin-bottom:22px}
+.modal .row{display:grid;gap:10px;justify-content:stretch}
+.modal .qrs{margin:24px auto 0;width:152px;height:152px;background:#fff;border:1px solid var(--line);
+  border-radius:16px;padding:10px}
+.modal .qrs svg{width:100%;height:100%}
+.modal .qcap{margin-top:10px;color:var(--muted);font-size:.86rem;word-break:break-all}
+.x{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);
+  background:#fff;display:grid;place-items:center;cursor:pointer;transition:background .25s,color .25s}
+.x:hover{background:var(--paper);color:var(--green)}
+.x svg{width:17px;height:17px}
+@media (min-width:640px){
+  .modal{padding:40px 44px 36px}
+  .modal h3{font-size:1.6rem}
+  .modal .row{display:flex;gap:12px;justify-content:center}
+}
+.toast{position:fixed;left:50%;bottom:104px;transform:translate(-50%,14px);z-index:120;
+  background:var(--ink);color:#fff;padding:13px 22px;border-radius:999px;font-size:.92rem;font-weight:500;
+  display:flex;align-items:center;gap:10px;box-shadow:0 20px 40px -16px rgba(11,16,13,.7);
+  opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .3s var(--ease);
+  max-width:calc(100vw - 32px)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast svg{width:18px;height:18px;flex:0 0 18px;color:var(--lime)}
+@media (min-width:900px){.toast{bottom:48px}}`;
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Stránka trénera — HTML
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Cenník pre HRÁČA. `pricing` drží podiel TRÉNERA, hráč platí ten plus poplatok
+ * — preto tie prevody. Pásmo 4 je otvorené („štyria a viac"), takže sa jeho
+ * celok uvádza ako „od".
+ */
+function cennik(coach) {
+  const cur = coach.currency === 'CZK' ? 'CZK' : 'EUR';
+  const tiers = getTiers(coach.pricing, coach.hourly_rate);
+  const riadky = [];
+  for (const t of tiers) {
+    if (t.players === 1) {
+      riadky.push({
+        lab: 'Individuálny tréning',
+        sub: 'len ty a tréner',
+        val: suma(customerTotal(t.price, cur), cur),
+        small: '',
+      });
+    } else {
+      const naOsobu = customerPerPerson(t.price, t.players, cur);
+      const spolu = groupCustomerTotal(t.price, t.players, cur);
+      const otvorene = t.players === OPEN_TIER;
+      riadky.push({
+        lab: otvorene ? `Skupina ${OPEN_TIER}+` : `${t.players} hráči`,
+        sub: 'cena za osobu',
+        val: suma(naOsobu, cur),
+        small: `${otvorene ? 'od ' : ''}${suma(spolu, cur)} spolu`,
+      });
+    }
+  }
+
+  // Pásma sa počítajú z INDIVIDUÁLNEJ sadzby trénera a až potom sa k nim
+  // pripočíta poplatok — presne ako `CoachDetailScreen` v appke
+  // (`customerTotal(applyBandPct(soloRate, pct))`).
+  const soloRate = groupRateFor(coach.pricing, coach.hourly_rate, 1);
+  const bands = timeBandsOf(coach.pricing);
+  const pasma = [];
+  if (bands && soloRate > 0) {
+    for (const b of bands.bands) {
+      if (!b.pct) continue;   // nulové pásmo je základná cena, netreba ho písať
+      pasma.push({
+        key: b.key,
+        nazov: PASMA[b.key] ?? PASMA.custom,
+        cas: `${cas(b.start_min)}–${cas(b.end_min)}`,
+        val: suma(customerTotal(applyBandPct(soloRate, b.pct), cur), cur),
+        zlava: b.pct < 0,
+      });
+    }
+  }
+
+  // „od X €" na karte aj v štatistike — najlacnejšia hodina pre jedného.
+  const min = minTierRate(coach.pricing, coach.hourly_rate);
+  const zaklad = groupRateFor(coach.pricing, coach.hourly_rate, 1);
+  const lacnejsiePasmo = min > 0 && min < zaklad;
+  const odCena = customerTotal(lacnejsiePasmo ? min : zaklad, cur);
+
+  return { cur, riadky, pasma, odCena, lacnejsiePasmo, vikendZaklad: bands ? bands.weekend === 'base' : false };
+}
+
+function kurtText(coach, cur) {
+  const mode = coach.court_fee_mode;
+  if (mode === 'in_app') {
+    const amt = Number(coach.court_fee_amount);
+    if (amt > 0) return KURT.in_app(suma(amt, cur));
+    return 'Kurt sa platí cez appku';
+  }
+  if (mode === 'on_site') return KURT.on_site();
+  return KURT.included();
+}
+
+function strankaTrenera(coach, ctx) {
+  const cur = coach.currency === 'CZK' ? 'CZK' : 'EUR';
+  const c = cennik(coach);
+  // Adresa, ktorú stránka NESIE: `/t/<slug>/` je to, čo GitHub Pages naozaj
+  // servíruje, tak patrí do `canonical`, `og:url` aj do sitemapy.
+  const url = `${WEB_ORIGIN}/t/${coach.slug}/`;
+  // Adresa, ktorú stránka ROZDÁVA — do QR, do „Zdieľať" a pod QR kód. Je to
+  // presne ten tvar, aký appka posiela z obrazovky Zdieľať profil
+  // (`publicPageLink` v src/services/coachLink.ts), takže naskenovaný kód a
+  // odkaz z appky sú ten istý reťazec. Bez lomky je aj QR o kúsok redšie.
+  const zdielanyUrl = `${WEB_ORIGIN}/t/${coach.slug}`;
+  const mestoSlug = slugify(coach.city_key || coach.city);
+  const fotka = coach.fotoSubor ? `/t/${coach.slug}/${coach.fotoSubor}` : '/logo.webp';
+  const maFotku = !!coach.fotoSubor;
+  const hodnotenia = Array.isArray(coach.reviews) ? coach.reviews : [];
+  const pocetHodnoteni = Number(coach.review_count) || 0;
+  const rating = Number(coach.avg_rating) || 0;
+  const zameranie = (coach.specializations || []).map((s) => ZAMERANIE[s]).filter(Boolean);
+  const jazyky = (coach.coaching_languages || []).map((l) => JAZYKY[l]).filter(Boolean);
+  const kurt = kurtText(coach, cur);
+
+  const title = `${coach.name} – tenisový tréning, ${coach.city} | Matchball`;
+  const popisCasti = [
+    `${coach.name} — tenisový tréning v meste ${coach.city}.`,
+    coach.training_location ? `Kde: ${coach.training_location}.` : '',
+    `Cena ${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur).replace('\u00a0', ' ')} za hodinu.`,
+    'Rezervácia a platba kartou v appke Matchball.',
+  ].filter(Boolean);
+  const popis = popisCasti.join(' ').slice(0, 300);
+
+  // JSON-LD. `AggregateRating` len keď sú hodnotenia — schéma ho bez `ratingCount`
+  // odmieta a Google by stránku označil za chybnú.
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: coach.name,
+    url,
+    jobTitle: 'Tenisový tréner',
+    address: { '@type': 'PostalAddress', addressLocality: coach.city, addressCountry: cur === 'CZK' ? 'CZ' : 'SK' },
+    ...(maFotku ? { image: `${WEB_ORIGIN}${fotka}` } : {}),
+    ...(coach.bio ? { description: String(coach.bio).slice(0, 600) } : {}),
+    ...(coach.training_location ? { workLocation: { '@type': 'Place', name: coach.training_location } } : {}),
+    ...(jazyky.length ? { knowsLanguage: jazyky } : {}),
+    ...(pocetHodnoteni > 0 && rating > 0 ? {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: rating.toFixed(1),
+        reviewCount: pocetHodnoteni,
+        bestRating: '5',
+        worstRating: '1',
+      },
+    } : {}),
+  };
+
+  const qrVelky = qrSvg(zdielanyUrl, { size: 164, label: `QR kód na profil: ${coach.name}` });
+  const qrMaly = qrSvg(zdielanyUrl, { size: 132, label: `QR kód na profil: ${coach.name}` });
+
+  const staty = [];
+  if (Number(coach.completed_lessons) > 0) {
+    staty.push({ num: String(coach.completed_lessons), lbl: 'odtrénovaných tréningov' });
+  }
+  if (Number(coach.years_experience) > 0) {
+    const r = Number(coach.years_experience);
+    staty.push({ num: `${r} ${pocet(r, 'rok', 'roky', 'rokov')}`, lbl: 'praxe s hráčmi' });
+  }
+  staty.push({
+    num: `${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur)}`,
+    lbl: 'za hodinu tréningu',
+  });
+
+  const metaCasti = [];
+  if (pocetHodnoteni > 0 && rating > 0) {
+    metaCasti.push(`<span class="rate">${IKONA.hviezda}${hodnotenie(rating)}</span>`);
+    metaCasti.push(`<span>${pocetHodnoteni} ${pocet(pocetHodnoteni, 'hodnotenie', 'hodnotenia', 'hodnotení')}</span>`);
+  }
+  if (Number(coach.completed_lessons) > 0) {
+    metaCasti.push(`<span>${coach.completed_lessons} ${pocet(Number(coach.completed_lessons), 'tréning', 'tréningy', 'tréningov')}</span>`);
+  }
+  const meta = metaCasti.join('<span class="dot"></span>');
+
+  const pracovnyCas = (Number.isFinite(coach.work_start_min) && Number.isFinite(coach.work_end_min)
+    && coach.work_end_min > coach.work_start_min)
+    ? `${cas(coach.work_start_min)}–${cas(coach.work_end_min)}`
+    : '';
+
+  return `<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(popis)}">
+<link rel="canonical" href="${url}">
+${FAVICONY}
+<meta property="og:type" content="profile">
+<meta property="og:url" content="${url}">
+<meta property="og:title" content="${esc(coach.name)} – tenisový tréning, ${esc(coach.city)}">
+<meta property="og:description" content="${esc(popis)}">
+<meta property="og:image" content="${WEB_ORIGIN}${fotka}">
+<meta property="og:image:alt" content="${esc(coach.name)}">
+<meta property="og:locale" content="sk_SK">
+<meta name="twitter:card" content="summary_large_image">
+${PISMO}
+<style>
+${CSS_ZAKLAD}
+${CSS_TRENER}
+</style>
+<script type="application/ld+json">${json(ld)}</script>
+</head>
+<body>
+<a class="skip" href="#obsah">Preskočiť na obsah</a>
+${hlavicka('treneri')}
+
+<main id="obsah" class="wrap">
+  <nav class="crumbs" aria-label="Drobčeková navigácia">
+    <a href="/treneri/">Tréneri</a>
+    <span class="sep" aria-hidden="true">›</span>
+    <a href="/treneri/${mestoSlug}/">${esc(coach.city)}</a>
+    <span class="sep" aria-hidden="true">›</span>
+    <span class="now">${esc(coach.name)}</span>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-photo">
+      <div class="hero-shot">
+        <img class="foto${maFotku ? '' : ' placeholder'}" src="${fotka}" alt="${esc(coach.name)}${maFotku ? `, tenisový tréner — ${esc(coach.city)}` : ''}" width="600" height="600">
+        <div class="hero-veil"></div>
+      </div>
+      <div class="hero-cap">
+        <p class="eyebrow">Tenisový tréning · ${esc(coach.city)}</p>
+        <h1>${esc(coach.name)}</h1>
+        ${meta ? `<div class="meta">${meta}</div>` : ''}
+      </div>
+    </div>
+
+    <div class="hero-body">
+      ${coach.training_location ? `<div class="club-line">${IKONA.pin}${esc(coach.training_location)}, ${esc(coach.city)}</div>` : ''}
+      ${coach.verified ? `<div class="verified">${IKONA.fajka}Overený tréner</div>` : ''}
+      <div class="stats">
+        ${staty.map((s) => `<div class="stat"><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div>`).join('\n        ')}
+      </div>
+      <div class="actions">
+        <button class="btn btn-green" type="button" data-otvor="rezervovat">${IKONA.kalendar}Rezervovať tréning</button>
+        <button class="btn btn-light" type="button" data-otvor="sprava">${IKONA.sprava}Napísať správu</button>
+        <button class="icon-btn" type="button" id="zdielat" title="Zdieľať profil" aria-label="Zdieľať profil">${IKONA.zdielat}</button>
+      </div>
+      <p class="note">Rezervácia prebieha v appke Matchball. Platíš až po potvrdení trénerom.</p>
+    </div>
+  </div>
+
+  <div class="split">
+    <div>
+      ${coach.bio ? `<div class="sec"><h2>O mne</h2><p class="bio">${esc(coach.bio)}</p></div>` : ''}
+      ${zameranie.length ? `<p class="sub">Zameranie</p><div class="pills">${zameranie.map((z) => `<span class="pill pill-soft">${esc(z)}</span>`).join('')}</div>` : ''}
+      ${jazyky.length ? `<p class="sub">Jazyky</p><div class="pills">${jazyky.map((j) => `<span class="pill">${esc(j)}</span>`).join('')}</div>` : ''}
+      ${pracovnyCas ? `<p class="sub">Kedy trénujem</p><div class="pills"><span class="pill">${pracovnyCas}</span></div>` : ''}
+      ${coach.training_location ? `<p class="sub" id="miesto">Kde trénujem</p>
+      <div class="place">
+        <div class="place-map"><div class="pinwrap">${IKONA.pin}</div></div>
+        <div class="place-body">
+          <div class="name">${esc(coach.training_location)}</div>
+          <div class="addr">${esc(coach.city)}</div>
+          <div class="tag">${IKONA.fajka}${esc(kurt)}</div>
+        </div>
+      </div>` : ''}
+    </div>
+
+    <div class="sec">
+      <div class="price">
+        <h3>Cenník</h3>
+        <p class="cap">za hodinu, poplatok je v cene</p>
+        ${c.riadky.map((r) => `<div class="prow">
+          <div><div class="lab">${esc(r.lab)}</div><div class="sub2">${esc(r.sub)}</div></div>
+          <div class="val">${r.val}${r.small ? `<small>${r.small}</small>` : ''}</div>
+        </div>`).join('\n        ')}
+        ${c.pasma.length ? `<hr>
+        ${c.pasma.map((p) => `<div class="band">
+          <span class="ico">${p.zlava ? IKONA.slnko : IKONA.mesiac}</span>
+          <span><span class="t">${esc(p.nazov)}</span><br><span class="h">${p.cas}</span></span>
+          <span class="v">od ${p.val}</span>
+        </div>`).join('\n        ')}
+        ${c.vikendZaklad ? '<p class="foot" style="text-align:left;margin-top:8px">Cez víkend platí základná cena.</p>' : ''}` : ''}
+        <button class="btn btn-green" type="button" data-otvor="rezervovat">Rezervovať tréning</button>
+        <p class="foot">${esc(kurt)} · poplatok je v cene</p>
+      </div>
+    </div>
+  </div>
+
+  ${hodnotenia.length ? `<section class="sec" aria-labelledby="hodnotenia-nadpis">
+    <div class="rev-head">
+      <div>
+        <div class="stars" aria-hidden="true">${hviezdy(rating)}</div>
+        <h2 id="hodnotenia-nadpis">${hodnotenie(rating)} z 5 · ${pocetHodnoteni} ${pocet(pocetHodnoteni, 'hodnotenie', 'hodnotenia', 'hodnotení')}</h2>
+      </div>
+      <p class="lead">Hodnotiť môže len hráč, ktorý si tréning naozaj odtrénoval.</p>
+    </div>
+    <div class="revs">
+      ${hodnotenia.map((r) => `<article class="rev">
+        <div class="top">
+          <img class="ava${r.fotoSubor ? '' : ' placeholder'}" src="${r.fotoSubor ? `/t/${coach.slug}/${r.fotoSubor}` : '/logo.webp'}" alt="" width="160" height="160" loading="lazy">
+          <div><div class="who">${esc(menoRecenzenta(r.name))}</div><div class="when">${esc(mesiacRok(r.created_at))}</div></div>
+          <div class="stars" aria-label="${Number(r.rating) || 0} z 5">${hviezdy(Number(r.rating) || 0)}</div>
+        </div>
+        ${r.comment ? `<p>„${esc(r.comment)}“</p>` : ''}
+      </article>`).join('\n      ')}
+      ${pocetHodnoteni > hodnotenia.length ? `<div class="rev" style="background:transparent;border-style:dashed;box-shadow:none">
+        <h3 style="margin-bottom:8px">Zvyšných ${pocetHodnoteni - hodnotenia.length} ${pocet(pocetHodnoteni - hodnotenia.length, 'hodnotenie', 'hodnotenia', 'hodnotení')}</h3>
+        <p style="color:var(--muted)">Celé vlákna aj s odpoveďami trénera nájdeš v appke.</p>
+        <button class="rev-more" type="button" data-otvor="hodnotenia">Zobraziť všetkých ${pocetHodnoteni} v appke${IKONA.sipka}</button>
+      </div>` : ''}
+    </div>
+  </section>` : ''}
+
+  <section class="cta">
+    <div>
+      <h2>Rezervuj si tréning</h2>
+      <p class="lead">Stiahni si Matchball, vyber termín a zaplať kartou až po potvrdení.</p>
+      <div class="row">
+        <a class="btn btn-lime" href="${ctx.appStore}">${IKONA.apple}Stiahnuť pre iPhone</a>
+        <a class="btn btn-ghost" href="${ctx.playStore}">${IKONA.play}Stiahnuť pre Android</a>
+      </div>
+    </div>
+    <div class="qr">
+      <div class="box">${qrVelky}</div>
+      <p class="cap">Naskenuj telefónom</p>
+    </div>
+  </section>
+</main>
+
+${PATICKA}
+
+<div class="dock">
+  <button class="btn btn-green" type="button" data-otvor="rezervovat">${IKONA.kalendar}Rezervovať tréning</button>
+  <button class="msg" type="button" data-otvor="sprava" aria-label="Napísať správu">${IKONA.sprava}<span>Napísať</span></button>
+</div>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="ov-nadpis" aria-hidden="true">
+  <div class="modal">
+    <button class="x" type="button" id="ov-zavriet" aria-label="Zavrieť">${IKONA.zavriet}</button>
+    <h3 id="ov-nadpis">Otvoriť v appke Matchball</h3>
+    <p class="lead" id="ov-text">Naskenuj QR kód telefónom — otvorí sa profil v appke. Ak appku nemáš, dostaneš sa do obchodu.</p>
+    <div class="row">
+      <a class="btn btn-dark" href="${ctx.appStore}">${IKONA.apple}App Store</a>
+      <a class="btn btn-light" href="${ctx.playStore}">${IKONA.play}Google Play</a>
+    </div>
+    <p class="lead" id="ov-mam" hidden style="margin:18px 0 0"><a class="rev-more" href="#" id="ov-mam-odkaz">Appku už mám — otvoriť${IKONA.sipka}</a></p>
+    <div class="qrs" id="ov-qr">${qrMaly}</div>
+    <p class="qcap" id="ov-qcap">matchballapp.com/t/${esc(coach.slug)}</p>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">${IKONA.fajka}<span id="toast-text"></span></div>
+
+<script>
+${skriptTrenera(coach, zdielanyUrl)}
+</script>
+</body>
+</html>
+`;
+}
+
+/**
+ * Správanie tlačidiel. Prevzaté z `i/index.html` (`otvorAppku`, detekcia
+ * zariadenia): schéma `mecbal://` otvorí appku len tomu, kto ju má, a keď ju
+ * nemá, Safari odpovie chybovým oknom. Preto sa nikdy nepresmerúva naslepo —
+ * na telefóne sa skúsi schéma a po 1,5 s bez odchodu zo stránky sa ukáže panel
+ * s obchodom, na počítači sa rovno otvorí QR.
+ *
+ * Písané ako obyčajný reťazec s `+`, nie ako šablóna — v šablóne by sa `${`
+ * v skripte stránky pomiešalo so `${` generátora.
+ */
+function skriptTrenera(coach, zdielanyUrl) {
+  const id = String(coach.id);
+  const slug = String(coach.slug);
+  return `(function(){
+  'use strict';
+  var ID = ${json(id)};
+  var SLUG = ${json(slug)};
+  var URL_STRANKY = ${json(zdielanyUrl)};
+  var APP_STORE = ${json(APP_STORE)};
+  var PLAY = ${json(PLAY_STORE)} + '&referrer=' + encodeURIComponent('coach=' + ID);
+
+  var ua = navigator.userAgent || '';
+  var jeAndroid = /Android/i.test(ua);
+  // iPadOS 13+ sa hlási ako Macintosh; rozlíši ho len dotyková obrazovka.
+  var jeIOS = /iPhone|iPad|iPod/i.test(ua)
+    || (/Macintosh/i.test(ua) && typeof document.ontouchend !== 'undefined');
+  var jeTelefon = jeAndroid || jeIOS;
+
+  var ov = document.getElementById('ov');
+  var ovText = document.getElementById('ov-text');
+  var ovQr = document.getElementById('ov-qr');
+  var ovQcap = document.getElementById('ov-qcap');
+  var ovMam = document.getElementById('ov-mam');
+  var ovMamOdkaz = document.getElementById('ov-mam-odkaz');
+  var toast = document.getElementById('toast');
+  var toastText = document.getElementById('toast-text');
+  var casovacToastu = null;
+  var poslednyCiel = null;
+
+  function schema(co){
+    var q = 'mecbal://coach?id=' + encodeURIComponent(ID) + '&slug=' + encodeURIComponent(SLUG);
+    if (co === 'sprava') q += '&sprava';
+    else if (co === 'hodnotenia') q += '&hodnotenia';
+    else q += '&rezervovat';
+    return q;
+  }
+
+  function ukazModal(sQr){
+    ovQr.hidden = !sQr;
+    ovQcap.hidden = !sQr;
+    ovMam.hidden = sQr;
+    ov.classList.add('on');
+    ov.setAttribute('aria-hidden', 'false');
+    document.getElementById('ov-zavriet').focus();
+  }
+  function zavriModal(){
+    ov.classList.remove('on');
+    ov.setAttribute('aria-hidden', 'true');
+  }
+
+  document.getElementById('ov-zavriet').addEventListener('click', zavriModal);
+  ov.addEventListener('click', function(e){ if (e.target === ov) zavriModal(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') zavriModal(); });
+
+  ovMamOdkaz.addEventListener('click', function(e){
+    e.preventDefault();
+    if (poslednyCiel) window.location.href = poslednyCiel;
+  });
+
+  // Odkazy do obchodu podľa zariadenia. Na počítači ostávajú oba.
+  if (jeTelefon) {
+    var obchod = jeIOS ? APP_STORE : PLAY;
+    [].forEach.call(ov.querySelectorAll('.row .btn'), function(a, i){
+      a.hidden = jeIOS ? i !== 0 : i !== 1;
+      if (!a.hidden) a.href = obchod;
+    });
+  }
+
+  function otvorAppku(co){
+    var ciel = schema(co);
+    poslednyCiel = ciel;
+    if (!jeTelefon) {
+      ovText.textContent = 'Naskenuj QR kód telefónom — otvorí sa profil v appke. Ak appku nemáš, dostaneš sa do obchodu.';
+      ukazModal(true);
+      return;
+    }
+    var odisiel = false;
+    function odchod(){ if (document.visibilityState === 'hidden') odisiel = true; }
+    document.addEventListener('visibilitychange', odchod);
+    window.setTimeout(function(){
+      document.removeEventListener('visibilitychange', odchod);
+      if (odisiel || document.visibilityState === 'hidden') return;
+      ovText.textContent = 'Vyzerá to, že appku ešte nemáš. Stiahni si ju — profil sa v nej otvorí hneď po inštalácii.';
+      ukazModal(false);
+    }, 1500);
+    window.location.href = ciel;
+  }
+
+  [].forEach.call(document.querySelectorAll('[data-otvor]'), function(b){
+    b.addEventListener('click', function(){ otvorAppku(b.getAttribute('data-otvor')); });
+  });
+
+  function ukazToast(text){
+    toastText.textContent = text;
+    toast.classList.add('on');
+    if (casovacToastu) window.clearTimeout(casovacToastu);
+    casovacToastu = window.setTimeout(function(){ toast.classList.remove('on'); }, 2400);
+  }
+
+  var zdielat = document.getElementById('zdielat');
+  if (zdielat) {
+    zdielat.addEventListener('click', function(){
+      if (navigator.share) {
+        navigator.share({ title: document.title, url: URL_STRANKY }).catch(function(){});
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(URL_STRANKY).then(function(){
+          ukazToast('Odkaz skopírovaný');
+        }, function(){ ukazToast(URL_STRANKY); });
+        return;
+      }
+      ukazToast(URL_STRANKY);
+    });
+  }
+})();`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Adresár trénerov — CSS a HTML
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CSS_ZOZNAM = `.sec-head{padding:26px 0 26px;max-width:44rem}
+.sec-head .lead{margin-top:14px}
+.filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:12px;background:var(--card);border:1px solid var(--line);
+  border-radius:26px;box-shadow:var(--shadow-soft);margin-bottom:28px}
+.fpill{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;
+  background:#fff;border:1px solid var(--line);font-size:.92rem;font-weight:500;color:var(--fg);
+  white-space:nowrap;cursor:pointer;transition:background .25s,border-color .25s,color .25s}
+.fpill:hover{border-color:rgba(26,122,74,.35)}
+.fpill svg{width:15px;height:15px;flex:0 0 15px}
+.fpill[aria-pressed="true"]{background:var(--green-soft);border-color:transparent;color:var(--green-dark);font-weight:600}
+.switch{width:30px;height:17px;border-radius:999px;background:var(--line);position:relative;flex:0 0 30px;
+  transition:background .25s}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;
+  background:#fff;transition:transform .25s var(--ease);box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.fpill[aria-pressed="true"] .switch{background:var(--green)}
+.fpill[aria-pressed="true"] .switch::after{transform:translateX(13px)}
+.fpill.static{cursor:default}
+.fpill.static:hover{border-color:var(--line)}
+.filters .spacer{flex:1 1 auto;display:none}
+.sort-wrap{display:inline-flex;align-items:center;gap:8px;padding:6px 8px 6px 16px;border-radius:999px;
+  background:#fff;border:1px solid var(--line);font-size:.92rem;font-weight:500}
+.sort-wrap select{font:inherit;border:0;background:transparent;padding:5px 6px;border-radius:999px;
+  cursor:pointer;color:var(--green-dark);font-weight:600}
+.pocet-vysledkov{color:var(--muted);font-size:.94rem;margin-bottom:18px}
+
+.grid-coaches{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:20px;margin-bottom:36px}
+.coach-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);overflow:hidden;display:flex;flex-direction:column;
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.coach-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+.coach-photo{position:relative;aspect-ratio:4/3;overflow:hidden;
+  background:linear-gradient(150deg,var(--green-soft),#DCEFE3);
+  display:flex;align-items:center;justify-content:center}
+.coach-photo .portret{width:100%;height:100%;object-fit:cover}
+.coach-photo .znak{position:relative;width:96px;height:96px;border-radius:50%;object-fit:contain;
+  padding:18px;background:#fff;border:4px solid rgba(255,255,255,.9);
+  box-shadow:0 10px 26px -8px rgba(11,16,13,.35)}
+.badge-verified{position:absolute;top:14px;left:14px;display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px 6px 9px;border-radius:999px;background:var(--green);color:#fff;
+  font-size:.78rem;font-weight:600;box-shadow:0 6px 16px -6px rgba(26,122,74,.6)}
+.badge-verified svg{width:13px;height:13px;flex:0 0 13px}
+.coach-body{padding:20px 22px 22px;display:flex;flex-direction:column;flex:1}
+.coach-meta{margin-top:6px;color:var(--muted);font-size:.92rem}
+.coach-meta b{color:var(--fg);font-weight:600}
+.coach-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.tag{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;
+  background:var(--green-soft);color:var(--green-dark);font-size:.8rem;font-weight:500}
+.coach-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+  margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
+.coach-foot{margin-top:18px}
+.coach-price b{font-size:1.24rem;font-weight:700;color:var(--green);letter-spacing:-.02em;white-space:nowrap}
+.coach-price span{display:block;color:var(--muted);font-size:.82rem;margin-top:1px}
+.prazdno{padding:34px 0 60px;color:var(--muted)}
+
+.cities-block{margin-bottom:64px}
+.cities-block h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);
+  font-weight:600;margin-bottom:16px;line-height:1.4}
+.cities-pills{display:flex;flex-wrap:wrap;gap:10px}
+.city-pill{display:inline-flex;align-items:center;gap:7px;padding:11px 18px;border-radius:999px;
+  background:var(--card);border:1px solid var(--line);font-size:.95rem;font-weight:500;
+  transition:border-color .25s,color .25s}
+.city-pill:hover{border-color:rgba(26,122,74,.35);color:var(--green-dark)}
+.city-pill span{color:var(--muted);font-weight:400}
+
+.cta-dark{background:var(--ink);color:#fff;border-radius:var(--radius-xl);
+  padding:34px 26px;display:flex;flex-direction:column;gap:22px;
+  margin-bottom:64px;position:relative;overflow:hidden}
+.cta-dark::after{content:"";position:absolute;width:460px;height:460px;right:-190px;top:-200px;
+  border-radius:50%;background:radial-gradient(circle,rgba(201,242,78,.2),transparent 65%);pointer-events:none}
+.cta-dark-text{max-width:34rem;position:relative}
+.cta-dark-text h2{color:#fff;font-size:1.7rem}
+.cta-dark-text .lead{color:rgba(255,255,255,.72);margin-top:12px}
+.cta-dark-actions{display:grid;gap:10px;flex:0 0 auto;position:relative}
+
+@media (min-width:900px){
+  .sec-head{padding:44px 0 40px}
+  .sec-head .lead{margin-top:18px}
+  .filters{padding:14px;border-radius:999px;margin-bottom:36px}
+  .filters .spacer{display:block}
+  .fpill{padding:11px 18px;font-size:.94rem}
+  .grid-coaches{grid-template-columns:repeat(3,1fr);gap:24px}
+  .cta-dark{flex-direction:row;align-items:center;justify-content:space-between;gap:40px;
+    padding:64px 72px;margin-bottom:80px}
+  .cta-dark-text h2{font-size:2.2rem}
+  .cta-dark-actions{display:flex;gap:12px}
+  .cities-block{margin-bottom:96px}
+}`;
+
+function kartaTrenera(coach) {
+  const cur = coach.currency === 'CZK' ? 'CZK' : 'EUR';
+  const c = cennik(coach);
+  const rating = Number(coach.avg_rating) || 0;
+  const pocetH = Number(coach.review_count) || 0;
+  const url = `/t/${coach.slug}/`;
+  const maFotku = !!coach.fotoSubor;
+  const tagy = (coach.specializations || []).map((s) => ZAMERANIE[s]).filter(Boolean).slice(0, 3);
+
+  const metaCasti = [];
+  if (pocetH > 0 && rating > 0) metaCasti.push(`★ <b>${hodnotenie(rating)}</b> (${pocetH})`);
+  metaCasti.push(esc(coach.city));
+  if (coach.training_location) metaCasti.push(esc(coach.training_location));
+
+  // Triedenie a filter beží v prehliadači nad týmito atribútmi — bez servera
+  // a bez toho, aby sa čokoľvek dopytovalo pri načítaní stránky.
+  const data = [
+    `data-overeny="${coach.verified ? '1' : '0'}"`,
+    `data-hodnotenie="${rating.toFixed(2)}"`,
+    `data-pocet="${pocetH}"`,
+    `data-cena="${c.odCena.toFixed(2)}"`,
+    `data-meno="${esc(coach.name)}"`,
+  ].join(' ');
+
+  return `<article class="coach-card" ${data}>
+        <div class="coach-photo">
+          ${maFotku
+    ? `<img class="portret" src="${url}${coach.fotoSubor}" alt="${esc(coach.name)}" width="600" height="600" loading="lazy">`
+    : '<img class="znak" src="/logo.webp" alt="" width="128" height="128" loading="lazy">'}
+          ${coach.verified ? `<span class="badge-verified">${IKONA.fajka}Overený tréner</span>` : ''}
+        </div>
+        <div class="coach-body">
+          <h3><a href="${url}">${esc(coach.name)}</a></h3>
+          <p class="coach-meta">${metaCasti.join(' · ')}</p>
+          ${tagy.length ? `<div class="coach-tags">${tagy.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+          <div class="coach-foot">
+            <div class="coach-price"><b>${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur)}</b><span>za hodinu</span></div>
+            <a class="btn btn-green btn-sm" href="${url}">Zobraziť profil</a>
+          </div>
+        </div>
+      </article>`;
+}
+
+/**
+ * Adresár — buď celý (`mesto === null`), alebo jedno mesto.
+ *
+ * `ostatneMesta` sú všetky mestá aj s počtami; na stránke mesta sa z nich to
+ * aktuálne vynechá, aby odkaz neviedol sám na seba.
+ */
+function strankaZoznamu({ mesto, coaches, ostatneMesta }) {
+  const jeMesto = !!mesto;
+  const n = coaches.length;
+  const url = jeMesto ? `${WEB_ORIGIN}/treneri/${mesto.slug}/` : `${WEB_ORIGIN}/treneri/`;
+  const nadpis = jeMesto ? `Tenisoví tréneri — ${mesto.name}` : 'Tenisoví tréneri';
+  const title = jeMesto
+    ? `Tenisoví tréneri ${mesto.name} | Matchball`
+    : 'Tenisoví tréneri na Slovensku a v Česku | Matchball';
+  const popis = jeMesto
+    ? `${n} ${pocet(n, 'tenisový tréner', 'tenisoví tréneri', 'tenisových trénerov')} v meste ${mesto.name}. Vyber si podľa hodnotenia a ceny, rezervuj termín v appke Matchball a plať kartou až po potvrdení.`
+    : 'Tenisoví tréneri, ktorých si vieš rezervovať cez appku Matchball. Vyber si podľa mesta, hodnotenia a ceny — platíš kartou až po potvrdení termínu.';
+
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: nadpis,
+    url,
+    numberOfItems: n,
+    itemListElement: coaches.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${WEB_ORIGIN}/t/${c.slug}/`,
+      name: c.name,
+    })),
+  };
+
+  const mestaPills = ostatneMesta
+    .filter((m) => !jeMesto || m.slug !== mesto.slug)
+    .map((m) => `<a class="city-pill" href="/treneri/${m.slug}/">${esc(m.name)} <span>${m.count}</span></a>`)
+    .join('\n        ');
+
+  return `<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(popis)}">
+<link rel="canonical" href="${url}">
+${FAVICONY}
+<meta property="og:type" content="website">
+<meta property="og:url" content="${url}">
+<meta property="og:title" content="${esc(nadpis)} | Matchball">
+<meta property="og:description" content="${esc(popis)}">
+<meta property="og:image" content="${WEB_ORIGIN}/hero.webp">
+<meta property="og:locale" content="sk_SK">
+<meta name="twitter:card" content="summary_large_image">
+${PISMO}
+<style>
+${CSS_ZAKLAD}
+${CSS_ZOZNAM}
+</style>
+<script type="application/ld+json">${json(ld)}</script>
+</head>
+<body>
+<a class="skip" href="#obsah">Preskočiť na obsah</a>
+${hlavicka('treneri')}
+
+<main id="obsah" class="wrap">
+  ${jeMesto ? `<nav class="crumbs" aria-label="Drobčeková navigácia" style="display:flex;gap:8px;color:var(--muted);font-size:.86rem;margin-top:8px">
+    <a href="/treneri/">Tréneri</a><span aria-hidden="true" style="opacity:.45">›</span><span style="color:var(--fg);font-weight:600">${esc(mesto.name)}</span>
+  </nav>` : ''}
+  <header class="sec-head">
+    <p class="eyebrow">Tenisoví tréneri</p>
+    <h1>${esc(nadpis)}</h1>
+    <p class="lead">${esc(popis)}</p>
+  </header>
+
+  ${n > 0 ? `<div class="filters">
+    ${jeMesto
+    ? `<a class="fpill" href="/treneri/">${IKONA.pin}${esc(mesto.name)}</a>`
+    : `<span class="fpill static">${IKONA.pin}Všetky mestá</span>`}
+    <span class="fpill static">Tenis</span>
+    <button class="fpill" type="button" id="len-overeni" aria-pressed="false"><span class="switch" aria-hidden="true"></span>Len overení</button>
+    <span class="spacer"></span>
+    <label class="sort-wrap">Zoradiť
+      <select id="zoradenie">
+        <option value="odporucane">Odporúčané</option>
+        <option value="hodnotenie">Podľa hodnotenia</option>
+        <option value="cena">Od najlacnejších</option>
+        <option value="meno">Podľa mena</option>
+      </select>
+    </label>
+  </div>
+
+  <p class="pocet-vysledkov" id="pocet-vysledkov">${n} ${pocet(n, 'tréner', 'tréneri', 'trénerov')}</p>
+
+  <div class="grid-coaches" id="mriezka">
+      ${coaches.map(kartaTrenera).join('\n      ')}
+  </div>
+  <p class="prazdno" id="ziadne" hidden>V tomto výbere nikto nie je. Skús vypnúť „Len overení“.</p>`
+    : '<p class="prazdno">Tu zatiaľ trénera nemáme. Skús iné mesto — pribúdajú.</p>'}
+
+  ${mestaPills ? `<section class="cities-block">
+    <h2>Ďalšie mestá</h2>
+    <div class="cities-pills">
+        ${mestaPills}
+    </div>
+  </section>` : ''}
+
+  <section class="cta-dark">
+    <div class="cta-dark-text">
+      <h2>Trénuješ? Buď medzi nimi.</h2>
+      <p class="lead">Založ si profil v appke Matchball, nastav si cenník a termíny. Verejná stránka ti vznikne sama.</p>
+    </div>
+    <div class="cta-dark-actions">
+      <a class="btn btn-lime" href="${APP_STORE}">${IKONA.apple}Stiahnuť pre iPhone</a>
+      <a class="btn btn-ghost" href="${PLAY_STORE}">${IKONA.play}Stiahnuť pre Android</a>
+    </div>
+  </section>
+</main>
+
+${PATICKA}
+${n > 0 ? `<script>\n${SKRIPT_ZOZNAMU}\n</script>` : ''}
+</body>
+</html>
+`;
+}
+
+/**
+ * Filter a zoradenie bez servera. Karty sú už v HTML (kvôli indexovaniu),
+ * skript len mení ich poradie a viditeľnosť podľa `data-` atribútov.
+ *
+ * „Odporúčané“ je pôvodné poradie z generátora (overení, hodnotenie, počet,
+ * meno) — drží sa v `data-poradie`, aby sa dalo vrátiť po inom zoradení.
+ */
+const SKRIPT_ZOZNAMU = `(function(){
+  'use strict';
+  var mriezka = document.getElementById('mriezka');
+  if (!mriezka) return;
+  var karty = [].slice.call(mriezka.children);
+  var prepinac = document.getElementById('len-overeni');
+  var vyber = document.getElementById('zoradenie');
+  var pocetEl = document.getElementById('pocet-vysledkov');
+  var ziadneEl = document.getElementById('ziadne');
+
+  karty.forEach(function(k, i){ k.dataset.poradie = String(i); });
+
+  function num(k, kluc){ return parseFloat(k.dataset[kluc]) || 0; }
+
+  var poradia = {
+    odporucane: function(a, b){ return num(a,'poradie') - num(b,'poradie'); },
+    hodnotenie: function(a, b){
+      return (num(b,'hodnotenie') - num(a,'hodnotenie'))
+        || (num(b,'pocet') - num(a,'pocet'))
+        || a.dataset.meno.localeCompare(b.dataset.meno, 'sk');
+    },
+    cena: function(a, b){
+      return (num(a,'cena') - num(b,'cena'))
+        || a.dataset.meno.localeCompare(b.dataset.meno, 'sk');
+    },
+    meno: function(a, b){ return a.dataset.meno.localeCompare(b.dataset.meno, 'sk'); }
+  };
+
+  function sklonuj(n){
+    if (n === 1) return '1 tréner';
+    if (n >= 2 && n <= 4) return n + ' tréneri';
+    return n + ' trénerov';
+  }
+
+  function prekresli(){
+    var lenOvereni = prepinac.getAttribute('aria-pressed') === 'true';
+    var vidno = 0;
+    karty.forEach(function(k){
+      var ok = !lenOvereni || k.dataset.overeny === '1';
+      k.hidden = !ok;
+      if (ok) vidno++;
+    });
+    var zoradene = karty.slice().sort(poradia[vyber.value] || poradia.odporucane);
+    zoradene.forEach(function(k){ mriezka.appendChild(k); });
+    pocetEl.textContent = sklonuj(vidno);
+    ziadneEl.hidden = vidno > 0;
+  }
+
+  prepinac.addEventListener('click', function(){
+    prepinac.setAttribute('aria-pressed', prepinac.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    prekresli();
+  });
+  vyber.addEventListener('change', prekresli);
+})();`;
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Dáta
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function nacitajZoSupabase(url, key) {
+  const res = await fetch(`${url.replace(/\/+$/, '')}/rest/v1/rpc/public_coach_pages`, {
+    method: 'POST',
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
+    },
+    body: '{}',
+  });
+  if (!res.ok) {
+    throw new Error(`RPC public_coach_pages zlyhalo: HTTP ${res.status} — ${(await res.text()).slice(0, 400)}`);
+  }
+  const data = await res.json();
+  if (!Array.isArray(data)) throw new Error('RPC public_coach_pages nevrátilo pole.');
+  return data;
+}
+
+/**
+ * Fotka z privátneho bucketu. Sťahuje sa len vtedy, keď súbor chýba alebo je
+ * starší než `updated_at` trénera — nočný beh inak vytiahne desiatky megabajtov
+ * za nič.
+ */
+async function stiahniFotku({ url, key, photoPath, cielovySubor, updatedAt }) {
+  if (!photoPath) return false;
+  const cas = Date.parse(updatedAt || '');
+  if (fs.existsSync(cielovySubor)) {
+    const st = fs.statSync(cielovySubor);
+    if (!Number.isFinite(cas) || st.mtimeMs >= cas) return true;
+  }
+  const cesta = String(photoPath).split('/').map(encodeURIComponent).join('/');
+  const res = await fetch(`${url.replace(/\/+$/, '')}/storage/v1/object/${BUCKET}/${cesta}`, {
+    headers: { apikey: key, Authorization: `Bearer ${key}` },
+  });
+  if (!res.ok) {
+    console.warn(`  ! fotka ${photoPath}: HTTP ${res.status} — použije sa zástupný znak`);
+    return fs.existsSync(cielovySubor);
+  }
+  const buf = Buffer.from(await res.arrayBuffer());
+  if (buf.length === 0) return fs.existsSync(cielovySubor);
+  fs.mkdirSync(path.dirname(cielovySubor), { recursive: true });
+  fs.writeFileSync(cielovySubor, buf);
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Zápis
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Zapisuje len pri zmene — Action tak nerobí commit z nezmenených súborov. */
+function zapis(relativna, obsah) {
+  const cielovaCesta = path.join(ROOT, relativna);
+  fs.mkdirSync(path.dirname(cielovaCesta), { recursive: true });
+  if (fs.existsSync(cielovaCesta) && fs.readFileSync(cielovaCesta, 'utf8') === obsah) return false;
+  fs.writeFileSync(cielovaCesta, obsah);
+  return true;
+}
+
+/**
+ * Priečinky trénerov, ktorí v dátach už nie sú (stránku si vypli, účet zmizol).
+ *
+ * Maže sa VÝHRADNE vnútri `t/` a len priečinky, ktoré tam generátor sám
+ * vyrobil — koreň repozitára obsahuje `legal/`, `auth/` a obrázky webu a
+ * generátor nemá dôvod siahnuť na čokoľvek z toho.
+ */
+function zmazStareStranky(zive) {
+  const tDir = path.join(ROOT, 't');
+  if (!fs.existsSync(tDir)) return [];
+  const zmazane = [];
+  for (const meno of fs.readdirSync(tDir).sort()) {
+    const p = path.join(tDir, meno);
+    if (!fs.statSync(p).isDirectory()) continue;
+    if (zive.has(meno)) continue;
+    fs.rmSync(p, { recursive: true, force: true });
+    zmazane.push(meno);
+  }
+  return zmazane;
+}
+
+function zmazStareMesta(zive) {
+  const dir = path.join(ROOT, 'treneri');
+  if (!fs.existsSync(dir)) return [];
+  const zmazane = [];
+  for (const meno of fs.readdirSync(dir).sort()) {
+    const p = path.join(dir, meno);
+    if (!fs.statSync(p).isDirectory()) continue;
+    if (zive.has(meno)) continue;
+    fs.rmSync(p, { recursive: true, force: true });
+    zmazane.push(meno);
+  }
+  return zmazane;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Hlavný beh
+// ═══════════════════════════════════════════════════════════════════════════
+
+function argHodnota(meno) {
+  const i = process.argv.indexOf(meno);
+  return i > -1 ? process.argv[i + 1] : undefined;
+}
+
+async function main() {
+  const fixture = argHodnota('--fixture');
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+
+  let treneri;
+  if (fixture) {
+    console.log(`Fixture: ${fixture}`);
+    treneri = JSON.parse(fs.readFileSync(path.resolve(fixture), 'utf8'));
+  } else {
+    if (!url || !key) {
+      console.error('Chýba SUPABASE_URL alebo SUPABASE_SERVICE_KEY (alebo použi --fixture <súbor>).');
+      process.exit(1);
+    }
+    treneri = await nacitajZoSupabase(url, key);
+  }
+
+  // Bez slugu niet adresy; bez mena a mesta niet čo ukázať.
+  const platni = treneri.filter((c) => c && c.slug && /^[a-z0-9][a-z0-9-]*$/.test(String(c.slug)) && c.name && c.city);
+  const preskocene = treneri.length - platni.length;
+  if (preskocene > 0) console.warn(`Preskočených ${preskocene} trénerov bez slugu / mena / mesta.`);
+
+  // Deterministické poradie: overení hore, potom hodnotenie, počet hodnotení
+  // a nakoniec meno. `localeCompare` s pevným locale, nie podľa prostredia.
+  const zorad = (a, b) =>
+    (b.verified ? 1 : 0) - (a.verified ? 1 : 0)
+    || (Number(b.avg_rating) || 0) - (Number(a.avg_rating) || 0)
+    || (Number(b.review_count) || 0) - (Number(a.review_count) || 0)
+    || String(a.name).localeCompare(String(b.name), 'sk')
+    || String(a.slug).localeCompare(String(b.slug), 'sk');
+  platni.sort(zorad);
+
+  // ── Fotky ────────────────────────────────────────────────────────────────
+  for (const coach of platni) {
+    const dir = path.join(ROOT, 't', coach.slug);
+    coach.fotoSubor = null;
+    if (coach.photo_path && !fixture) {
+      const ok = await stiahniFotku({
+        url, key, photoPath: coach.photo_path,
+        cielovySubor: path.join(dir, 'foto.jpg'),
+        updatedAt: coach.updated_at,
+      });
+      if (ok) coach.fotoSubor = 'foto.jpg';
+    } else if (coach.photo_path && fixture) {
+      // Pri fixture sa nesťahuje; ak fotka na disku je (z predošlého behu), použije sa.
+      if (fs.existsSync(path.join(dir, 'foto.jpg'))) coach.fotoSubor = 'foto.jpg';
+    }
+
+    const reviews = Array.isArray(coach.reviews) ? coach.reviews.slice(0, 6) : [];
+    coach.reviews = reviews;
+    for (let i = 0; i < reviews.length; i++) {
+      const r = reviews[i];
+      r.fotoSubor = null;
+      const meno = `r${i + 1}.jpg`;
+      if (r.photo_path && !fixture) {
+        const ok = await stiahniFotku({
+          url, key, photoPath: r.photo_path,
+          cielovySubor: path.join(dir, meno),
+          updatedAt: coach.updated_at,
+        });
+        if (ok) r.fotoSubor = meno;
+      } else if (r.photo_path && fixture && fs.existsSync(path.join(dir, meno))) {
+        r.fotoSubor = meno;
+      }
+    }
+  }
+
+  // ── Mestá ────────────────────────────────────────────────────────────────
+  const mestaMap = new Map();
+  for (const coach of platni) {
+    const slug = slugify(coach.city_key || coach.city);
+    if (!slug) continue;
+    coach.mestoSlug = slug;
+    if (!mestaMap.has(slug)) mestaMap.set(slug, { slug, name: coach.city, coaches: [] });
+    mestaMap.get(slug).coaches.push(coach);
+  }
+  const mesta = [...mestaMap.values()]
+    .map((m) => ({ ...m, count: m.coaches.length }))
+    .filter((m) => m.count > 0)
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'sk'));
+
+  // ── Generovanie ──────────────────────────────────────────────────────────
+  const ctx = { appStore: APP_STORE, playStore: PLAY_STORE };
+  let zmenene = 0;
+  const zive = new Set(platni.map((c) => c.slug));
+
+  for (const coach of platni) {
+    if (zapis(path.join('t', coach.slug, 'index.html'), strankaTrenera(coach, ctx))) zmenene++;
+  }
+
+  const vsetkyMesta = mesta.map(({ slug, name, count }) => ({ slug, name, count }));
+  if (zapis(path.join('treneri', 'index.html'),
+    strankaZoznamu({ mesto: null, coaches: platni, ostatneMesta: vsetkyMesta }))) zmenene++;
+
+  for (const m of mesta) {
+    if (zapis(path.join('treneri', m.slug, 'index.html'),
+      strankaZoznamu({ mesto: m, coaches: m.coaches, ostatneMesta: vsetkyMesta }))) zmenene++;
+  }
+
+  // ── Sitemap ──────────────────────────────────────────────────────────────
+  const den = (iso) => {
+    const t = Date.parse(iso || '');
+    return Number.isFinite(t) ? new Date(t).toISOString().slice(0, 10) : null;
+  };
+  const najnovsi = platni.reduce((acc, c) => {
+    const d = den(c.updated_at);
+    return d && (!acc || d > acc) ? d : acc;
+  }, null);
+  const polozka = (loc, lastmod, priority) =>
+    `  <url>\n    <loc>${loc}</loc>\n${lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : ''}    <priority>${priority}</priority>\n  </url>`;
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${[
+    polozka(`${WEB_ORIGIN}/`, najnovsi, '1.0'),
+    polozka(`${WEB_ORIGIN}/treneri/`, najnovsi, '0.9'),
+    ...mesta.map((m) => polozka(`${WEB_ORIGIN}/treneri/${m.slug}/`, najnovsi, '0.8')),
+    ...platni.map((c) => polozka(`${WEB_ORIGIN}/t/${c.slug}/`, den(c.updated_at), '0.7')),
+  ].join('\n')}
+</urlset>
+`;
+  if (zapis('sitemap.xml', sitemap)) zmenene++;
+
+  // ── GitHub Pages a hlboké odkazy ─────────────────────────────────────────
+  // Bez `.nojekyll` Jekyll priečinky začínajúce bodkou nepublikuje a
+  // `.well-known/` by na webe vôbec nebolo — hlboké odkazy by tíško nefungovali.
+  if (zapis('.nojekyll', '')) zmenene++;
+
+  const aasa = {
+    applinks: { apps: [], details: [{ appID: APPLE_APP_ID, paths: ['/t/*'] }] },
+  };
+  if (zapis(path.join('.well-known', 'apple-app-site-association'), `${JSON.stringify(aasa, null, 2)}\n`)) zmenene++;
+
+  // Odtlačok podpisového kľúča sa dá získať len z EAS (`eas credentials`) —
+  // do repa ho generátor nemá odkiaľ vziať, preto placeholder. Kým tam je
+  // „DOPLNIT", Android hlboké odkazy na `/t/*` neoveria a otvoria sa v prehliadači.
+  // Súbor musí zostať čistým Digital Asset Links statementom — overovač Googlu
+  // cudzie kľúče neznáša, takže poznámka je v README a vo výpise, nie tu.
+  const assetlinks = [{
+    relation: ['delegate_permission/common.handle_all_urls'],
+    target: {
+      namespace: 'android_app',
+      package_name: ANDROID_PACKAGE,
+      sha256_cert_fingerprints: ['DOPLNIT'],
+    },
+  }];
+  if (zapis(path.join('.well-known', 'assetlinks.json'), `${JSON.stringify(assetlinks, null, 2)}\n`)) zmenene++;
+
+  // ── Upratovanie ──────────────────────────────────────────────────────────
+  const zmazaniTreneri = zmazStareStranky(zive);
+  const zmazaneMesta = zmazStareMesta(new Set(mesta.map((m) => m.slug)));
+
+  console.log(`Tréneri: ${platni.length} · mestá: ${mesta.length} · zapísaných súborov: ${zmenene}`);
+  if (zmazaniTreneri.length) console.log(`Zmazané stránky trénerov: ${zmazaniTreneri.join(', ')}`);
+  if (zmazaneMesta.length) console.log(`Zmazané stránky miest: ${zmazaneMesta.join(', ')}`);
+  const bezOdtlacku = fs.readFileSync(path.join(ROOT, '.well-known', 'assetlinks.json'), 'utf8').includes('DOPLNIT');
+  if (bezOdtlacku) {
+    console.log('POZOR: .well-known/assetlinks.json má placeholder "DOPLNIT" — doplň SHA-256 odtlačok z `eas credentials`, inak Android hlboké odkazy neoverí.');
+  }
+}
+
+main().catch((e) => {
+  console.error(e && e.stack ? e.stack : e);
+  process.exit(1);
+});
