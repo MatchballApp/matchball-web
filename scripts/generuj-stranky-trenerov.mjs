@@ -43,7 +43,7 @@ const BUCKET = 'profile-photos';
 //
 //  Od migrácie 340 (Matchball je zadarmo) je `hourly_rate`/`pricing` už PRIAMO
 //  cena, akú hráč zaplatí — Matchball si z nej nič neberie, takže sa web nemá
-//  čo prepočítavať. Poplatok za platbu kartou (1,5 % + 0,25 €/6 Kč) sa dopočíta
+//  čo prepočítavať. Poplatok za platbu kartou (5 % + 0,30 €/7,50 Kč) sa dopočíta
 //  až v appke pri rezervácii a na cenníku sa neukazuje.
 //
 //  Pri každej zmene v `pricing.ts` treba prepísať aj toto. Zdroj:
@@ -872,7 +872,7 @@ body{padding-bottom:92px}
  * Cenník pre HRÁČA. Od 340 (Matchball je zadarmo) je `pricing`/`hourly_rate`
  * priamo cena, akú hráč zaplatí pri priamej platbe (QR / hotovosť) — Matchball
  * si z nej nič neberie, tak sa ukazuje bez akéhokoľvek prepočtu. Poplatok za
- * platbu kartou (1,5 % + 0,25 €/6 Kč) sa dopočíta až pri rezervácii v appke,
+ * platbu kartou (5 % + 0,30 €/7,50 Kč) sa dopočíta až pri rezervácii v appke,
  * na cenníku sa nezobrazuje. Pásmo 4 je otvorené („štyria a viac"), takže sa
  * jeho celok uvádza ako „od".
  */
@@ -1122,7 +1122,7 @@ ${hlavicka('treneri')}
           <div><div class="lab">${esc(r.lab)}</div><div class="sub2">${esc(r.sub)}</div></div>
           <div class="val">${r.val}${r.small ? `<small>${r.small}</small>` : ''}</div>
         </div>`).join('\n        ')}
-        <p class="foot" style="text-align:left">Matchball si z ceny nič neberie. Pri platbe kartou v appke zaplatíš navyše len poplatok platobnej brány (1,5 % + 0,25 €); QR prevodom alebo v hotovosti trénerovi presne túto sumu.</p>
+        <p class="foot" style="text-align:left">Matchball si z ceny nič neberie. Pri platbe kartou v appke zaplatíš navyše poplatok za platbu kartou (5 % + 0,30 €) — je v ňom záruka vrátenia a storno pravidlá; QR prevodom alebo v hotovosti trénerovi presne túto sumu.</p>
         ${c.pasma.length ? `<hr>
         ${c.pasma.map((p) => `<div class="band">
           <span class="ico">${p.zlava ? IKONA.slnko : IKONA.mesiac}</span>
