@@ -270,7 +270,7 @@ const MESIACE = [
 ];
 
 // sk.json: booking.band_morning / _afternoon / _evening
-const PASMA = { morning: 'Ráno', afternoon: 'Poobede', evening: 'Večer', custom: 'Vlastný čas' };
+const PASMA = { morning: 'Doobeda', afternoon: 'Poobede', evening: 'Večer', custom: 'Vlastný čas' };
 
 /** Slovenské číslo: desatinná čiarka, celé sumy bez „,00". */
 function cislo(n) {
