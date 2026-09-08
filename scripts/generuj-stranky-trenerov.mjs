@@ -259,10 +259,90 @@ const JAZYKY = {
 
 // sk.json: coach_pricing.court_included / court.on_site_note / court.in_app_note
 const KURT = {
-  included: () => 'Kurt je v cene',
-  on_site: () => 'Kurt sa platí na mieste',
-  in_app: (suma) => `Kurt ${suma} navyše, platí sa v appke`,
+  included: (slovo) => `${slovo} je v cene`,
+  on_site: (slovo) => `${slovo} sa platí na mieste`,
+  in_app: (slovo, suma) => `${slovo} ${suma} navyše, platí sa v appke`,
 };
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Športy — appka od migrácie 336 pridáva k tenisu bedminton, padel, squash
+//  a stolný tenis. Starí tréneri bez `sports` v RPC dostávajú `['tennis']`
+//  (pozri `sportyOf`), takže zvyšok generátora sa na pole `sports` môže
+//  spoľahnúť vždy.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const SPORT_ORDER = ['tennis', 'badminton', 'padel', 'squash', 'table_tennis'];
+
+const SPORT_NAZOV = {
+  tennis: 'Tenis',
+  badminton: 'Bedminton',
+  padel: 'Padel',
+  squash: 'Squash',
+  table_tennis: 'Stolný tenis',
+};
+
+// Prídavné meno pred „tréning" / „tréner" — „tenisový tréning".
+const SPORT_PRIDAVNE = {
+  tennis: 'tenisový',
+  badminton: 'bedmintonový',
+  padel: 'padelový',
+  squash: 'squashový',
+  table_tennis: 'stolnotenisový',
+};
+
+// Genitív pre „Tréner(i) …" a nadpisy adresára — „Tréner bedmintonu".
+const SPORT_GENITIV = {
+  tennis: 'tenisu',
+  badminton: 'bedmintonu',
+  padel: 'padelu',
+  squash: 'squashu',
+  table_tennis: 'stolného tenisu',
+};
+
+const SPORT_SLUG = {
+  tennis: 'tenis',
+  badminton: 'bedminton',
+  padel: 'padel',
+  squash: 'squash',
+  table_tennis: 'stolny-tenis',
+};
+
+// Slovo pre miesto, kde sa trénuje — všade „kurt", pri čistom stolnom tenise „stôl".
+function miestoSlovoPre(sportyKodmi) {
+  return sportyKodmi.length === 1 && sportyKodmi[0] === 'table_tennis' ? 'Stôl' : 'Kurt';
+}
+
+/** Kódy športov trénera v pevnom, deterministickom poradí; bez záznamu = tenis. */
+function sportyOf(coach) {
+  const raw = Array.isArray(coach.sports) ? coach.sports : [];
+  const znamych = SPORT_ORDER.filter((s) => raw.includes(s));
+  return znamych.length ? znamych : ['tennis'];
+}
+
+/** „a, b, c" → „a, b a c" — slovenské vypočítavanie zoznamu. */
+function spojSpojkou(zoznam) {
+  if (zoznam.length === 0) return '';
+  if (zoznam.length === 1) return zoznam[0];
+  return `${zoznam.slice(0, -1).join(', ')} a ${zoznam[zoznam.length - 1]}`;
+}
+
+function velkePismeno(s) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
+// Ikony športov — rovnaký štýl ako IKONA (viewBox 24×24, stroke 1.8), len
+// dosť jednoduché na to, aby boli čitateľné aj na 14px štítku.
+const SPORT_IKONA = {
+  tennis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"></circle><path d="M4.6 7c2.8 2.2 2.8 7.8 0 10M19.4 7c-2.8 2.2-2.8 7.8 0 10"></path></svg>',
+  badminton: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.2" r="1.6"></circle><path d="M12 6v3M8.2 20.5L10.6 9M15.8 20.5L13.4 9M5.2 17L10 9M18.8 17L14 9"></path></svg>',
+  padel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="2.6" width="13" height="13.4" rx="6.5"></rect><path d="M12 16v5.4"></path><circle cx="9.3" cy="7" r=".5" fill="currentColor" stroke="none"></circle><circle cx="12" cy="6.4" r=".5" fill="currentColor" stroke="none"></circle><circle cx="14.7" cy="7" r=".5" fill="currentColor" stroke="none"></circle><circle cx="9.3" cy="10.6" r=".5" fill="currentColor" stroke="none"></circle><circle cx="12" cy="11.2" r=".5" fill="currentColor" stroke="none"></circle><circle cx="14.7" cy="10.6" r=".5" fill="currentColor" stroke="none"></circle></svg>',
+  squash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.6c3.5.5 5.7 3.2 5.2 6.8-.5 3.5-3.6 5.7-7.2 5.2-3.5-.5-5.7-3.6-5.2-7.1.4-3 2.9-5.2 5.9-5.1"></path><path d="M8.6 14.3L3.4 21.4"></path></svg>',
+  table_tennis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="9.5" r="6.3"></circle><path d="M14.7 13.8L20 19.5"></path></svg>',
+};
+
+function sportPillHtml(kod, trieda) {
+  return `<span class="${trieda}">${SPORT_IKONA[kod] || ''}${esc(SPORT_NAZOV[kod] || kod)}</span>`;
+}
 
 const MESIACE = [
   'január', 'február', 'marec', 'apríl', 'máj', 'jún',
@@ -645,6 +725,8 @@ const CSS_TRENER = `main{padding-bottom:96px}
 .pill{padding:8px 15px;border-radius:999px;background:#fff;border:1px solid var(--line);
   font-size:.9rem;font-weight:500;box-shadow:0 1px 2px rgba(20,31,26,.04)}
 .pill-soft{background:var(--green-soft);border-color:rgba(26,122,74,.16);color:var(--green-dark);font-weight:600}
+.pill-sport{display:inline-flex;align-items:center;gap:6px}
+.pill-sport svg{width:14px;height:14px;flex:0 0 14px}
 .place{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
   overflow:hidden;box-shadow:var(--shadow-soft);display:flex;flex-direction:column}
 .place-map{height:104px;flex:0 0 104px;position:relative;
@@ -898,15 +980,15 @@ function cennik(coach) {
   return { cur, riadky, pasma, odCena, lacnejsiePasmo, vikendZaklad: bands ? bands.weekend === 'base' : false };
 }
 
-function kurtText(coach, cur) {
+function kurtText(coach, cur, slovo = 'Kurt') {
   const mode = coach.court_fee_mode;
   if (mode === 'in_app') {
     const amt = Number(coach.court_fee_amount);
-    if (amt > 0) return KURT.in_app(suma(amt, cur));
-    return 'Kurt sa platí cez appku';
+    if (amt > 0) return KURT.in_app(slovo, suma(amt, cur));
+    return `${slovo} sa platí cez appku`;
   }
-  if (mode === 'on_site') return KURT.on_site();
-  return KURT.included();
+  if (mode === 'on_site') return KURT.on_site(slovo);
+  return KURT.included(slovo);
 }
 
 function strankaTrenera(coach, ctx) {
@@ -928,11 +1010,17 @@ function strankaTrenera(coach, ctx) {
   const rating = Number(coach.avg_rating) || 0;
   const zameranie = (coach.specializations || []).map((s) => ZAMERANIE[s]).filter(Boolean);
   const jazyky = (coach.coaching_languages || []).map((l) => JAZYKY[l]).filter(Boolean);
-  const kurt = kurtText(coach, cur);
+  const sportyKodmi = sportyOf(coach);
+  const sportNazvy = sportyKodmi.map((k) => SPORT_NAZOV[k]);
+  const sportPridavne = sportyKodmi.map((k) => SPORT_PRIDAVNE[k]);
+  const miestoSlovo = miestoSlovoPre(sportyKodmi);
+  const kurt = kurtText(coach, cur, miestoSlovo);
+  const sportOznacenie = spojSpojkou(sportNazvy.map((n) => n.toLowerCase()));
+  const sportPridavneSpojene = spojSpojkou(sportPridavne);
 
-  const title = `${coach.name} – tenisový tréning, ${coach.city} | Matchball`;
+  const title = `${coach.name} – ${sportOznacenie}, ${coach.city} | Matchball`;
   const popisCasti = [
-    `${coach.name} — tenisový tréning v meste ${coach.city}.`,
+    `${coach.name} — ${sportPridavneSpojene} tréning v meste ${coach.city}.`,
     coach.training_location ? `Kde: ${coach.training_location}.` : '',
     `Cena ${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur).replace('\u00a0', ' ')} za hodinu.`,
     'Rezervácia a platba kartou v appke Matchball.',
@@ -946,7 +1034,7 @@ function strankaTrenera(coach, ctx) {
     '@type': 'Person',
     name: coach.name,
     url,
-    jobTitle: 'Tenisový tréner',
+    jobTitle: `Tréner ${spojSpojkou(sportyKodmi.map((k) => SPORT_GENITIV[k]))}`,
     address: { '@type': 'PostalAddress', addressLocality: coach.city, addressCountry: cur === 'CZK' ? 'CZ' : 'SK' },
     ...(maFotku ? { image: `${WEB_ORIGIN}${fotka}` } : {}),
     ...(coach.bio ? { description: String(coach.bio).slice(0, 600) } : {}),
@@ -1005,7 +1093,7 @@ function strankaTrenera(coach, ctx) {
 ${FAVICONY}
 <meta property="og:type" content="profile">
 <meta property="og:url" content="${url}">
-<meta property="og:title" content="${esc(coach.name)} – tenisový tréning, ${esc(coach.city)}">
+<meta property="og:title" content="${esc(coach.name)} – ${sportOznacenie}, ${esc(coach.city)}">
 <meta property="og:description" content="${esc(popis)}">
 <meta property="og:image" content="${WEB_ORIGIN}${fotka}">
 <meta property="og:image:alt" content="${esc(coach.name)}">
@@ -1034,11 +1122,11 @@ ${hlavicka('treneri')}
   <div class="hero">
     <div class="hero-photo">
       <div class="hero-shot">
-        <img class="foto${maFotku ? '' : ' placeholder'}" src="${fotka}" alt="${esc(coach.name)}${maFotku ? `, tenisový tréner — ${esc(coach.city)}` : ''}" width="600" height="600">
+        <img class="foto${maFotku ? '' : ' placeholder'}" src="${fotka}" alt="${esc(coach.name)}${maFotku ? `, ${sportPridavneSpojene} tréner — ${esc(coach.city)}` : ''}" width="600" height="600">
         <div class="hero-veil"></div>
       </div>
       <div class="hero-cap">
-        <p class="eyebrow">Tenisový tréning · ${esc(coach.city)}</p>
+        <p class="eyebrow">${esc(velkePismeno(sportPridavneSpojene))} tréning · ${esc(coach.city)}</p>
         <h1>${esc(coach.name)}</h1>
         ${meta ? `<div class="meta">${meta}</div>` : ''}
       </div>
@@ -1046,6 +1134,7 @@ ${hlavicka('treneri')}
 
     <div class="hero-body">
       ${coach.training_location ? `<div class="club-line">${IKONA.pin}${esc(coach.training_location)}, ${esc(coach.city)}</div>` : ''}
+      <div class="pills" style="margin-top:14px">${sportyKodmi.map((k) => sportPillHtml(k, 'pill pill-soft pill-sport')).join('')}</div>
       ${coach.verified ? `<div class="verified">${IKONA.fajka}Overený tréner</div>` : ''}
       <div class="stats">
         ${staty.map((s) => `<div class="stat"><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div>`).join('\n        ')}
@@ -1350,6 +1439,8 @@ const CSS_ZOZNAM = `.sec-head{padding:26px 0 26px;max-width:44rem}
 .coach-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
 .tag{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;
   background:var(--green-soft);color:var(--green-dark);font-size:.8rem;font-weight:500}
+.tag-sport{gap:5px}
+.tag-sport svg{width:12px;height:12px;flex:0 0 12px}
 .coach-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
   margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
 .coach-foot{margin-top:18px}
@@ -1399,6 +1490,8 @@ function kartaTrenera(coach) {
   const url = `/t/${coach.slug}/`;
   const maFotku = !!coach.fotoSubor;
   const tagy = (coach.specializations || []).map((s) => ZAMERANIE[s]).filter(Boolean).slice(0, 3);
+  const sportyKodmi = sportyOf(coach);
+  const ukazSporty = sportyKodmi.length > 1 || sportyKodmi[0] !== 'tennis';
 
   const metaCasti = [];
   if (pocetH > 0 && rating > 0) metaCasti.push(`★ <b>${hodnotenie(rating)}</b> (${pocetH})`);
@@ -1425,6 +1518,7 @@ function kartaTrenera(coach) {
         <div class="coach-body">
           <h3><a href="${url}">${esc(coach.name)}</a></h3>
           <p class="coach-meta">${metaCasti.join(' · ')}</p>
+          ${ukazSporty ? `<div class="coach-tags">${sportyKodmi.map((k) => sportPillHtml(k, 'tag tag-sport')).join('')}</div>` : ''}
           ${tagy.length ? `<div class="coach-tags">${tagy.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
           <div class="coach-foot">
             <div class="coach-price"><b>${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur)}</b><span>za hodinu</span></div>
@@ -1440,17 +1534,29 @@ function kartaTrenera(coach) {
  * `ostatneMesta` sú všetky mestá aj s počtami; na stránke mesta sa z nich to
  * aktuálne vynechá, aby odkaz neviedol sám na seba.
  */
-function strankaZoznamu({ mesto, coaches, ostatneMesta }) {
+function strankaZoznamu({ mesto, sport, coaches, ostatneMesta, sportyVScope }) {
   const jeMesto = !!mesto;
   const n = coaches.length;
-  const url = jeMesto ? `${WEB_ORIGIN}/treneri/${mesto.slug}/` : `${WEB_ORIGIN}/treneri/`;
-  const nadpis = jeMesto ? `Tenisoví tréneri — ${mesto.name}` : 'Tenisoví tréneri';
-  const title = jeMesto
-    ? `Tenisoví tréneri ${mesto.name} | Matchball`
-    : 'Tenisoví tréneri na Slovensku a v Česku | Matchball';
-  const popis = jeMesto
-    ? `${n} ${pocet(n, 'tenisový tréner', 'tenisoví tréneri', 'tenisových trénerov')} v meste ${mesto.name}. Vyber si podľa hodnotenia a ceny, rezervuj termín v appke Matchball a plať kartou až po potvrdení.`
-    : 'Tenisoví tréneri, ktorých si vieš rezervovať cez appku Matchball. Vyber si podľa mesta, hodnotenia a ceny — platíš kartou až po potvrdení termínu.';
+  const sportSlug = sport ? SPORT_SLUG[sport] : null;
+  const sportNazov = sport ? SPORT_NAZOV[sport] : null;
+  const sportGenitiv = sport ? SPORT_GENITIV[sport] : null;
+  // Predpona `/treneri/<sport>/…` sa drží aj pri odkazoch na iné mestá a pri
+  // odchode z mesta — filter na šport sa tak neresetuje.
+  const predpona = sportSlug ? `/treneri/${sportSlug}` : '/treneri';
+  const url = jeMesto ? `${WEB_ORIGIN}${predpona}/${mesto.slug}/` : `${WEB_ORIGIN}${predpona}/`;
+  const nadpis = sport
+    ? (jeMesto ? `Tréneri ${sportGenitiv} — ${mesto.name}` : `Tréneri ${sportGenitiv}`)
+    : (jeMesto ? `Tréneri — ${mesto.name}` : 'Tréneri');
+  const title = sport
+    ? (jeMesto ? `Tréneri ${sportGenitiv} ${mesto.name} | Matchball` : `Tréneri ${sportGenitiv} na Slovensku a v Česku | Matchball`)
+    : (jeMesto ? `Tréneri ${mesto.name} | Matchball` : 'Tréneri na Slovensku a v Česku | Matchball');
+  const popis = sport
+    ? (jeMesto
+      ? `${n} ${pocet(n, `tréner ${sportGenitiv}`, `tréneri ${sportGenitiv}`, `trénerov ${sportGenitiv}`)} v meste ${mesto.name}. Vyber si podľa hodnotenia a ceny, rezervuj termín v appke Matchball a plať kartou až po potvrdení.`
+      : `Tréneri ${sportGenitiv}, ktorých si vieš rezervovať cez appku Matchball. Vyber si podľa mesta, hodnotenia a ceny — platíš kartou až po potvrdení termínu.`)
+    : (jeMesto
+      ? `${n} ${pocet(n, 'tréner', 'tréneri', 'trénerov')} v meste ${mesto.name}. Vyber si podľa hodnotenia a ceny, rezervuj termín v appke Matchball a plať kartou až po potvrdení.`
+      : 'Tréneri, ktorých si vieš rezervovať cez appku Matchball. Vyber si podľa mesta, hodnotenia a ceny — platíš kartou až po potvrdení termínu.');
 
   const ld = {
     '@context': 'https://schema.org',
@@ -1468,8 +1574,33 @@ function strankaZoznamu({ mesto, coaches, ostatneMesta }) {
 
   const mestaPills = ostatneMesta
     .filter((m) => !jeMesto || m.slug !== mesto.slug)
-    .map((m) => `<a class="city-pill" href="/treneri/${m.slug}/">${esc(m.name)} <span>${m.count}</span></a>`)
+    .map((m) => `<a class="city-pill" href="${predpona}/${m.slug}/">${esc(m.name)} <span>${m.count}</span></a>`)
     .join('\n        ');
+
+  // Chipy športov vo filtri — len tie, čo majú v tomto rozsahu (meste alebo
+  // celkovo) aspoň jedného trénera. Keď je v rozsahu len jeden šport, nemá
+  // zmysel z neho robiť filter — zostane statický štítok ako predtým.
+  const sportChipy = sportyVScope.length <= 1
+    ? `<span class="fpill static">${esc(SPORT_NAZOV[sportyVScope[0] || 'tennis'])}</span>`
+    : [
+      `<a class="fpill" href="${jeMesto ? `/treneri/${mesto.slug}/` : '/treneri/'}" aria-pressed="${sport ? 'false' : 'true'}">Všetky športy</a>`,
+      ...sportyVScope.map((k) => {
+        const href = jeMesto ? `/treneri/${SPORT_SLUG[k]}/${mesto.slug}/` : `/treneri/${SPORT_SLUG[k]}/`;
+        return `<a class="fpill" href="${href}" aria-pressed="${sport === k ? 'true' : 'false'}">${SPORT_IKONA[k]}${esc(SPORT_NAZOV[k])}</a>`;
+      }),
+    ].join('\n    ');
+
+  const crumbCasti = ['<a href="/treneri/">Tréneri</a>'];
+  if (sport) {
+    crumbCasti.push('<span aria-hidden="true" style="opacity:.45">›</span>');
+    crumbCasti.push(jeMesto
+      ? `<a href="/treneri/${sportSlug}/">${esc(sportNazov)}</a>`
+      : `<span style="color:var(--fg);font-weight:600">${esc(sportNazov)}</span>`);
+  }
+  if (jeMesto) {
+    crumbCasti.push('<span aria-hidden="true" style="opacity:.45">›</span>');
+    crumbCasti.push(`<span style="color:var(--fg);font-weight:600">${esc(mesto.name)}</span>`);
+  }
 
   return `<!doctype html>
 <html lang="sk">
@@ -1499,20 +1630,20 @@ ${CSS_ZOZNAM}
 ${hlavicka('treneri')}
 
 <main id="obsah" class="wrap">
-  ${jeMesto ? `<nav class="crumbs" aria-label="Drobčeková navigácia" style="display:flex;gap:8px;color:var(--muted);font-size:.86rem;margin-top:8px">
-    <a href="/treneri/">Tréneri</a><span aria-hidden="true" style="opacity:.45">›</span><span style="color:var(--fg);font-weight:600">${esc(mesto.name)}</span>
+  ${jeMesto || sport ? `<nav class="crumbs" aria-label="Drobčeková navigácia" style="display:flex;gap:8px;color:var(--muted);font-size:.86rem;margin-top:8px">
+    ${crumbCasti.join('\n    ')}
   </nav>` : ''}
   <header class="sec-head">
-    <p class="eyebrow">Tenisoví tréneri</p>
+    <p class="eyebrow">Tréneri</p>
     <h1>${esc(nadpis)}</h1>
     <p class="lead">${esc(popis)}</p>
   </header>
 
   ${n > 0 ? `<div class="filters">
     ${jeMesto
-    ? `<a class="fpill" href="/treneri/">${IKONA.pin}${esc(mesto.name)}</a>`
+    ? `<a class="fpill" href="${predpona}/">${IKONA.pin}${esc(mesto.name)}</a>`
     : `<span class="fpill static">${IKONA.pin}Všetky mestá</span>`}
-    <span class="fpill static">Tenis</span>
+    ${sportChipy}
     <button class="fpill" type="button" id="len-overeni" aria-pressed="false"><span class="switch" aria-hidden="true"></span>Len overení</button>
     <span class="spacer"></span>
     <label class="sort-wrap">Zoradiť
@@ -1704,8 +1835,12 @@ function zmazStareStranky(zive) {
   return zmazane;
 }
 
-function zmazStareMesta(zive) {
-  const dir = path.join(ROOT, 'treneri');
+/**
+ * Zmaže podpriečinky `dir`, ktoré nie sú v `zive` — použité na `treneri/`
+ * (mestá aj adresáre športov ležia na tej istej úrovni) aj na `treneri/<sport>/`
+ * (mestá toho športu).
+ */
+function zmazNezive(dir, zive) {
   if (!fs.existsSync(dir)) return [];
   const zmazane = [];
   for (const meno of fs.readdirSync(dir).sort()) {
@@ -1748,6 +1883,11 @@ async function main() {
   const platni = treneri.filter((c) => c && c.slug && /^[a-z0-9][a-z0-9-]*$/.test(String(c.slug)) && c.name && c.city);
   const preskocene = treneri.length - platni.length;
   if (preskocene > 0) console.warn(`Preskočených ${preskocene} trénerov bez slugu / mena / mesta.`);
+
+  // Bez `sports` (starí tréneri spred migrácie 336, alebo neznáme kódy) je
+  // jediný šport tenis — `sportyOf` túto normalizáciu robí pri každom čítaní,
+  // tu sa dorába len samotné pole na objekte, nech ho vidí aj `coach.sports`.
+  for (const c of platni) c.sports = sportyOf(c);
 
   // Deterministické poradie: overení hore, potom hodnotenie, počet hodnotení
   // a nakoniec meno. `localeCompare` s pevným locale, nie podľa prostredia.
@@ -1808,6 +1948,26 @@ async function main() {
     .filter((m) => m.count > 0)
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'sk'));
 
+  // Športy prítomné v jednotlivých mestách a celkovo — pre chipy vo filtri
+  // a pre to, ktoré `treneri/<sport>/` stránky vôbec dáva zmysel generovať.
+  const sportyPoMeste = new Map();
+  for (const coach of platni) {
+    if (!sportyPoMeste.has(coach.mestoSlug)) sportyPoMeste.set(coach.mestoSlug, new Set());
+    for (const s of coach.sports) sportyPoMeste.get(coach.mestoSlug).add(s);
+  }
+  const sportyGlobalne = SPORT_ORDER.filter((s) => platni.some((c) => c.sports.includes(s)));
+
+  // Tréneri a mestá pre každý šport — `treneri/<sport>/` a `treneri/<sport>/<mesto>/`.
+  const sportMestaMap = new Map(); // sport -> Map(citySlug -> {slug, name, coaches})
+  for (const coach of platni) {
+    for (const s of coach.sports) {
+      if (!sportMestaMap.has(s)) sportMestaMap.set(s, new Map());
+      const m = sportMestaMap.get(s);
+      if (!m.has(coach.mestoSlug)) m.set(coach.mestoSlug, { slug: coach.mestoSlug, name: coach.city, coaches: [] });
+      m.get(coach.mestoSlug).coaches.push(coach);
+    }
+  }
+
   // ── Generovanie ──────────────────────────────────────────────────────────
   const ctx = { appStore: APP_STORE, playStore: PLAY_STORE };
   let zmenene = 0;
@@ -1819,11 +1979,45 @@ async function main() {
 
   const vsetkyMesta = mesta.map(({ slug, name, count }) => ({ slug, name, count }));
   if (zapis(path.join('treneri', 'index.html'),
-    strankaZoznamu({ mesto: null, coaches: platni, ostatneMesta: vsetkyMesta }))) zmenene++;
+    strankaZoznamu({
+      mesto: null, sport: null, coaches: platni, ostatneMesta: vsetkyMesta, sportyVScope: sportyGlobalne,
+    }))) zmenene++;
 
   for (const m of mesta) {
+    const sportyMesta = SPORT_ORDER.filter((s) => sportyPoMeste.get(m.slug)?.has(s));
     if (zapis(path.join('treneri', m.slug, 'index.html'),
-      strankaZoznamu({ mesto: m, coaches: m.coaches, ostatneMesta: vsetkyMesta }))) zmenene++;
+      strankaZoznamu({
+        mesto: m, sport: null, coaches: m.coaches, ostatneMesta: vsetkyMesta, sportyVScope: sportyMesta,
+      }))) zmenene++;
+  }
+
+  // Adresáre podľa športu — len tie, kde je aspoň jeden tréner.
+  const sportyStranky = []; // { sport, slug, mesta: [{slug,name,count}] } — pre sitemapu a upratovanie
+  for (const sport of sportyGlobalne) {
+    const cityMap = sportMestaMap.get(sport);
+    const sportCoaches = platni.filter((c) => c.sports.includes(sport));
+    const sportMesta = [...cityMap.values()]
+      .map((m) => ({ ...m, count: m.coaches.length }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'sk'));
+    const sportSlug = SPORT_SLUG[sport];
+    sportyStranky.push({ sport, slug: sportSlug, mesta: sportMesta.map(({ slug, name, count }) => ({ slug, name, count })) });
+
+    if (zapis(path.join('treneri', sportSlug, 'index.html'),
+      strankaZoznamu({
+        mesto: null, sport, coaches: sportCoaches,
+        ostatneMesta: sportMesta.map(({ slug, name, count }) => ({ slug, name, count })),
+        sportyVScope: sportyGlobalne,
+      }))) zmenene++;
+
+    for (const m of sportMesta) {
+      const sportyVMesteScope = SPORT_ORDER.filter((s) => sportyPoMeste.get(m.slug)?.has(s));
+      if (zapis(path.join('treneri', sportSlug, m.slug, 'index.html'),
+        strankaZoznamu({
+          mesto: m, sport, coaches: m.coaches,
+          ostatneMesta: sportMesta.map(({ slug, name, count }) => ({ slug, name, count })),
+          sportyVScope: sportyVMesteScope,
+        }))) zmenene++;
+    }
   }
 
   // ── Sitemap ──────────────────────────────────────────────────────────────
@@ -1843,6 +2037,9 @@ ${[
     polozka(`${WEB_ORIGIN}/`, najnovsi, '1.0'),
     polozka(`${WEB_ORIGIN}/treneri/`, najnovsi, '0.9'),
     ...mesta.map((m) => polozka(`${WEB_ORIGIN}/treneri/${m.slug}/`, najnovsi, '0.8')),
+    ...sportyStranky.map((s) => polozka(`${WEB_ORIGIN}/treneri/${s.slug}/`, najnovsi, '0.75')),
+    ...sportyStranky.flatMap((s) => s.mesta.map((m) =>
+      polozka(`${WEB_ORIGIN}/treneri/${s.slug}/${m.slug}/`, najnovsi, '0.7'))),
     ...platni.map((c) => polozka(`${WEB_ORIGIN}/t/${c.slug}/`, den(c.updated_at), '0.7')),
   ].join('\n')}
 </urlset>
@@ -1876,7 +2073,15 @@ ${[
 
   // ── Upratovanie ──────────────────────────────────────────────────────────
   const zmazaniTreneri = zmazStareStranky(zive);
-  const zmazaneMesta = zmazStareMesta(new Set(mesta.map((m) => m.slug)));
+  // `treneri/` obsahuje mestá aj adresáre športov na tej istej úrovni —
+  // priečinok, ktorý nie je ani jedno z toho (šport bez trénera, mesto bez
+  // trénera), sa zmaže tu; podmestá vnútri žijúcich športov sa upracú zvlášť.
+  const ziveVTreneri = new Set([...mesta.map((m) => m.slug), ...sportyStranky.map((s) => s.slug)]);
+  const zmazaneMesta = zmazNezive(path.join(ROOT, 'treneri'), ziveVTreneri);
+  for (const s of sportyStranky) {
+    const zmazane = zmazNezive(path.join(ROOT, 'treneri', s.slug), new Set(s.mesta.map((m) => m.slug)));
+    zmazaneMesta.push(...zmazane.map((m) => `${s.slug}/${m}`));
+  }
 
   console.log(`Tréneri: ${platni.length} · mestá: ${mesta.length} · zapísaných súborov: ${zmenene}`);
   if (zmazaniTreneri.length) console.log(`Zmazané stránky trénerov: ${zmazaniTreneri.join(', ')}`);

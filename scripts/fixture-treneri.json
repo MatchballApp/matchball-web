@@ -9,6 +9,7 @@
     "bio": "Bývalá profesionálna hráčka, na rebríčku WTA som to dotiahla na 873. miesto. Dnes trénujem hlavne deti od šiestich rokov: učím ich držať raketu, čítať loptu a hlavne baviť sa tenisom. Beriem aj dospelých, ktorí chcú spraviť poriadok v technike. Mám 24 rokov a trénujem v Košiciach na antuke aj v hale.",
     "hourly_rate": 18.76,
     "currency": "EUR",
+    "sports": ["tennis", "badminton"],
     "pricing": {
       "1": 18.76,
       "2": 20.43,
@@ -82,6 +83,7 @@
     "bio": "Kondičný aj technický tréning pre dospelých rekreačných hráčov.",
     "hourly_rate": 14.2,
     "currency": "EUR",
+    "sports": ["table_tennis"],
     "pricing": { "1": 14.2, "2": 16.5 },
     "specializations": ["adults", "fitness"],
     "coaching_languages": ["sk"],
