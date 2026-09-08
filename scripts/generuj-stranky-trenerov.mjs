@@ -41,18 +41,15 @@ const BUCKET = 'profile-photos';
 // ═══════════════════════════════════════════════════════════════════════════
 //  CENY — prevzaté 1:1 zo `src/utils/pricing.ts` v repe appky.
 //
-//  Nie je to duplicita z lenivosti: web musí ukázať PRESNE tú cenu, akú hráč
-//  uvidí v appke a akú mu server strhne (`expected_booking_price`). Keby sa
-//  web počítal „približne", stránka by sľubovala inú sumu než rezervácia —
-//  a to je horšie než cenu neukázať vôbec.
+//  Od migrácie 340 (Matchball je zadarmo) je `hourly_rate`/`pricing` už PRIAMO
+//  cena, akú hráč zaplatí — Matchball si z nej nič neberie, takže sa web nemá
+//  čo prepočítavať. Poplatok za platbu kartou (1,5 % + 0,25 €/6 Kč) sa dopočíta
+//  až v appke pri rezervácii a na cenníku sa neukazuje.
 //
 //  Pri každej zmene v `pricing.ts` treba prepísať aj toto. Zdroj:
-//  Matchball/src/utils/pricing.ts (PLATFORM_PCT … minTierRate).
+//  Matchball/src/utils/pricing.ts (GROUP_TIERS … minTierRate).
 // ═══════════════════════════════════════════════════════════════════════════
 
-const PLATFORM_PCT = 0.05;
-const PLATFORM_FIXED = { EUR: 0.30, CZK: 7.50 };
-const SPLIT_PAYMENT_COST = { EUR: 0.25, CZK: 6.00 };
 const GROUP_TIERS = [1, 2, 3, 4];
 const OPEN_TIER = 4;
 const MAX_GROUP_PLAYERS = 12;
@@ -67,50 +64,6 @@ const DAY_MINUTES = 24 * 60;
 function round2(n) {
   const scaled = Number((Math.abs(n) * 100).toPrecision(12));
   return Math.sign(n) * Math.round(scaled) / 100;
-}
-
-function fixedFor(currency) {
-  return PLATFORM_FIXED[currency] ?? PLATFORM_FIXED.EUR;
-}
-
-function serviceFee(coachPrice, currency = 'EUR', courtFee = 0) {
-  if (coachPrice <= 0) return 0;
-  return round2(PLATFORM_PCT * (coachPrice + Math.max(courtFee, 0)) + fixedFor(currency));
-}
-
-// Každý účastník platí vlastnou kartou, takže pevná časť poplatku sa účtuje za
-// KAŽDÚ platbu — násobí sa počtom hláv, nedelí sa medzi ne.
-function groupServiceFee(groupCoachTotal, players, currency = 'EUR', courtFee = 0) {
-  if (groupCoachTotal <= 0 || players <= 0) return 0;
-  const extra = SPLIT_PAYMENT_COST[currency] ?? SPLIT_PAYMENT_COST.EUR;
-  return round2(PLATFORM_PCT * (groupCoachTotal + Math.max(courtFee, 0))
-    + fixedFor(currency) + extra * (players - 1));
-}
-
-function customerTotal(coachPrice, currency = 'EUR', courtFee = 0) {
-  const court = Math.max(courtFee, 0);
-  return round2(coachPrice + court + serviceFee(coachPrice, currency, court));
-}
-
-function groupCustomerTotal(groupCoachTotal, players, currency = 'EUR', courtFee = 0) {
-  const court = Math.max(courtFee, 0);
-  return round2(groupCoachTotal + court + groupServiceFee(groupCoachTotal, players, currency, court));
-}
-
-function groupCoachTotalFromCustomerTotal(total, players, currency = 'EUR') {
-  const extra = (SPLIT_PAYMENT_COST[currency] ?? SPLIT_PAYMENT_COST.EUR) * Math.max(players - 1, 0);
-  const raw = (total - fixedFor(currency) - extra) / (1 + PLATFORM_PCT);
-  if (raw <= 0) return 0;
-  let rate = Math.floor(raw * 100) / 100;
-  for (let i = 0; i < 3 && groupCustomerTotal(round2(rate + 0.01), players, currency) <= total; i++) {
-    rate = round2(rate + 0.01);
-  }
-  return rate;
-}
-
-// Jeden platiaci je skupina o jednom. (pricing.ts:coachPriceFromCustomerTotal)
-function coachPriceFromCustomerTotal(total, currency = 'EUR') {
-  return groupCoachTotalFromCustomerTotal(total, 1, currency);
 }
 
 function numAt(map, key) {
@@ -160,13 +113,6 @@ function getTiers(pricing, hourlyRate) {
     }
   }
   return tiers;
-}
-
-// Koľko z toho zaplatí JEDEN hráč. Delí sa CELÁ suma vrátane skupinového
-// poplatku — inak by cenník sľuboval menej, než sa naozaj strhne.
-function customerPerPerson(groupTotal, players, currency = 'EUR') {
-  if (players <= 0) return customerTotal(groupTotal, currency);
-  return round2(groupCustomerTotal(groupTotal, players, currency) / players);
 }
 
 function isStepMinute(v) {
@@ -923,9 +869,12 @@ body{padding-bottom:92px}
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Cenník pre HRÁČA. `pricing` drží podiel TRÉNERA, hráč platí ten plus poplatok
- * — preto tie prevody. Pásmo 4 je otvorené („štyria a viac"), takže sa jeho
- * celok uvádza ako „od".
+ * Cenník pre HRÁČA. Od 340 (Matchball je zadarmo) je `pricing`/`hourly_rate`
+ * priamo cena, akú hráč zaplatí pri priamej platbe (QR / hotovosť) — Matchball
+ * si z nej nič neberie, tak sa ukazuje bez akéhokoľvek prepočtu. Poplatok za
+ * platbu kartou (1,5 % + 0,25 €/6 Kč) sa dopočíta až pri rezervácii v appke,
+ * na cenníku sa nezobrazuje. Pásmo 4 je otvorené („štyria a viac"), takže sa
+ * jeho celok uvádza ako „od".
  */
 function cennik(coach) {
   const cur = coach.currency === 'CZK' ? 'CZK' : 'EUR';
@@ -936,12 +885,12 @@ function cennik(coach) {
       riadky.push({
         lab: 'Individuálny tréning',
         sub: 'len ty a tréner',
-        val: suma(customerTotal(t.price, cur), cur),
+        val: suma(t.price, cur),
         small: '',
       });
     } else {
-      const naOsobu = customerPerPerson(t.price, t.players, cur);
-      const spolu = groupCustomerTotal(t.price, t.players, cur);
+      const naOsobu = round2(t.price / t.players);
+      const spolu = t.price;
       const otvorene = t.players === OPEN_TIER;
       riadky.push({
         lab: otvorene ? `Skupina ${OPEN_TIER}+` : `${t.players} hráči`,
@@ -952,9 +901,9 @@ function cennik(coach) {
     }
   }
 
-  // Pásma sa počítajú z INDIVIDUÁLNEJ sadzby trénera a až potom sa k nim
-  // pripočíta poplatok — presne ako `CoachDetailScreen` v appke
-  // (`customerTotal(applyBandPct(soloRate, pct))`).
+  // Pásma sa počítajú z INDIVIDUÁLNEJ sadzby trénera — presne ako
+  // `CoachDetailScreen` v appke (`applyBandPct(soloRate, pct)`), len bez
+  // poplatku, ktorý sa už do zobrazenej ceny nepočíta.
   const soloRate = groupRateFor(coach.pricing, coach.hourly_rate, 1);
   const bands = timeBandsOf(coach.pricing);
   const pasma = [];
@@ -965,7 +914,7 @@ function cennik(coach) {
         key: b.key,
         nazov: PASMA[b.key] ?? PASMA.custom,
         cas: `${cas(b.start_min)}–${cas(b.end_min)}`,
-        val: suma(customerTotal(applyBandPct(soloRate, b.pct), cur), cur),
+        val: suma(applyBandPct(soloRate, b.pct), cur),
         zlava: b.pct < 0,
       });
     }
@@ -975,7 +924,7 @@ function cennik(coach) {
   const min = minTierRate(coach.pricing, coach.hourly_rate);
   const zaklad = groupRateFor(coach.pricing, coach.hourly_rate, 1);
   const lacnejsiePasmo = min > 0 && min < zaklad;
-  const odCena = customerTotal(lacnejsiePasmo ? min : zaklad, cur);
+  const odCena = lacnejsiePasmo ? min : zaklad;
 
   return { cur, riadky, pasma, odCena, lacnejsiePasmo, vikendZaklad: bands ? bands.weekend === 'base' : false };
 }
@@ -1168,11 +1117,12 @@ ${hlavicka('treneri')}
     <div class="sec">
       <div class="price">
         <h3>Cenník</h3>
-        <p class="cap">za hodinu, poplatok je v cene</p>
+        <p class="cap">za hodinu</p>
         ${c.riadky.map((r) => `<div class="prow">
           <div><div class="lab">${esc(r.lab)}</div><div class="sub2">${esc(r.sub)}</div></div>
           <div class="val">${r.val}${r.small ? `<small>${r.small}</small>` : ''}</div>
         </div>`).join('\n        ')}
+        <p class="foot" style="text-align:left">Matchball si z ceny nič neberie. Pri platbe kartou v appke zaplatíš navyše len poplatok platobnej brány (1,5 % + 0,25 €); QR prevodom alebo v hotovosti trénerovi presne túto sumu.</p>
         ${c.pasma.length ? `<hr>
         ${c.pasma.map((p) => `<div class="band">
           <span class="ico">${p.zlava ? IKONA.slnko : IKONA.mesiac}</span>
@@ -1181,7 +1131,7 @@ ${hlavicka('treneri')}
         </div>`).join('\n        ')}
         ${c.vikendZaklad ? '<p class="foot" style="text-align:left;margin-top:8px">Cez víkend platí základná cena.</p>' : ''}` : ''}
         <button class="btn btn-green" type="button" data-otvor="rezervovat">Rezervovať tréning</button>
-        <p class="foot">${esc(kurt)} · poplatok je v cene</p>
+        <p class="foot">${esc(kurt)}</p>
       </div>
     </div>
   </div>
