@@ -478,8 +478,60 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
 .reveal.in{opacity:1;transform:none}
 
+/* ── Kam ďalej ──────────────────────────────────────────────
+   Dve karty hneď pod hero. Sú to dve rôzne otázky — „kto ma naučí" a
+   „s kým si zahrám" — a na každú má web vlastnú stránku. Dlaždice miest
+   medzi značkami `mesta-treneri` / `mesta-skupiny` dopĺňa nočný generátor
+   (`scripts/generuj-stranky-trenerov.mjs`), ručne sa do nich nepíše. */
+.next-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,2vw,24px)}
+.next-card{
+  position:relative;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius-xl);padding:clamp(26px,3.4vw,40px);
+  display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow-soft);
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .25s;
+}
+.next-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift);border-color:rgba(26,122,74,.28)}
+.next-card h2{font-size:clamp(1.35rem,2.4vw,1.9rem)}
+.next-card h2 a{text-decoration:none;color:inherit}
+/* Klikateľná je celá karta, ale odkaz je jeden: dlaždice miest ležia nad ním
+   a vedú každá inam. Vnorený <a> v <a> by bol neplatný. */
+.next-card h2 a::after{content:"";position:absolute;inset:0;border-radius:inherit}
+.next-card p{color:var(--muted);font-size:1.02rem;line-height:1.6}
+.next-cities{display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
+.city-chip{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;
+  background:var(--paper);border:1px solid var(--line);font-size:.9rem;font-weight:500;
+  color:var(--fg);text-decoration:none;
+  transition:border-color .25s,color .25s,background .25s;
+}
+.city-chip:hover{border-color:rgba(26,122,74,.4);color:var(--green-dark);background:#fff}
+.city-chip span{color:var(--muted);font-weight:400}
+.next-note{color:var(--muted);font-size:.92rem}
+.next-go{
+  display:inline-flex;align-items:center;gap:8px;margin-top:auto;padding-top:6px;
+  color:var(--green);font-weight:600;font-size:.98rem;
+}
+.next-go svg{transition:transform .35s var(--ease)}
+.next-card:hover .next-go svg{transform:translateX(3px)}
+/* Textové odkazy pod tlačidlami v záverečnej výzve. */
+.cta-links{
+  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 16px;
+  margin-top:22px;position:relative;font-size:.98rem;
+}
+.cta-links a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.45);
+  padding-bottom:2px;transition:border-color .25s,opacity .25s}
+.cta-links a:hover{border-color:var(--lime);opacity:.9}
+.cta-links .dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.45)}
+/* Odkaz z odstavca — v krokoch aj vo výhodách. */
+.inline-link{color:var(--green);text-decoration:none;font-weight:600;
+  border-bottom:1px solid rgba(26,122,74,.35);transition:border-color .25s}
+.inline-link:hover{border-color:var(--green)}
+.why .inline-link{color:var(--lime);border-bottom-color:rgba(201,242,78,.4)}
+.why .inline-link:hover{border-bottom-color:var(--lime)}
+
 /* ── Menšie obrazovky ───────────────────────────────────────── */
 @media (max-width:980px){
+  .next-grid{grid-template-columns:1fr}
   .hero h1{max-width:none}
   .how{grid-template-columns:1fr}
   .phone-col{position:static;order:-1;margin-bottom:8px}
@@ -530,6 +582,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
     </a>
     <div class="nav-links">
       <a href="/treneri/">Tréneri</a>
+      <a href="/skupiny/">Skupiny</a>
       <a href="#ako">Ako to funguje</a>
       <a href="#preco">Výhody</a>
       <a href="#ceny">Ceny</a>
@@ -542,6 +595,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 
 <div class="mobile-menu" id="mobileMenu">
   <a href="/treneri/">Tréneri</a>
+  <a href="/skupiny/">Skupiny</a>
   <a href="#ako">Ako to funguje</a>
   <a href="#preco">Výhody</a>
   <a href="#ceny">Ceny</a>
@@ -578,6 +632,45 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   </div>
 </header>
 
+<!-- ── Kam ďalej ────────────────────────────────────────────
+     Prvé, čo človek po hero potrebuje, nie je vysvetlenie appky, ale odpoveď
+     na svoju otázku: „kto ma naučí" alebo „s kým si zahrám". Obe majú na webe
+     vlastnú stránku, tak sem patria ako dve veľké dlaždice — a mestá pod nimi
+     dopĺňa nočný generátor, nech vedú rovno tam, kde niekto naozaj je. -->
+<section class="section" id="kam" style="padding:clamp(48px,7vw,90px) 0 0">
+  <div class="wrap">
+    <div class="next-grid reveal">
+      <div class="next-card">
+        <span class="eyebrow" style="margin-bottom:0">Tréneri</span>
+        <h2><a href="/treneri/">Nájdi trénera vo svojom meste</a></h2>
+        <p>Cenník, kurt aj hodnotenia od hráčov vidíš vopred. Termín si rezervuješ v appke a platíš až po potvrdení.</p>
+        <div class="next-cities">
+          <!-- mesta-treneri:start -->
+          <a class="city-chip" href="/treneri/kosice/">Košice <span>1</span></a>
+          <!-- mesta-treneri:end -->
+        </div>
+        <span class="next-go">Pozrieť všetkých trénerov
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </div>
+
+      <div class="next-card">
+        <span class="eyebrow" style="margin-bottom:0">Skupiny</span>
+        <h2><a href="/skupiny/">Nájdi skupinu vo svojom meste</a></h2>
+        <p>Partie, ktoré hrávajú pravidelne a berú nových hráčov. Pozri si deň, čas a úroveň — a pridaj sa cez appku.</p>
+        <div class="next-cities">
+          <!-- mesta-skupiny:start -->
+          <p class="next-note">Prvé skupiny vznikajú v appke.</p>
+          <!-- mesta-skupiny:end -->
+        </div>
+        <span class="next-go">Pozrieť všetky skupiny
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── Ako to funguje (taby) ────────────────────────────────── -->
 <section class="section" id="ako">
   <div class="wrap">
@@ -603,7 +696,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
               <div class="no">01</div>
               <div>
                 <h3>Nájdi trénera vo svojom okolí</h3>
-                <p>Hľadaj podľa mesta, ceny a hodnotení. V profile trénera vidíš kurt, cenník aj voľné termíny.</p>
+                <p>Hľadaj podľa mesta, ceny a hodnotení. V profile trénera vidíš kurt, cenník aj voľné termíny. Chceš len zahrať? Pozri si <a class="inline-link" href="/skupiny/">skupiny vo svojom meste</a>.</p>
               </div>
             </article>
             <article class="step reveal">
@@ -718,6 +811,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         <div>
           <h3>Vyber si trénera podľa toho, čo o ňom povedali ostatní</h3>
           <p>Nie každý tréner ti sadne na prvýkrát. V Matchballe si prejdeš trénerov vo svojom meste, prečítaš si hodnotenia od ľudí, ktorí u nich naozaj trénovali, a skúsiš viacerých — kým nenájdeš toho svojho.</p>
+          <p style="margin-top:14px"><a class="inline-link" href="/treneri/">Pozri si trénerov vo svojom meste</a> — profily sú verejné, appku na to nepotrebuješ.</p>
           <ul class="why-list">
             <li>Tréneri v tvojom meste s hodnotením od hráčov</li>
             <li>Voľné hodiny vidíš v jeho kalendári a rezervuješ na pár ťuknutí</li>
@@ -870,6 +964,13 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       </a>
     </div>
 
+    <!-- Kto ešte appku sťahovať nechce, si vie oboje pozrieť aj na webe. -->
+    <p class="cta-links">
+      <a href="/treneri/">Pozrieť trénerov</a>
+      <span class="dot" aria-hidden="true"></span>
+      <a href="/skupiny/">Pozrieť skupiny</a>
+    </p>
+
     <!-- QR kódy. Stránku si ľudia otvárajú aj na počítači, kde je tlačidlo do
          obchodu na nič — telefón ho namieri a má appku. Kódy sú vykreslené
          priamo v HTML ako cesta, nie obrázok z cudzej služby: nič sa
@@ -906,6 +1007,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         <h4>Stránka</h4>
         <div class="foot-links">
           <a href="/treneri/">Tréneri</a>
+          <a href="/skupiny/">Skupiny</a>
           <a href="#ako">Ako to funguje</a>
           <a href="#preco">Výhody</a>
           <a href="#ceny">Ceny</a>

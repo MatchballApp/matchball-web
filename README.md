@@ -10,10 +10,11 @@ Dôvod: ten istý text musí byť v aplikácii aj na webe. Keby sa udržiavali
 zvlášť, po prvej zmene by sa rozišli — a rozpor medzi tým, čo sľubujeme
 na webe a čo v aplikácii, je pri kontrole to najhoršie, čo môže nastať.
 
-## Stránky trénerov (`t/`, `treneri/`)
+## Stránky trénerov a skupín (`t/`, `treneri/`, `skupiny/`)
 
-Verejná stránka trénera na `matchballapp.com/t/<slug>` a adresár na
-`matchballapp.com/treneri/`. **Tieto priečinky neupravuj ručne** — generujú sa
+Verejná stránka trénera na `matchballapp.com/t/<slug>`, adresár na
+`matchballapp.com/treneri/` a zoznam sparingových skupín na
+`matchballapp.com/skupiny/`. **Tieto priečinky neupravuj ručne** — generujú sa
 skriptom a najbližší nočný beh každú ručnú zmenu prepíše.
 
 ### Čo generátor robí
@@ -25,14 +26,27 @@ skriptom a najbližší nočný beh každú ručnú zmenu prepíše.
 2. Stiahne fotky z privátneho bucketu `profile-photos` do `t/<slug>/foto.jpg`
    a `t/<slug>/r1.jpg`… Sťahuje len chýbajúce alebo staršie než `updated_at`
    trénera; kto fotku nemá, dostane logo v krúžku.
-3. Vygeneruje `t/<slug>/index.html`, `treneri/index.html`,
-   `treneri/<mesto>/index.html`, `sitemap.xml`, `.nojekyll` a `.well-known/`.
-4. Zmaže `t/<slug>` trénerov, ktorí už v dátach nie sú (stránku si vypli).
-   Mimo `t/` a `treneri/` nemaže nič.
+3. Zavolá RPC `public_sparring_groups` (migrácia 349) — verejné sparingové
+   skupiny. Keď funkcia ešte nie je nasadená alebo zlyhá, beh POKRAČUJE
+   a zoznam skupín ostane prázdny; stránky trénerov to neovplyvní.
+4. Vygeneruje `t/<slug>/index.html`, `treneri/index.html`,
+   `treneri/<mesto>/index.html`, `skupiny/index.html`,
+   `skupiny/<mesto>/index.html`, `sitemap.xml`, `.nojekyll` a `.well-known/`,
+   a doplní dlaždice miest na hlavnej stránke (bloky medzi značkami
+   `<!-- mesta-treneri:start -->` a `<!-- mesta-skupiny:start -->`
+   v `index.html`; zvyšok `index.html` sa nedotýka).
+5. Zmaže `t/<slug>` trénerov, ktorí už v dátach nie sú (stránku si vypli),
+   a mestá bez skupín v `skupiny/`. Mimo `t/`, `treneri/` a `skupiny/`
+   nemaže nič.
 
 Ceny sú prepísané 1:1 zo `src/utils/pricing.ts` v repe appky, aby stránka
 sľubovala presne tú sumu, akú hráč zaplatí v appke. **Pri každej zmene cenníkovej
 logiky v appke treba prepísať aj hlavičku toho skriptu.**
+
+Maskoti skupín v `avatary/` sú zmenšené kópie `src/assets/avatars/` z repa
+appky (224 px, JPEG). Generátor ich nesťahuje — sú v repe natrvalo a odkazuje
+sa na ne podľa `avatar_id`. Keď v appke pribudne nový maskot, treba jeho
+obrázok doniesť sem, inak karta skupiny ukáže logo.
 
 QR kód sa kreslí pri generovaní (`scripts/qrcode.js`, kópia balíka
 `qrcode-generator`, MIT). Zámerne, nie cez cudziu QR službu: kto si otvorí

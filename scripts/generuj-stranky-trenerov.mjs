@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 //
-// Generátor verejných stránok trénerov (matchballapp.com/t/<slug>).
+// Generátor verejných stránok trénerov (matchballapp.com/t/<slug>) a zoznamu
+// sparingových skupín (matchballapp.com/skupiny/).
 //
 // Beží v GitHub Action raz denne: vytiahne trénerov zo Supabase, stiahne fotky
 // z privátneho bucketu a vygeneruje statické HTML, ktoré GitHub Pages servíruje.
+//
+// Skupiny (migrácia 349) sú druhý, nezávislý zdroj: keď ich RPC nie je
+// nasadené alebo zlyhá, stránky trénerov sa vygenerujú tak či tak a zoznam
+// skupín zostane prázdny — pozri `nacitajSkupiny`.
 //
 // Spustenie ručne:
 //   SUPABASE_URL=... SUPABASE_SERVICE_KEY=... node scripts/generuj-stranky-trenerov.mjs
@@ -337,6 +342,86 @@ function sportPillHtml(kod, trieda) {
   return `<span class="${trieda}">${SPORT_IKONA[kod] || ''}${esc(SPORT_NAZOV[kod] || kod)}</span>`;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  Sparingové skupiny — texty (migrácia 349, `public_sparring_groups()`)
+//
+//  Skupina nie je inzerát trénera: von ide len to, čo vydá RPC — názov, šport,
+//  mesto, miesto, kedy sa hráva, koľko je miest, úroveň, krátka upútavka a
+//  organizátor krstným menom. O peniazoch skupín web nehovorí vôbec (349).
+// ═══════════════════════════════════════════════════════════════════════════
+
+// sk.json: sparring.level_short (množné číslo, malými — do vety sa prvé písmeno
+// zväčší). Rovnaké slová ako v appke, aby sa úroveň nikde nevolala inak.
+const UROVNE = {
+  beginner: 'začiatočníci',
+  intermediate: 'mierne pokročilí',
+  advanced: 'pokročilí',
+  competitive: 'turnajoví',
+};
+
+const UROVEN_PORADIE = ['beginner', 'intermediate', 'advanced', 'competitive'];
+
+// ISO deň (1 = pondelok … 7 = nedeľa), rovnako ako `recurrence.weekday` (342).
+const DNI = ['', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota', 'Nedeľa'];
+
+/**
+ * Úroveň skupiny jednou vetou: „Všetky úrovne", „Pokročilí" alebo
+ * „Mierne pokročilí – pokročilí".
+ *
+ * Keď je vyplnená len jedna hranica, druhá je koniec stupnice — skupina
+ * „od pokročilých" je otvorená aj turnajovým, nie len pokročilým.
+ */
+function urovenText(min, max) {
+  const od = UROVEN_PORADIE.indexOf(String(min ?? ''));
+  const doo = UROVEN_PORADIE.indexOf(String(max ?? ''));
+  if (od < 0 && doo < 0) return 'Všetky úrovne';
+  const a = od < 0 ? 0 : od;
+  const b = doo < 0 ? UROVEN_PORADIE.length - 1 : doo;
+  const zdola = Math.min(a, b);
+  const zhora = Math.max(a, b);
+  if (zdola === 0 && zhora === UROVEN_PORADIE.length - 1) return 'Všetky úrovne';
+  if (zdola === zhora) return velkePismeno(UROVNE[UROVEN_PORADIE[zdola]]);
+  return `${velkePismeno(UROVNE[UROVEN_PORADIE[zdola]])} – ${UROVNE[UROVEN_PORADIE[zhora]]}`;
+}
+
+/**
+ * Kedy sa hráva: „Nedeľa 18:00–20:00".
+ *
+ * Minúty v `recurrence` sú nástenný čas na kurte (Europe/Bratislava), preto sa
+ * tu nič neprepočítava cez `Date` — rovnaká úvaha ako v appke
+ * (`src/utils/sparringRecurrence.ts`). Jednorazový termín (`type:"once"`)
+ * a neznámy tvar vrátia prázdny reťazec a riadok sa jednoducho nevykreslí:
+ * dátum jedného stretnutia by na stránke, ktorá sa prepisuje raz za noc,
+ * zostal visieť aj po ňom.
+ */
+function kedyText(recurrence) {
+  const r = recurrence && typeof recurrence === 'object' ? recurrence : null;
+  if (!r || r.type !== 'weekly') return '';
+  const den = DNI[Number(r.weekday)] || '';
+  const od = Number(r.start_min);
+  const doo = Number(r.end_min);
+  if (!den || !Number.isFinite(od) || !Number.isFinite(doo)) return '';
+  return `${den} ${cas(od)}–${cas(doo)}`;
+}
+
+/** Slovenské skloňovanie počtu skupín. */
+function pocetSkupin(n) {
+  return `${n} ${pocet(n, 'skupina', 'skupiny', 'skupín')}`;
+}
+
+/**
+ * Maskot skupiny. `avatar_id` je názov obrázka zo zbierky maskotov appky
+ * (`src/assets/avatars/` v repe appky, zmenšená kópia leží v `avatary/`);
+ * keď skupina svojho nemá, berie sa maskot organizátora — rovnako ako v appke
+ * (migrácia 346). Neznámy názov nekreslí nič a karta dostane značku Matchballu:
+ * cudzí reťazec z databázy sa nesmie dostať do cesty k súboru.
+ */
+function avatarSubor(id) {
+  const s = String(id ?? '').trim().toLowerCase();
+  if (!/^[a-z][a-z0-9]{0,15}$/.test(s)) return null;
+  return fs.existsSync(path.join(ROOT, 'avatary', `${s}.jpg`)) ? `/avatary/${s}.jpg` : null;
+}
+
 const MESIACE = [
   'január', 'február', 'marec', 'apríl', 'máj', 'jún',
   'júl', 'august', 'september', 'október', 'november', 'december',
@@ -508,6 +593,7 @@ function hlavicka(aktivna) {
     </a>
     <div class="nav-links">
       ${odkaz('/treneri/', 'Tréneri', aktivna === 'treneri')}
+      ${odkaz('/skupiny/', 'Skupiny', aktivna === 'skupiny')}
       ${odkaz('/#ako', 'Ako to funguje')}
       ${odkaz('/#preco', 'Výhody')}
       ${odkaz('/#ceny', 'Ceny')}
@@ -531,6 +617,7 @@ const PATICKA = `<footer>
         <h4>Stránka</h4>
         <div class="foot-links">
           <a href="/treneri/">Tréneri</a>
+          <a href="/skupiny/">Skupiny</a>
           <a href="/#ako">Ako to funguje</a>
           <a href="/#preco">Prečo Matchball</a>
           <a href="/#ceny">Ceny a platby</a>
@@ -1467,6 +1554,20 @@ const CSS_ZOZNAM = `.sec-head{padding:26px 0 26px;max-width:44rem}
 .city-pill:hover{border-color:rgba(26,122,74,.35);color:var(--green-dark)}
 .city-pill span{color:var(--muted);font-weight:400}
 
+/* Krížový odkaz medzi trénermi a skupinami. Nie je to reklama na inú stránku,
+   ale druhá polovica tej istej otázky: kto hľadá partiu, potrebuje aj trénera
+   a naopak. Preto stojí na konci zoznamu, nie nad ním. */
+.krizom{display:flex;align-items:center;gap:14px;margin-bottom:44px;padding:20px 22px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.krizom:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+.krizom .txt{flex:1 1 auto}
+.krizom .txt b{display:block;font-weight:600;font-size:1.05rem;letter-spacing:-.02em}
+.krizom .txt span{color:var(--muted);font-size:.94rem}
+.krizom .sip{flex:0 0 40px;width:40px;height:40px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;background:var(--green-soft);color:var(--green-dark)}
+.krizom .sip svg{width:18px;height:18px}
+
 .cta-dark{background:var(--ink);color:#fff;border-radius:var(--radius-xl);
   padding:34px 26px;display:flex;flex-direction:column;gap:22px;
   margin-bottom:64px;position:relative;overflow:hidden}
@@ -1490,6 +1591,14 @@ const CSS_ZOZNAM = `.sec-head{padding:26px 0 26px;max-width:44rem}
   .cta-dark-actions{display:flex;gap:12px}
   .cities-block{margin-bottom:96px}
 }`;
+
+/** Odkaz z jedného zoznamu do druhého — jedna karta, jedna veta, šípka. */
+function krizovyOdkaz(href, nadpis, popis) {
+  return `<a class="krizom" href="${href}">
+    <span class="txt"><b>${esc(nadpis)}</b><span>${esc(popis)}</span></span>
+    <span class="sip" aria-hidden="true">${IKONA.sipka}</span>
+  </a>`;
+}
 
 function kartaTrenera(coach) {
   const cur = coach.currency === 'CZK' ? 'CZK' : 'EUR';
@@ -1543,7 +1652,7 @@ function kartaTrenera(coach) {
  * `ostatneMesta` sú všetky mestá aj s počtami; na stránke mesta sa z nich to
  * aktuálne vynechá, aby odkaz neviedol sám na seba.
  */
-function strankaZoznamu({ mesto, sport, coaches, ostatneMesta, sportyVScope }) {
+function strankaZoznamu({ mesto, sport, coaches, ostatneMesta, sportyVScope, skupinyMesta }) {
   const jeMesto = !!mesto;
   const n = coaches.length;
   const sportSlug = sport ? SPORT_SLUG[sport] : null;
@@ -1680,6 +1789,12 @@ ${hlavicka('treneri')}
     </div>
   </section>` : ''}
 
+  ${krizovyOdkaz(
+    jeMesto && skupinyMesta?.has(mesto.slug) ? `/skupiny/${mesto.slug}/` : '/skupiny/',
+    jeMesto ? `Hľadáš partiu? Skupiny v meste ${mesto.name}` : 'Hľadáš partiu, nie trénera?',
+    'Sparingové skupiny hrávajú pravidelne a berú nových hráčov.',
+  )}
+
   <section class="cta-dark">
     <div class="cta-dark-text">
       <h2>Trénuješ? Buď medzi nimi.</h2>
@@ -1762,6 +1877,235 @@ const SKRIPT_ZOZNAMU = `(function(){
 })();`;
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  Skupiny — CSS a HTML
+//
+//  Zoznam sparingových skupín podľa miest. Skupina NEMÁ vlastnú stránku:
+//  RPC (349) o nej vydáva len upútavku a bez fotky, pravidiel a členov by
+//  samostatná stránka nemala čím byť. Kto sa chce pridať, potrebuje appku —
+//  a tam ho pošle spoločná výzva dole na stránke.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CSS_SKUPINY = `.city-groups{margin-bottom:44px}
+.city-groups h2{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;font-size:1.45rem;
+  margin-bottom:18px}
+.city-groups h2 span{font-size:.92rem;font-weight:500;color:var(--muted);letter-spacing:0}
+.grid-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:20px}
+.grid-groups.solo{margin-bottom:44px}
+.group-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);padding:20px 22px 22px;display:flex;flex-direction:column;
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.group-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+.group-head{display:flex;align-items:center;gap:14px}
+.group-head h3{overflow-wrap:anywhere}
+.group-avatar{width:58px;height:58px;flex:0 0 58px;border-radius:50%;object-fit:cover;
+  background:var(--green-soft);border:2px solid #fff;box-shadow:0 8px 20px -10px rgba(11,16,13,.4)}
+.group-avatar.znak{object-fit:contain;padding:12px}
+.group-when{margin-top:5px;color:var(--muted);font-size:.9rem}
+.group-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}
+.group-desc{margin-top:13px;color:var(--muted);font-size:.94rem;line-height:1.5}
+.group-org{display:flex;align-items:center;gap:8px;margin-top:15px;color:var(--muted);font-size:.88rem}
+.group-org img{width:24px;height:24px;flex:0 0 24px;border-radius:50%;object-fit:cover}
+.group-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+  margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
+.group-foot{margin-top:18px}
+.group-spots b{font-size:1.2rem;font-weight:700;color:var(--green);letter-spacing:-.02em;
+  white-space:nowrap}
+.group-spots span{display:block;color:var(--muted);font-size:.82rem;margin-top:1px}
+.cta-dark-note{color:rgba(255,255,255,.72);font-size:.92rem;margin-top:14px;position:relative}
+
+@media (min-width:900px){
+  .city-groups{margin-bottom:64px}
+  .city-groups h2{font-size:1.7rem;margin-bottom:22px}
+  .grid-groups{grid-template-columns:repeat(3,1fr);gap:24px}
+  .grid-groups.solo{margin-bottom:64px}
+}`;
+
+function kartaSkupiny(g) {
+  const maskot = avatarSubor(g.avatar_id) || avatarSubor(g.organizer_avatar);
+  const organizator = avatarSubor(g.organizer_avatar);
+  const kedy = kedyText(g.recurrence);
+  const miesto = [g.venue, kedy].filter(Boolean).map((s) => esc(s)).join(' · ');
+  const obsadene = Number(g.members_count) || 0;
+  const miest = Number(g.capacity) || 0;
+
+  return `<article class="group-card">
+        <div class="group-head">
+          ${maskot
+    ? `<img class="group-avatar" src="${maskot}" alt="" width="224" height="224" loading="lazy">`
+    : '<img class="group-avatar znak" src="/logo.webp" alt="" width="128" height="128" loading="lazy">'}
+          <div>
+            <h3>${esc(g.name)}</h3>
+            ${miesto ? `<p class="group-when">${miesto}</p>` : ''}
+          </div>
+        </div>
+        <div class="group-tags">
+          ${sportPillHtml(g.sport, 'tag tag-sport')}
+          <span class="tag">${esc(urovenText(g.level_min, g.level_max))}</span>
+        </div>
+        ${g.description ? `<p class="group-desc">${esc(g.description)}</p>` : ''}
+        ${g.organizer_first_name ? `<p class="group-org">${organizator
+    ? `<img src="${organizator}" alt="" width="224" height="224" loading="lazy">` : ''}Organizuje ${esc(g.organizer_first_name)}</p>` : ''}
+        <div class="group-foot">
+          ${miest > 0
+    ? `<div class="group-spots"><b>${obsadene} z ${miest}</b><span>miest obsadených</span></div>`
+    : '<div class="group-spots"><span>Miesta sa dopĺňajú</span></div>'}
+          <a class="btn btn-green btn-sm" href="#pridat-sa">Pridať sa v appke</a>
+        </div>
+      </article>`;
+}
+
+/**
+ * Zoznam skupín — buď celý (`mesto === null`), alebo jedno mesto.
+ *
+ * `mestaPodla` je zoznam miest so skupinami (na celej stránke sa z neho
+ * skladajú sekcie, na stránke mesta slúži už len na dlaždice „Ďalšie mestá").
+ * `maTrenerov` hovorí, či pre toto mesto existuje `treneri/<mesto>/` — bez
+ * toho by krížový odkaz viedol na 404.
+ */
+function strankaSkupin({ mesto, mestaPodla, maTrenerov }) {
+  const jeMesto = !!mesto;
+  const skupiny = jeMesto
+    ? (mestaPodla.find((m) => m.slug === mesto.slug)?.skupiny ?? [])
+    : mestaPodla.flatMap((m) => m.skupiny);
+  const n = skupiny.length;
+  const url = jeMesto ? `${WEB_ORIGIN}/skupiny/${mesto.slug}/` : `${WEB_ORIGIN}/skupiny/`;
+  const nadpis = jeMesto ? `Skupiny — ${mesto.name}` : 'Skupiny';
+  const title = jeMesto
+    ? `Sparingové skupiny ${mesto.name} | Matchball`
+    : 'Sparingové skupiny na Slovensku a v Česku | Matchball';
+  const popis = n > 0
+    ? (jeMesto
+      ? `${pocetSkupin(n)} v meste ${mesto.name}, ${n === 1
+        ? 'ktorá hráva pravidelne a berie nových hráčov'
+        : 'ktoré hrávajú pravidelne a berú nových hráčov'}. Pozri si deň, čas a úroveň — pridáš sa v appke Matchball.`
+      : 'Sparingové skupiny podľa miest: partie, ktoré hrávajú pravidelne a hľadajú ďalších hráčov. Pozri si deň, čas a úroveň — pridáš sa v appke Matchball.')
+    : (jeMesto
+      ? `V meste ${mesto.name} zatiaľ žiadna verejná skupina nie je. Prvé skupiny vznikajú v appke Matchball.`
+      : 'Sparingové skupiny sú partie, ktoré hrávajú pravidelne a berú nových hráčov. Prvé skupiny vznikajú v appke Matchball.');
+
+  // Skupina nemá vlastnú adresu, takže položkou zoznamu je samotný termín —
+  // `SportsEvent` je jediný typ, ktorý o dni, mieste a kapacite vie povedať
+  // pravdu. `url` ukazuje na zoznam mesta, kde skupina naozaj stojí.
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: nadpis,
+    url,
+    numberOfItems: n,
+    itemListElement: skupiny.map((g, i) => {
+      const ev = {
+        '@type': 'SportsEvent',
+        name: g.name,
+        url: `${WEB_ORIGIN}/skupiny/${g.mestoSlug}/`,
+        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+        location: {
+          '@type': 'Place',
+          name: g.venue || g.city,
+          address: { '@type': 'PostalAddress', addressLocality: g.city },
+        },
+      };
+      if (g.next_starts_at) ev.startDate = g.next_starts_at;
+      if (Number(g.capacity) > 0) ev.maximumAttendeeCapacity = Number(g.capacity);
+      if (g.organizer_first_name) ev.organizer = { '@type': 'Person', name: g.organizer_first_name };
+      return { '@type': 'ListItem', position: i + 1, item: ev };
+    }),
+  };
+
+  // Len na stránke mesta. Na celom zozname stoja tie isté mestá o kus vyššie
+  // ako nadpisy sekcií a dlaždice pod nimi by boli to isté dvakrát.
+  const mestaPills = jeMesto
+    ? mestaPodla
+      .filter((m) => m.slug !== mesto.slug)
+      .map((m) => `<a class="city-pill" href="/skupiny/${m.slug}/">${esc(m.name)} <span>${m.skupiny.length}</span></a>`)
+      .join('\n        ')
+    : '';
+
+  const sekcie = jeMesto
+    ? `<div class="grid-groups solo">
+      ${skupiny.map(kartaSkupiny).join('\n      ')}
+  </div>`
+    : mestaPodla.map((m) => `<section class="city-groups">
+    <h2>${esc(m.name)} <span>${pocetSkupin(m.skupiny.length)}</span></h2>
+    <div class="grid-groups">
+      ${m.skupiny.map(kartaSkupiny).join('\n      ')}
+    </div>
+  </section>`).join('\n\n  ');
+
+  return `<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(popis)}">
+<link rel="canonical" href="${url}">
+${FAVICONY}
+<meta property="og:type" content="website">
+<meta property="og:url" content="${url}">
+<meta property="og:title" content="${esc(nadpis)} | Matchball">
+<meta property="og:description" content="${esc(popis)}">
+<meta property="og:image" content="${WEB_ORIGIN}/hero.webp">
+<meta property="og:locale" content="sk_SK">
+<meta name="twitter:card" content="summary_large_image">
+${PISMO}
+<style>
+${CSS_ZAKLAD}
+${CSS_ZOZNAM}
+${CSS_SKUPINY}
+</style>
+<script type="application/ld+json">${json(ld)}</script>
+</head>
+<body>
+<a class="skip" href="#obsah">Preskočiť na obsah</a>
+${hlavicka('skupiny')}
+
+<main id="obsah" class="wrap">
+  ${jeMesto ? `<nav class="crumbs" aria-label="Drobčeková navigácia" style="display:flex;gap:8px;color:var(--muted);font-size:.86rem;margin-top:8px">
+    <a href="/skupiny/">Skupiny</a>
+    <span aria-hidden="true" style="opacity:.45">›</span>
+    <span style="color:var(--fg);font-weight:600">${esc(mesto.name)}</span>
+  </nav>` : ''}
+  <header class="sec-head">
+    <p class="eyebrow">Skupiny</p>
+    <h1>${esc(nadpis)}</h1>
+    <p class="lead">${esc(popis)}</p>
+  </header>
+
+  ${n > 0 ? sekcie : '<p class="prazdno">Založ svoju v appke — a nechaj ju nájsť ďalších hráčov.</p>'}
+
+  ${mestaPills ? `<section class="cities-block">
+    <h2>Ďalšie mestá</h2>
+    <div class="cities-pills">
+        ${mestaPills}
+    </div>
+  </section>` : ''}
+
+  ${krizovyOdkaz(
+    jeMesto && maTrenerov ? `/treneri/${mesto.slug}/` : '/treneri/',
+    jeMesto ? `Chceš sa zlepšiť? Tréneri v meste ${mesto.name}` : 'Chceš sa zlepšiť?',
+    'Tréner ti ukáže, čo v hre opraviť. Termín si rezervuješ v appke.',
+  )}
+
+  <section class="cta-dark" id="pridat-sa">
+    <div class="cta-dark-text">
+      <h2>Pridaj sa k partii.</h2>
+      <p class="lead">Skupinu nájdeš v appke v Hľadať › Skupiny. Napíšeš organizátorovi a hráš.</p>
+      <p class="cta-dark-note">Cez Matchball pri sparingu neprejde ani cent — o peniazoch sa partia dohodne sama.</p>
+    </div>
+    <div class="cta-dark-actions">
+      <a class="btn btn-lime" href="${APP_STORE}">${IKONA.apple}Stiahnuť pre iPhone</a>
+      <a class="btn btn-ghost" href="${PLAY_STORE}">${IKONA.play}Stiahnuť pre Android</a>
+    </div>
+  </section>
+</main>
+
+${PATICKA}
+</body>
+</html>
+`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  Dáta
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1781,6 +2125,39 @@ async function nacitajZoSupabase(url, key) {
   const data = await res.json();
   if (!Array.isArray(data)) throw new Error('RPC public_coach_pages nevrátilo pole.');
   return data;
+}
+
+/**
+ * Verejné sparingové skupiny (migrácia 349).
+ *
+ * Na rozdiel od trénerov sa chyba NEVYHADZUJE: kým 349 nie je na produkcii,
+ * RPC neexistuje a PostgREST vráti 404. Stránky trénerov s tým nemajú nič
+ * spoločné a nočný beh nesmie padnúť na tom, že jedna funkcia ešte nie je
+ * nasadená — vtedy vznikne prázdna stránka skupín a v logu je dôvod.
+ */
+async function nacitajSkupiny(url, key) {
+  try {
+    const res = await fetch(`${url.replace(/\/+$/, '')}/rest/v1/rpc/public_sparring_groups`, {
+      method: 'POST',
+      headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+    if (!res.ok) {
+      console.warn(`  ! RPC public_sparring_groups: HTTP ${res.status} — ${(await res.text()).slice(0, 200)}`);
+      console.warn('    Stránka skupín bude prázdna (čaká sa na migráciu 349 na produkcii).');
+      return [];
+    }
+    const data = await res.json();
+    if (!Array.isArray(data)) {
+      console.warn('  ! RPC public_sparring_groups nevrátilo pole — stránka skupín bude prázdna.');
+      return [];
+    }
+    return data;
+  } catch (e) {
+    console.warn(`  ! RPC public_sparring_groups zlyhalo: ${e && e.message ? e.message : e}`);
+    console.warn('    Stránka skupín bude prázdna.');
+    return [];
+  }
 }
 
 /**
@@ -1821,6 +2198,44 @@ function zapis(relativna, obsah) {
   if (fs.existsSync(cielovaCesta) && fs.readFileSync(cielovaCesta, 'utf8') === obsah) return false;
   fs.writeFileSync(cielovaCesta, obsah);
   return true;
+}
+
+/**
+ * Dlaždice miest na hlavnej stránke.
+ *
+ * `index.html` je ručne písaná stránka a generátor jej NEPREPISUJE nič okrem
+ * dvoch blokov medzi značkami — mestá sa inak menia každú noc a ručne
+ * dopisované by boli zastarané prv, než by ich niekto opravil. Keď značky
+ * v súbore nie sú (niekto ich pri úprave vyhodil), beh sa nezastaví: napíše
+ * o tom a nechá stránku tak, ako je.
+ */
+function dopisMestaDoIndexu(bloky) {
+  const cesta = path.join(ROOT, 'index.html');
+  if (!fs.existsSync(cesta)) {
+    console.warn('  ! index.html neexistuje — dlaždice miest sa nedoplnili.');
+    return false;
+  }
+  const povodne = fs.readFileSync(cesta, 'utf8');
+  let html = povodne;
+  for (const [meno, obsah] of Object.entries(bloky)) {
+    const re = new RegExp(`(<!-- ${meno}:start -->)[\\s\\S]*?(<!-- ${meno}:end -->)`);
+    if (!re.test(html)) {
+      console.warn(`  ! index.html nemá značky ${meno}:start/end — dlaždice miest sa nedoplnili.`);
+      continue;
+    }
+    html = html.replace(re, `$1\n${obsah}\n          $2`);
+  }
+  if (html === povodne) return false;
+  fs.writeFileSync(cesta, html);
+  return true;
+}
+
+/** Dlaždice miest do bloku na hlavnej stránke; bez miest zostane veta. */
+function dlaziceMiest(mesta, predpona, prazdneText) {
+  if (!mesta.length) return `          <p class="next-note">${esc(prazdneText)}</p>`;
+  return mesta
+    .map((m) => `          <a class="city-chip" href="${predpona}${m.slug}/">${esc(m.name)} <span>${m.count}</span></a>`)
+    .join('\n');
 }
 
 /**
@@ -1877,6 +2292,7 @@ async function main() {
   const key = process.env.SUPABASE_SERVICE_KEY;
 
   let treneri;
+  let skupinySurove = [];
   if (fixture) {
     console.log(`Fixture: ${fixture}`);
     treneri = JSON.parse(fs.readFileSync(path.resolve(fixture), 'utf8'));
@@ -1886,6 +2302,7 @@ async function main() {
       process.exit(1);
     }
     treneri = await nacitajZoSupabase(url, key);
+    skupinySurove = await nacitajSkupiny(url, key);
   }
 
   // Bez slugu niet adresy; bez mena a mesta niet čo ukázať.
@@ -1977,6 +2394,42 @@ async function main() {
     }
   }
 
+  // ── Skupiny ──────────────────────────────────────────────────────────────
+  //
+  // Bez mesta a názvu niet čo ukázať; bez `city_key` by skupina nemala kam
+  // patriť. Sport, ktorý generátor nepozná, sa berie ako tenis — rovnaká
+  // úvaha ako pri trénerovi bez `sports`.
+  const skupiny = skupinySurove.filter((g) => g && g.name && g.city && slugify(g.city_key || g.city));
+  const preskoceneSkupiny = skupinySurove.length - skupiny.length;
+  if (preskoceneSkupiny > 0) console.warn(`Preskočených ${preskoceneSkupiny} skupín bez mena alebo mesta.`);
+  for (const g of skupiny) {
+    g.mestoSlug = slugify(g.city_key || g.city);
+    if (!SPORT_NAZOV[g.sport]) g.sport = 'tennis';
+  }
+
+  const skupinyMestaMap = new Map();
+  for (const g of skupiny) {
+    if (!skupinyMestaMap.has(g.mestoSlug)) {
+      skupinyMestaMap.set(g.mestoSlug, { slug: g.mestoSlug, name: g.city, skupiny: [] });
+    }
+    skupinyMestaMap.get(g.mestoSlug).skupiny.push(g);
+  }
+  // Poradie ako v RPC (349): najbližší termín hore, skupina bez termínu na
+  // koniec, pri zhode podľa názvu. Mestá podľa počtu skupín, potom abecedne —
+  // rovnako ako pri trénerov.
+  const casTerminu = (g) => {
+    const t = Date.parse(g.next_starts_at || '');
+    return Number.isFinite(t) ? t : Number.POSITIVE_INFINITY;
+  };
+  for (const m of skupinyMestaMap.values()) {
+    m.skupiny.sort((a, b) =>
+      casTerminu(a) - casTerminu(b) || String(a.name).localeCompare(String(b.name), 'sk'));
+  }
+  const mestaSkupin = [...skupinyMestaMap.values()]
+    .sort((a, b) => b.skupiny.length - a.skupiny.length || a.name.localeCompare(b.name, 'sk'));
+  const mestaSoSkupinami = new Set(mestaSkupin.map((m) => m.slug));
+  const mestaSTrenermi = new Set(mesta.map((m) => m.slug));
+
   // ── Generovanie ──────────────────────────────────────────────────────────
   const ctx = { appStore: APP_STORE, playStore: PLAY_STORE };
   let zmenene = 0;
@@ -1989,14 +2442,16 @@ async function main() {
   const vsetkyMesta = mesta.map(({ slug, name, count }) => ({ slug, name, count }));
   if (zapis(path.join('treneri', 'index.html'),
     strankaZoznamu({
-      mesto: null, sport: null, coaches: platni, ostatneMesta: vsetkyMesta, sportyVScope: sportyGlobalne,
+      mesto: null, sport: null, coaches: platni, ostatneMesta: vsetkyMesta,
+      sportyVScope: sportyGlobalne, skupinyMesta: mestaSoSkupinami,
     }))) zmenene++;
 
   for (const m of mesta) {
     const sportyMesta = SPORT_ORDER.filter((s) => sportyPoMeste.get(m.slug)?.has(s));
     if (zapis(path.join('treneri', m.slug, 'index.html'),
       strankaZoznamu({
-        mesto: m, sport: null, coaches: m.coaches, ostatneMesta: vsetkyMesta, sportyVScope: sportyMesta,
+        mesto: m, sport: null, coaches: m.coaches, ostatneMesta: vsetkyMesta,
+        sportyVScope: sportyMesta, skupinyMesta: mestaSoSkupinami,
       }))) zmenene++;
   }
 
@@ -2015,7 +2470,7 @@ async function main() {
       strankaZoznamu({
         mesto: null, sport, coaches: sportCoaches,
         ostatneMesta: sportMesta.map(({ slug, name, count }) => ({ slug, name, count })),
-        sportyVScope: sportyGlobalne,
+        sportyVScope: sportyGlobalne, skupinyMesta: mestaSoSkupinami,
       }))) zmenene++;
 
     for (const m of sportMesta) {
@@ -2024,9 +2479,24 @@ async function main() {
         strankaZoznamu({
           mesto: m, sport, coaches: m.coaches,
           ostatneMesta: sportMesta.map(({ slug, name, count }) => ({ slug, name, count })),
-          sportyVScope: sportyVMesteScope,
+          sportyVScope: sportyVMesteScope, skupinyMesta: mestaSoSkupinami,
         }))) zmenene++;
     }
+  }
+
+  // Skupiny. Stránka `skupiny/` vzniká VŽDY, aj keď skupina zatiaľ nie je
+  // žiadna: odkazuje na ňu hlavička, pätička aj hlavná stránka a 404 by z toho
+  // spravila chybu webu, nie prázdny zoznam.
+  if (zapis(path.join('skupiny', 'index.html'),
+    strankaSkupin({ mesto: null, mestaPodla: mestaSkupin, maTrenerov: false }))) zmenene++;
+
+  for (const m of mestaSkupin) {
+    if (zapis(path.join('skupiny', m.slug, 'index.html'),
+      strankaSkupin({
+        mesto: { slug: m.slug, name: m.name },
+        mestaPodla: mestaSkupin,
+        maTrenerov: mestaSTrenermi.has(m.slug),
+      }))) zmenene++;
   }
 
   // ── Sitemap ──────────────────────────────────────────────────────────────
@@ -2036,6 +2506,12 @@ async function main() {
   };
   const najnovsi = platni.reduce((acc, c) => {
     const d = den(c.updated_at);
+    return d && (!acc || d > acc) ? d : acc;
+  }, null);
+  // Skupiny majú vlastný `lastmod`: keď pribudne skupina, stránka trénerov sa
+  // nezmenila a naopak. `created_at` je jediný dátum, ktorý RPC vydáva.
+  const najnovsiaSkupina = skupiny.reduce((acc, g) => {
+    const d = den(g.created_at);
     return d && (!acc || d > acc) ? d : acc;
   }, null);
   const polozka = (loc, lastmod, priority) =>
@@ -2049,6 +2525,8 @@ ${[
     ...sportyStranky.map((s) => polozka(`${WEB_ORIGIN}/treneri/${s.slug}/`, najnovsi, '0.75')),
     ...sportyStranky.flatMap((s) => s.mesta.map((m) =>
       polozka(`${WEB_ORIGIN}/treneri/${s.slug}/${m.slug}/`, najnovsi, '0.7'))),
+    polozka(`${WEB_ORIGIN}/skupiny/`, najnovsiaSkupina || najnovsi, '0.8'),
+    ...mestaSkupin.map((m) => polozka(`${WEB_ORIGIN}/skupiny/${m.slug}/`, najnovsiaSkupina || najnovsi, '0.7')),
     ...platni.map((c) => polozka(`${WEB_ORIGIN}/t/${c.slug}/`, den(c.updated_at), '0.7')),
   ].join('\n')}
 </urlset>
@@ -2092,9 +2570,27 @@ ${[
     zmazaneMesta.push(...zmazane.map((m) => `${s.slug}/${m}`));
   }
 
+  const zmazaneMestaSkupin = zmazNezive(path.join(ROOT, 'skupiny'), mestaSoSkupinami);
+
+  // ── Dlaždice miest na hlavnej stránke ────────────────────────────────────
+  if (dopisMestaDoIndexu({
+    'mesta-treneri': dlaziceMiest(
+      mesta.map(({ slug, name, count }) => ({ slug, name, count })),
+      '/treneri/',
+      'Mestá pribúdajú, ako sa tréneri pridávajú.',
+    ),
+    'mesta-skupiny': dlaziceMiest(
+      mestaSkupin.map((m) => ({ slug: m.slug, name: m.name, count: m.skupiny.length })),
+      '/skupiny/',
+      'Prvé skupiny vznikajú v appke.',
+    ),
+  })) zmenene++;
+
   console.log(`Tréneri: ${platni.length} · mestá: ${mesta.length} · zapísaných súborov: ${zmenene}`);
+  console.log(`Skupiny: ${skupiny.length} · mestá so skupinami: ${mestaSkupin.length}`);
   if (zmazaniTreneri.length) console.log(`Zmazané stránky trénerov: ${zmazaniTreneri.join(', ')}`);
   if (zmazaneMesta.length) console.log(`Zmazané stránky miest: ${zmazaneMesta.join(', ')}`);
+  if (zmazaneMestaSkupin.length) console.log(`Zmazané stránky miest so skupinami: ${zmazaneMestaSkupin.join(', ')}`);
   const bezOdtlacku = fs.readFileSync(path.join(ROOT, '.well-known', 'assetlinks.json'), 'utf8').includes('DOPLNIT');
   if (bezOdtlacku) {
     console.log('POZOR: .well-known/assetlinks.json má placeholder "DOPLNIT" — doplň SHA-256 odtlačok z `eas credentials`, inak Android hlboké odkazy neoverí.');

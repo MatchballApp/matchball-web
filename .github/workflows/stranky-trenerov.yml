@@ -40,11 +40,14 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add -A t treneri sitemap.xml .well-known .nojekyll
+          # `skupiny` a `index.html` sú tu preto, že generátor od 9/2026 píše aj
+          # zoznam sparingových skupín a dlaždice miest na hlavnej stránke.
+          # `avatary/` sa negeneruje — maskoti sú v repe natrvalo.
+          git add -A t treneri skupiny sitemap.xml index.html .well-known .nojekyll
           # Generátor je idempotentný, takže vo väčšine nocí niet čo commitnúť —
           # bez tejto poistky by `git commit` spadol na prázdnom indexe a celý
           # beh by sa tváril ako chyba.
           git diff --cached --quiet || {
-            git commit -m "Stránky trénerov — $(date +%F)"
+            git commit -m "Stránky trénerov a skupín — $(date +%F)"
             git push
           }
