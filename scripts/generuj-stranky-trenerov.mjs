@@ -1925,8 +1925,12 @@ function kartaSkupiny(g) {
   const organizator = avatarSubor(g.organizer_avatar);
   const kedy = kedyText(g.recurrence);
   const miesto = [g.venue, kedy].filter(Boolean).map((s) => esc(s)).join(' · ');
-  const obsadene = Number(g.members_count) || 0;
+  // Počet ČLENOV, nie „1 z 8 miest": do skupiny sa pridá, kto chce, kapacita
+  // platí až na jednotlivý termín (Martin, 9. 9.). Kapacita termínu je
+  // v podtitulku, aby bolo jasné, koľkí sa na jedno stretnutie zmestia.
+  const clenov = Number(g.members_count) || 0;
   const miest = Number(g.capacity) || 0;
+  const clenovSlovo = clenov === 1 ? 'člen' : (clenov >= 2 && clenov <= 4 ? 'členovia' : 'členov');
 
   return `<article class="group-card">
         <div class="group-head">
@@ -1946,9 +1950,7 @@ function kartaSkupiny(g) {
         ${g.organizer_first_name ? `<p class="group-org">${organizator
     ? `<img src="${organizator}" alt="" width="224" height="224" loading="lazy">` : ''}Organizuje ${esc(g.organizer_first_name)}</p>` : ''}
         <div class="group-foot">
-          ${miest > 0
-    ? `<div class="group-spots"><b>${obsadene} z ${miest}</b><span>miest obsadených</span></div>`
-    : '<div class="group-spots"><span>Miesta sa dopĺňajú</span></div>'}
+          <div class="group-spots"><b>${clenov} ${clenovSlovo}</b><span>${miest > 0 ? `na termín ${miest} miest` : 'pridá sa, kto chce'}</span></div>
           <a class="btn btn-green btn-sm" href="#pridat-sa">Pridať sa v appke</a>
         </div>
       </article>`;
