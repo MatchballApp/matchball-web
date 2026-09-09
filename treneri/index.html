@@ -186,6 +186,20 @@ footer .brand{font-size:1.14rem}
 .city-pill:hover{border-color:rgba(26,122,74,.35);color:var(--green-dark)}
 .city-pill span{color:var(--muted);font-weight:400}
 
+/* Krížový odkaz medzi trénermi a skupinami. Nie je to reklama na inú stránku,
+   ale druhá polovica tej istej otázky: kto hľadá partiu, potrebuje aj trénera
+   a naopak. Preto stojí na konci zoznamu, nie nad ním. */
+.krizom{display:flex;align-items:center;gap:14px;margin-bottom:44px;padding:20px 22px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.krizom:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+.krizom .txt{flex:1 1 auto}
+.krizom .txt b{display:block;font-weight:600;font-size:1.05rem;letter-spacing:-.02em}
+.krizom .txt span{color:var(--muted);font-size:.94rem}
+.krizom .sip{flex:0 0 40px;width:40px;height:40px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;background:var(--green-soft);color:var(--green-dark)}
+.krizom .sip svg{width:18px;height:18px}
+
 .cta-dark{background:var(--ink);color:#fff;border-radius:var(--radius-xl);
   padding:34px 26px;display:flex;flex-direction:column;gap:22px;
   margin-bottom:64px;position:relative;overflow:hidden}
@@ -222,6 +236,7 @@ footer .brand{font-size:1.14rem}
     </a>
     <div class="nav-links">
       <a class="on" aria-current="page" href="/treneri/">Tréneri</a>
+      <a href="/skupiny/">Skupiny</a>
       <a href="/#ako">Ako to funguje</a>
       <a href="/#preco">Výhody</a>
       <a href="/#ceny">Ceny</a>
@@ -256,7 +271,7 @@ footer .brand{font-size:1.14rem}
   <p class="pocet-vysledkov" id="pocet-vysledkov">2 tréneri</p>
 
   <div class="grid-coaches" id="mriezka">
-      <article class="coach-card" data-overeny="0" data-hodnotenie="0.00" data-pocet="0" data-cena="103.49" data-meno="Ing. Michal Kažimír">
+      <article class="coach-card" data-overeny="0" data-hodnotenie="0.00" data-pocet="0" data-cena="98.28" data-meno="Ing. Michal Kažimír">
         <div class="coach-photo">
           <img class="portret" src="/t/ing-michal-kazimir/foto.jpg" alt="Ing. Michal Kažimír" width="600" height="600" loading="lazy">
           
@@ -267,12 +282,12 @@ footer .brand{font-size:1.14rem}
           
           
           <div class="coach-foot">
-            <div class="coach-price"><b>103,49 €</b><span>za hodinu</span></div>
+            <div class="coach-price"><b>98,28 €</b><span>za hodinu</span></div>
             <a class="btn btn-green btn-sm" href="/t/ing-michal-kazimir/">Zobraziť profil</a>
           </div>
         </div>
       </article>
-      <article class="coach-card" data-overeny="0" data-hodnotenie="0.00" data-pocet="0" data-cena="16.05" data-meno="Martin Mucha">
+      <article class="coach-card" data-overeny="0" data-hodnotenie="0.00" data-pocet="0" data-cena="15.00" data-meno="Martin Mucha">
         <div class="coach-photo">
           <img class="portret" src="/t/martin-mucha/foto.jpg" alt="Martin Mucha" width="600" height="600" loading="lazy">
           
@@ -283,7 +298,7 @@ footer .brand{font-size:1.14rem}
           
           
           <div class="coach-foot">
-            <div class="coach-price"><b>16,05 €</b><span>za hodinu</span></div>
+            <div class="coach-price"><b>15 €</b><span>za hodinu</span></div>
             <a class="btn btn-green btn-sm" href="/t/martin-mucha/">Zobraziť profil</a>
           </div>
         </div>
@@ -298,6 +313,11 @@ footer .brand{font-size:1.14rem}
         <a class="city-pill" href="/treneri/michalovce/">Michalovce <span>1</span></a>
     </div>
   </section>
+
+  <a class="krizom" href="/skupiny/">
+    <span class="txt"><b>Hľadáš partiu, nie trénera?</b><span>Sparingové skupiny hrávajú pravidelne a berú nových hráčov.</span></span>
+    <span class="sip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12h15M13.5 6l6 6-6 6"></path></svg></span>
+  </a>
 
   <section class="cta-dark">
     <div class="cta-dark-text">
@@ -325,6 +345,7 @@ footer .brand{font-size:1.14rem}
         <h4>Stránka</h4>
         <div class="foot-links">
           <a href="/treneri/">Tréneri</a>
+          <a href="/skupiny/">Skupiny</a>
           <a href="/#ako">Ako to funguje</a>
           <a href="/#preco">Prečo Matchball</a>
           <a href="/#ceny">Ceny a platby</a>

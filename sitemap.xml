@@ -36,6 +36,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://matchballapp.com/skupiny/</loc>
+    <lastmod>2026-09-09</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://matchballapp.com/t/ing-michal-kazimir/</loc>
     <lastmod>2026-09-09</lastmod>
     <priority>0.7</priority>
