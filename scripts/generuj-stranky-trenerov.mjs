@@ -611,12 +611,15 @@ function hlavicka(aktivna) {
       <img class="mark" src="/logo.webp" alt="" width="128" height="128">
       <span>Matchball</span>
     </a>
+    <!-- Presne tie isté odkazy v tom istom poradí ako na domovskej stránke —
+         menu sa pri prechode na Trénerov či Skupiny nesmie meniť (Martin, 11. 9.). -->
     <div class="nav-links">
+      ${odkaz('/#trenerom', 'Pre trénerov')}
+      ${odkaz('/#hracom', 'Pre hráčov')}
+      ${odkaz('/#partie', 'Partie')}
       ${odkaz('/treneri/', 'Tréneri', aktivna === 'treneri')}
       ${odkaz('/skupiny/', 'Skupiny', aktivna === 'skupiny')}
-      ${odkaz('/#ako', 'Ako to funguje')}
-      ${odkaz('/#preco', 'Výhody')}
-      ${odkaz('/#ceny', 'Ceny')}
+      ${odkaz('/#ceny', 'Platby')}
     </div>
     <a class="btn btn-dark btn-sm nav-cta" href="/#stiahnut">Stiahnuť</a>
   </nav>
@@ -631,18 +634,17 @@ const PATICKA = `<footer>
           <img class="mark" src="/logo.webp" alt="" width="128" height="128">
           <span>Matchball</span>
         </a>
-        <p class="foot-about">41 športov a služieb na jednom mieste. Hráč si nájde trénera, vyberie termín a zaplatí kartou až po potvrdení.</p>
+        <p class="foot-about">Nájdi si trénera, parťáka na sparing alebo partiu vo svojom meste. 41 športov a služieb, účet zadarmo.</p>
       </div>
       <div>
         <h4>Stránka</h4>
         <div class="foot-links">
+          <a href="/#trenerom">Pre trénerov</a>
+          <a href="/#hracom">Pre hráčov</a>
+          <a href="/#partie">Partie</a>
           <a href="/treneri/">Tréneri</a>
           <a href="/skupiny/">Skupiny</a>
-          <a href="/#ako">Ako to funguje</a>
-          <a href="/#preco">Prečo Matchball</a>
-          <a href="/#ceny">Ceny a platby</a>
-          <a href="${APP_STORE}">Stiahnuť pre iPhone</a>
-          <a href="${PLAY_STORE}">Stiahnuť pre Android</a>
+          <a href="/#ceny">Platby</a>
         </div>
       </div>
       <div>
