@@ -441,6 +441,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 .sport-cat[aria-expanded="true"]{border-color:var(--green)}
 .sport-cat[aria-expanded="true"] .chev{transform:rotate(180deg)}
 .sport-lists{margin-top:14px}
+.sport-list[hidden]{display:none}
 .sport-list{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:14px 16px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-soft)}
 .sport-list .dot{width:9px;height:9px;border-radius:50%}
 .sport-list b{font-weight:700;margin-right:6px}
@@ -1044,4 +1045,236 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         <span class="pay-tag">Poplatok brány</span>
         <h3>Kartou v appke</h3>
         <p>Suma sa strhne až po tom, čo tréner potvrdí, že tréning prebehol.</p>
-        <p class="fee"><b>5 % + 0,30 €<b>5 % + 0,30 €</b> pokrýva platbu kartou, výplatu trénerovi a vrátenie peňazí, keď sa tréning zruší. Z ceny trénera sa nič neodpočíta.
+        <p class="fee"><b>5 % + 0,30 €</b> pokrýva platbu kartou, výplatu trénerovi a vrátenie peňazí, keď sa tréning zruší. Z ceny trénera sa nič neodpočíta.</p>
+      </div>
+
+      <div class="pay-card">
+        <span class="pay-tag">Bez poplatku</span>
+        <h3>Hotovosť</h3>
+        <p>Peniaze dáš trénerovi na mieste a v appke to len potvrdíš.</p>
+        <p class="fee"><b>0 € navyše.</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stiahnutie ───────────────────────────────────────────── -->
+<section class="wrap" id="stiahnut" style="padding-bottom:clamp(40px,6vw,80px)">
+  <div class="cta reveal">
+    <h2>Zahraj si ešte tento týždeň.</h2>
+    <p class="lead">Appka aj účet sú zadarmo. Zvyšok je na tebe a na tom, koho si nájdeš.</p>
+    <div class="cta-actions">
+      <a class="btn btn-light" href="https://apps.apple.com/sk/app/matchball/id6804171137">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.8c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.6.9-.7 0-1.9-.9-3.1-.8-1.6 0-3 .9-3.8 2.4-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3.1-.7 1.4 0 1.8.7 3.1.7 1.3 0 2.1-1.1 2.9-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.6-3.7zM14 5.9c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3z"/></svg>
+        Stiahnuť z App Store
+      </a>
+      <a class="btn btn-light" href="https://play.google.com/store/apps/details?id=sk.matchball.app">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.3c-.3.3-.5.8-.5 1.4v16.6c0 .6.2 1.1.5 1.4l.1.1 9.3-9.3v-.2L3.7 2.9l-.1-.1zm12.1 6.2L4.9 2.3l8.9 8.9 1.9-1.9zM17.9 9.7l-2.2-1.3-2.1 2.1 2.1 2.1 2.2-1.3c.7-.4.7-1.2 0-1.6zM4.9 21.7l10.8-6.2-1.9-1.9-8.9 8.1z"/></svg>
+        Stiahnuť z Google Play
+      </a>
+    </div>
+
+    <!-- QR kódy. Stránku si ľudia otvárajú aj na počítači, kde je tlačidlo do
+         obchodu na nič — telefón ho namieri a má appku. Kódy sú vykreslené
+         priamo v HTML ako cesta, nie obrázok z cudzej služby: nič sa
+         nedosťahováva a fungujú aj bez pripojenia k tretej strane. -->
+    <div class="qr-row">
+        <a class="qr qr-ios" href="https://apps.apple.com/sk/app/matchball/id6804171137">
+          <span class="qr-code" aria-hidden="true">
+            <svg viewBox="0 0 41 41" role="img"><use href="#qrIos"/></svg>
+          </span>
+          <span class="qr-label">iPhone</span>
+        </a>
+        <a class="qr qr-android" href="https://play.google.com/store/apps/details?id=sk.matchball.app">
+          <span class="qr-code" aria-hidden="true">
+            <svg viewBox="0 0 41 41" role="img"><use href="#qrAndroid"/></svg>
+          </span>
+          <span class="qr-label">Android</span>
+        </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pätička ──────────────────────────────────────────────── -->
+<footer id="kontakt">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="#top" style="font-size:1.25rem">
+          <img class="mark" src="logo.webp" alt="" width="128" height="128">
+          <span>Matchball</span>
+        </a>
+        <p class="foot-about">Nájdi si trénera, parťáka na sparing alebo partiu vo svojom meste. 41 športov a služieb, účet zadarmo.</p>
+      </div>
+      <div>
+        <h4>Stránka</h4>
+        <div class="foot-links">
+          <a href="#trenerom">Pre trénerov</a>
+          <a href="#hracom">Pre hráčov</a>
+          <a href="#partie">Pre skupiny</a>
+          <a href="/treneri/">Tréneri</a>
+          <a href="/skupiny/">Skupiny</a>
+          <a href="#ceny">Platby</a>
+        </div>
+      </div>
+      <div>
+        <h4>Dokumenty a kontakt</h4>
+        <div class="foot-links">
+          <a href="./legal/privacy.html">Ochrana osobných údajov</a>
+          <a href="./legal/terms.html">Podmienky používania</a>
+          <a href="mailto:support@matchballapp.com">support@matchballapp.com</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>Matchball — Martin Mucha · Košice, Slovensko · IČO 57 799 032</span>
+      <span>© <span id="year">2026</span> Matchball</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Športy: kategória sa rozklikne na celý zoznam ─────────── */
+  document.querySelectorAll('[data-sports]').forEach(function (bar) {
+    var btns = [].slice.call(bar.querySelectorAll('.sport-cat'));
+    btns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var open = btn.getAttribute('aria-expanded') === 'true';
+        btns.forEach(function (b) {
+          var on = b === btn && !open;
+          b.setAttribute('aria-expanded', on ? 'true' : 'false');
+          var panel = document.getElementById(b.getAttribute('aria-controls'));
+          if (panel) panel.hidden = !on;
+        });
+      });
+    });
+  });
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── Hlavička: tieň po odrolovaní ──────────────────────── */
+  var nav = document.getElementById('nav');
+  function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 12); }
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ── Mobilné menu ──────────────────────────────────────── */
+  var burger = document.getElementById('burger');
+  var menu = document.getElementById('mobileMenu');
+  function closeMenu() {
+    burger.setAttribute('aria-expanded', 'false');
+    menu.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  burger.addEventListener('click', function () {
+    var open = burger.getAttribute('aria-expanded') === 'true';
+    if (open) { closeMenu(); return; }
+    burger.setAttribute('aria-expanded', 'true');
+    menu.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+  menu.addEventListener('click', function (e) { if (e.target.tagName === 'A') closeMenu(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+
+  /* ── Taby „Prečo Matchball" ────────────────────────────── */
+  document.querySelectorAll('[data-why]').forEach(function (bar) {
+    var tabs = [].slice.call(bar.querySelectorAll('[role="tab"]'));
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (o) {
+          var on = o === t;
+          o.setAttribute('aria-selected', on ? 'true' : 'false');
+          var p = document.getElementById(o.getAttribute('aria-controls'));
+          if (p) p.hidden = !on;
+        });
+      });
+      t.addEventListener('keydown', function (e) {
+        var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        tabs[(i + d + tabs.length) % tabs.length].focus();
+        tabs[(i + d + tabs.length) % tabs.length].click();
+      });
+    });
+  });
+
+  /* ── Odhalenie pri rolovaní ────────────────────────────── */
+  var revealables = [].slice.call(document.querySelectorAll('.reveal'));
+  if (reduce || !('IntersectionObserver' in window)) {
+    revealables.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('in');
+        io.unobserve(en.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: .08 });
+    revealables.forEach(function (el, i) {
+      el.style.transitionDelay = (Math.min(i % 4, 3) * 70) + 'ms';
+      io.observe(el);
+    });
+  }
+
+  /* ── Androidová čakačka (edge funkcia `waitlist`) ──────────
+     Od vydania na Play formulár na stránke NIE JE — ostáva len kód, lebo tú
+     istú obsluhu si berie pozvánková stránka. Bez tejto poistky spadol celý
+     skript na `null.addEventListener` a s ním aj taby, akordeón a galéria:
+     jeden odstránený formulár by potichu vypol polovicu stránky. */
+  var form = document.getElementById('waitForm');
+  var note = document.getElementById('waitNote');
+  var btn = document.getElementById('waitBtn');
+  var input = document.getElementById('email');
+  var sent = false;
+
+  function say(text, kind) {
+    if (!note) return;
+    note.textContent = text;
+    note.className = 'note' + (kind ? ' ' + kind : '');
+  }
+
+  if (form) form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (sent) return;
+    var email = (input.value || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/.test(email)) {
+      say('Skontroluj adresu, niečo tam nesedí.', 'err');
+      input.focus();
+      return;
+    }
+    btn.disabled = true;
+    say('Posielam…');
+    fetch('https://hpfcyriuitwbwtluaxbu.supabase.co/functions/v1/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        ref: null,
+        locale: (navigator.language || '').slice(0, 8) || null
+      })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (b) { return { ok: r.ok, body: b }; });
+    }).then(function (res) {
+      if (res.ok && res.body.ok) {
+        sent = true;
+        form.hidden = true;
+        say('Hotovo. Ozvem sa, hneď ako bude Android vonku.', 'ok');
+        return;
+      }
+      btn.disabled = false;
+      if (res.body.error === 'email_invalid') say('Skontroluj adresu, niečo tam nesedí.', 'err');
+      else if (res.body.error === 'rate_limited') say('Skús to o chvíľu znova.', 'err');
+      else say('Nepodarilo sa to odoslať. Skús to o chvíľu znova.', 'err');
+    }).catch(function () {
+      btn.disabled = false;
+      say('Nepodarilo sa to odoslať. Skontroluj pripojenie.', 'err');
+    });
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
