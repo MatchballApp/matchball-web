@@ -435,6 +435,16 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 .sport-cat .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
 .sport-cat b{font-weight:700}
 .sport-cat span{color:var(--muted)}
+.sport-cat{cursor:pointer;font-family:inherit;color:inherit;transition:transform .15s,box-shadow .15s}
+.sport-cat:hover{transform:translateY(-1px)}
+.sport-cat .chev{color:var(--muted);transition:transform .2s}
+.sport-cat[aria-expanded="true"]{border-color:var(--green)}
+.sport-cat[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.sport-lists{margin-top:14px}
+.sport-list{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:14px 16px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-soft)}
+.sport-list .dot{width:9px;height:9px;border-radius:50%}
+.sport-list b{font-weight:700;margin-right:6px}
+.sport-item{padding:6px 12px;border-radius:999px;background:#EEF3EE;font-size:.9rem;font-weight:500}
 
 /* ── Mock karty (namiesto snímok z appky) ─────────────────────
    Fotky a video appky sú preč (neaktuálne); tieto karty ukazujú TVAR
@@ -641,12 +651,22 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
     <!-- Chipy stoja mimo `.section-head`: tá drží riadok textu na 44 rem, čo je
          dobré na čítanie, ale päť kategórií by pod sebou spravilo stĺpec cez
          pol obrazovky. Na plnej šírke sa zmestia do dvoch radov. -->
-    <div class="sport-cats reveal" style="margin-top:0">
-        <span class="sport-cat"><span class="dot" style="background:#1A7A4A"></span><b>Raketové</b><span>tenis, bedminton, padel, squash, stolný tenis, pickleball</span></span>
-        <span class="sport-cat"><span class="dot" style="background:#2F7BD1"></span><b>Loptové a tímové</b><span>futbal, volejbal, basketbal, hokej…</span></span>
-        <span class="sport-cat"><span class="dot" style="background:#C9F24E"></span><b>Fitnes a telo</b><span>joga, box, tanec, pilates…</span></span>
-        <span class="sport-cat"><span class="dot" style="background:#E8B93B"></span><b>Individuálne a outdoor</b><span>beh, plávanie, lyžovanie, golf…</span></span>
-        <span class="sport-cat"><span class="dot" style="background:#D1685C"></span><b>Zdravie a služby</b><span>fyzioterapia, masáže, výživa…</span></span>
+    <!-- Každá kategória sa dá rozkliknúť a ukáže všetky svoje športy —
+         hráč aj tréner majú vidieť, čo presne je k dispozícii (Martin, 11. 9.). -->
+    <div class="sport-cats reveal" style="margin-top:0" data-sports>
+        <button class="sport-cat" type="button" aria-expanded="false" aria-controls="sporty-0"><span class="dot" style="background:#1A7A4A"></span><b>Raketové</b><span>tenis, bedminton, padel, squash, stolný tenis, pickleball</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="sport-cat" type="button" aria-expanded="false" aria-controls="sporty-1"><span class="dot" style="background:#2F7BD1"></span><b>Loptové a tímové</b><span>futbal, volejbal, basketbal, hokej…</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="sport-cat" type="button" aria-expanded="false" aria-controls="sporty-2"><span class="dot" style="background:#C9F24E"></span><b>Fitnes a telo</b><span>joga, box, tanec, pilates…</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="sport-cat" type="button" aria-expanded="false" aria-controls="sporty-3"><span class="dot" style="background:#E8B93B"></span><b>Individuálne a outdoor</b><span>beh, plávanie, lyžovanie, golf…</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="sport-cat" type="button" aria-expanded="false" aria-controls="sporty-4"><span class="dot" style="background:#D1685C"></span><b>Zdravie a služby</b><span>fyzioterapia, masáže, výživa…</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    </div>
+    <div class="sport-lists">
+      <div class="sport-list" id="sporty-0" hidden><span class="dot" style="background:#1A7A4A"></span><b>Raketové</b><span class="sport-item">Tenis</span><span class="sport-item">Bedminton</span><span class="sport-item">Padel</span><span class="sport-item">Squash</span><span class="sport-item">Stolný tenis</span><span class="sport-item">Pickleball</span></div>
+      <div class="sport-list" id="sporty-1" hidden><span class="dot" style="background:#2F7BD1"></span><b>Loptové a tímové</b><span class="sport-item">Futbal</span><span class="sport-item">Futsal</span><span class="sport-item">Volejbal</span><span class="sport-item">Plážový volejbal</span><span class="sport-item">Basketbal</span><span class="sport-item">Hádzaná</span><span class="sport-item">Florbal</span><span class="sport-item">Hokej</span><span class="sport-item">Nohejbal</span></div>
+      <div class="sport-list" id="sporty-2" hidden><span class="dot" style="background:#C9F24E"></span><b>Fitnes a telo</b><span class="sport-item">Fitnes</span><span class="sport-item">Funkčný tréning</span><span class="sport-item">Skupinové cvičenie</span><span class="sport-item">Kondičná príprava</span><span class="sport-item">Joga</span><span class="sport-item">Pilates</span><span class="sport-item">Box a kickbox</span><span class="sport-item">Bojové umenia</span><span class="sport-item">Sebaobrana</span><span class="sport-item">Tanec</span></div>
+      <div class="sport-list" id="sporty-3" hidden><span class="dot" style="background:#E8B93B"></span><b>Individuálne a outdoor</b><span class="sport-item">Beh</span><span class="sport-item">Cyklistika</span><span class="sport-item">Plávanie</span><span class="sport-item">Triatlon</span><span class="sport-item">Lezenie</span><span class="sport-item">Lyžovanie</span><span class="sport-item">Snowboard</span><span class="sport-item">Golf</span><span class="sport-item">Korčuľovanie</span><span class="sport-item">Jazdectvo</span><span class="sport-item">Šach</span></div>
+      <div class="sport-list" id="sporty-4" hidden><span class="dot" style="background:#D1685C"></span><b>Zdravie a služby</b><span class="sport-item">Fyzioterapia</span><span class="sport-item">Masáže</span><span class="sport-item">Výživové poradenstvo</span><span class="sport-item">Športová psychológia</span><span class="sport-item">Servis výstroja</span></div>
+    </div>
     </div>
   </div>
 </section>
@@ -894,8 +914,8 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Zdravie a služby</span>
-      <h2>Máš ordináciu a chceš, aby ťa našli športovci z okolia?</h2>
-      <p class="lead">Ak si fyzioterapeut, masér, výživový poradca alebo športový psychológ, nastavíš si cenník podľa vyšetrenia či terapie, nie podľa hodiny. Keď niečo bolí teba, objednáš sa v appke rovnako – ako na tréning.</p>
+      <h2>Robíš masáže, fyzioterapiu alebo výživové poradenstvo?</h2>
+      <p class="lead">Športovci z tvojho mesta ťa nájdu tam, kde hľadajú trénera. Nastavíš si cenník podľa vyšetrenia či terapie, klient sa objedná ako na tréning a zaplatí ti priamo. A keď niečo bolí teba, objednáš sa rovnako jednoducho.</p>
     </div>
 
     <div class="how how-demo">
@@ -1115,6 +1135,22 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 <script>
 (function () {
   'use strict';
+
+  /* ── Športy: kategória sa rozklikne na celý zoznam ─────────── */
+  document.querySelectorAll('[data-sports]').forEach(function (bar) {
+    var btns = [].slice.call(bar.querySelectorAll('.sport-cat'));
+    btns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var open = btn.getAttribute('aria-expanded') === 'true';
+        btns.forEach(function (b) {
+          var on = b === btn && !open;
+          b.setAttribute('aria-expanded', on ? 'true' : 'false');
+          var panel = document.getElementById(b.getAttribute('aria-controls'));
+          if (panel) panel.hidden = !on;
+        });
+      });
+    });
+  });
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ── Hlavička: tieň po odrolovaní ──────────────────────── */
