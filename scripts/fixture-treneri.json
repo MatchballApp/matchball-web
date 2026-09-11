@@ -99,5 +99,79 @@
     "photo_path": null,
     "reviews": [],
     "updated_at": "2026-09-06T19:15:00Z"
+  },
+  {
+    "id": "d1f2e3a4-5b6c-4d7e-8f90-112233445566",
+    "slug": "simona-volejbal",
+    "name": "Simona K.",
+    "city": "Bratislava",
+    "city_key": "bratislava",
+    "training_location": "Hala Mladosť",
+    "bio": "Bývalá extraligová hráčka, trénujem volejbal pre začiatočníkov aj pokročilých — príjem, nahrávku aj útok.",
+    "hourly_rate": 24,
+    "currency": "EUR",
+    "sports": ["volleyball"],
+    "pricing": { "1": 24 },
+    "pricing_by_sport": { "volleyball": { "1": 24, "2": 26 } },
+    "specializations": ["adults", "competitive"],
+    "coaching_languages": ["sk", "en"],
+    "years_experience": 7,
+    "avg_rating": 4.8,
+    "review_count": 12,
+    "completed_lessons": 64,
+    "verified": true,
+    "court_fee_mode": "on_site",
+    "court_fee_amount": null,
+    "work_start_min": 480,
+    "work_end_min": 1260,
+    "photo_path": null,
+    "reviews": [],
+    "updated_at": "2026-09-08T10:00:00Z"
+  },
+  {
+    "id": "e2a3b4c5-6d7e-4f80-9a1b-223344556677",
+    "slug": "katarina-fyzio",
+    "name": "Katarína Baková",
+    "city": "Bratislava",
+    "city_key": "bratislava",
+    "training_location": "FyzioCentrum Ružinov",
+    "bio": "Fyzioterapeutka so zameraním na športové zranenia a rehabilitáciu po operácii kolena a ramena.",
+    "hourly_rate": 45,
+    "currency": "EUR",
+    "sports": ["physiotherapy"],
+    "pricing": {
+      "1": 45,
+      "items": [
+        { "name": "Vstupné vyšetrenie", "minutes": 60, "price": 45 },
+        { "name": "Terapia", "minutes": 45, "price": 35 },
+        { "name": "Konzultácia", "minutes": 30, "price": 25 }
+      ]
+    },
+    "pricing_by_sport": {
+      "physiotherapy": {
+        "1": 45,
+        "items": [
+          { "name": "Vstupné vyšetrenie", "minutes": 60, "price": 45 },
+          { "name": "Terapia", "minutes": 45, "price": 35 },
+          { "name": "Konzultácia", "minutes": 30, "price": 25 }
+        ]
+      }
+    },
+    "specializations": ["adults"],
+    "coaching_languages": ["sk", "en"],
+    "years_experience": 9,
+    "avg_rating": 4.9,
+    "review_count": 21,
+    "completed_lessons": 310,
+    "verified": true,
+    "court_fee_mode": "included",
+    "court_fee_amount": null,
+    "work_start_min": 420,
+    "work_end_min": 1080,
+    "photo_path": null,
+    "reviews": [
+      { "name": "Marek", "photo_path": null, "rating": 5, "comment": "Skvelá starostlivosť, koleno je po pár sedeniach ako nové.", "created_at": "2026-09-01T09:00:00Z" }
+    ],
+    "updated_at": "2026-09-09T08:00:00Z"
   }
 ]

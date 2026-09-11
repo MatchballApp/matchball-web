@@ -186,6 +186,39 @@ function applyBandPct(rate, pct) {
   return round2(rate * (1 + pct / 100));
 }
 
+// ── Cenník služby — položky namiesto hodinových pásiem (pricing.ts:serviceItems) ──
+//
+// Fyzioterapia nie je tenis: predáva sa ÚKON („Vstupné vyšetrenie 60 min 45 €"),
+// nie hodina delená medzi hráčov. Cenník služby má vlastný tvar — pole `items`
+// v tom istom objekte cenníka.
+const SERVICE_DURATIONS = [30, 45, 60, 90, 120];
+const MAX_SERVICE_ITEMS = 5;
+
+function serviceItems(pricing) {
+  const raw = (pricing ?? {}).items;
+  if (!Array.isArray(raw)) return [];
+  const out = [];
+  for (const it of raw) {
+    if (!it || typeof it !== 'object' || Array.isArray(it)) continue;
+    const name = typeof it.name === 'string' ? it.name.trim() : '';
+    const { minutes, price } = it;
+    if (!name) continue;
+    if (!SERVICE_DURATIONS.includes(minutes)) continue;
+    if (typeof price !== 'number' || !(price > 0)) continue;
+    out.push({ name, minutes, price: round2(price) });
+    if (out.length >= MAX_SERVICE_ITEMS) break;
+  }
+  return out;
+}
+
+/** Cenník trénera pre KONKRÉTNY šport — `pricing_by_sport[kód]`, inak legacy `pricing`. */
+function pricingZaSport(coach, sportKod) {
+  const poSporte = coach.pricing_by_sport && typeof coach.pricing_by_sport === 'object'
+    ? coach.pricing_by_sport[sportKod]
+    : null;
+  return (poSporte && typeof poSporte === 'object') ? poSporte : (coach.pricing ?? {});
+}
+
 // Najnižšia sadzba individuálneho tréningu naprieč pásmami — pre „od X €".
 function minTierRate(pricing, hourlyRate) {
   const base = groupRateFor(pricing, hourlyRate, 1);
@@ -236,51 +269,49 @@ const KURT = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  Športy — appka od migrácie 336 pridáva k tenisu bedminton, padel, squash
-//  a stolný tenis. Starí tréneri bez `sports` v RPC dostávajú `['tennis']`
-//  (pozri `sportyOf`), takže zvyšok generátora sa na pole `sports` môže
-//  spoľahnúť vždy.
+//  Športy a služby — jediný zdroj pravdy je `scripts/sport-katalog.json`,
+//  kópia `docs/sport-katalog.json` z repa appky (41 športov/služieb v 5
+//  kategóriách, rozšírenie 10. 9. 2026). Pri zmene katalógu v appke treba
+//  kópiu tu prepísať a tento súbor si z nej sám dovytiahne mená, slovo pre
+//  miesto (`venue_sk`) aj to, či ide o šport (level, sparing) alebo o
+//  službu bez levelu (`kind: 'service'`).
+//
+//  Starí tréneri bez `sports` v RPC dostávajú `['tennis']` (pozri
+//  `sportyOf`), takže zvyšok generátora sa na pole `sports` môže spoľahnúť
+//  vždy.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const SPORT_ORDER = ['tennis', 'badminton', 'padel', 'squash', 'table_tennis'];
+const SPORT_KATALOG = JSON.parse(fs.readFileSync(path.join(SCRIPTS_DIR, 'sport-katalog.json'), 'utf8'));
 
-const SPORT_NAZOV = {
-  tennis: 'Tenis',
-  badminton: 'Bedminton',
-  padel: 'Padel',
-  squash: 'Squash',
-  table_tennis: 'Stolný tenis',
-};
+const SPORT_ORDER = SPORT_KATALOG.sports.slice().sort((a, b) => a.sort - b.sort).map((s) => s.code);
 
-// Prídavné meno pred „tréning" / „tréner" — „tenisový tréning".
-const SPORT_PRIDAVNE = {
-  tennis: 'tenisový',
-  badminton: 'bedmintonový',
-  padel: 'padelový',
-  squash: 'squashový',
-  table_tennis: 'stolnotenisový',
-};
+const SPORT_NAZOV = Object.fromEntries(SPORT_KATALOG.sports.map((s) => [s.code, s.sk]));
 
-// Genitív pre „Tréner(i) …" a nadpisy adresára — „Tréner bedmintonu".
-const SPORT_GENITIV = {
-  tennis: 'tenisu',
-  badminton: 'bedmintonu',
-  padel: 'padelu',
-  squash: 'squashu',
-  table_tennis: 'stolného tenisu',
-};
+// Genitív pre „Tréning …" na profile, „Tréner(i) …" a nadpisy adresára.
+const SPORT_GENITIV = Object.fromEntries(SPORT_KATALOG.sports.map((s) => [s.code, s.sk_gen]));
 
-const SPORT_SLUG = {
-  tennis: 'tenis',
-  badminton: 'bedminton',
-  padel: 'padel',
-  squash: 'squash',
-  table_tennis: 'stolny-tenis',
-};
+// Slovo pre miesto, kde sa šport/služba odohráva — „kurt", „ihrisko", „ordinácia"…
+const SPORT_MIESTO = Object.fromEntries(SPORT_KATALOG.sports.map((s) => [s.code, s.venue_sk]));
 
-// Slovo pre miesto, kde sa trénuje — všade „kurt", pri čistom stolnom tenise „stôl".
+// Kto to poskytuje, bez rodu — „tréner", „fyzioterapeut", „masér"…
+const SPORT_POSKYTOVATEL = Object.fromEntries(SPORT_KATALOG.sports.map((s) => [s.code, s.provider_sk]));
+
+// „sport" (level, sparing, skupiny) vs. „service" (cenník s položkami, bez levelu).
+const SPORT_DRUH = Object.fromEntries(SPORT_KATALOG.sports.map((s) => [s.code, s.kind]));
+
+const SPORT_SLUG = Object.fromEntries(SPORT_KATALOG.sports.map((s) => [s.code, slugify(s.sk)]));
+
+// Slovo pre miesto, kde sa trénuje/poskytuje — podľa športu/služby trénera;
+// pri kombinácii viacerých kódov naraz sa berie ten prvý (deterministické
+// poradie `sportyOf`), rovnaké slovo majú aj titulok, aj text pri cenníku.
 function miestoSlovoPre(sportyKodmi) {
-  return sportyKodmi.length === 1 && sportyKodmi[0] === 'table_tennis' ? 'Stôl' : 'Kurt';
+  const slovo = SPORT_MIESTO[sportyKodmi[0]] || 'kurt';
+  return velkePismeno(slovo);
+}
+
+/** Je táto sada kódov služba (fyzioterapia a pod.), nie šport? */
+function jeSluzba(sportyKodmi) {
+  return sportyKodmi.length > 0 && sportyKodmi.every((k) => SPORT_DRUH[k] === 'service');
 }
 
 /** Kódy športov trénera v pevnom, deterministickom poradí; bez záznamu = tenis. */
@@ -309,10 +340,26 @@ const SPORT_IKONA = {
   padel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="2.6" width="13" height="13.4" rx="6.5"></rect><path d="M12 16v5.4"></path><circle cx="9.3" cy="7" r=".5" fill="currentColor" stroke="none"></circle><circle cx="12" cy="6.4" r=".5" fill="currentColor" stroke="none"></circle><circle cx="14.7" cy="7" r=".5" fill="currentColor" stroke="none"></circle><circle cx="9.3" cy="10.6" r=".5" fill="currentColor" stroke="none"></circle><circle cx="12" cy="11.2" r=".5" fill="currentColor" stroke="none"></circle><circle cx="14.7" cy="10.6" r=".5" fill="currentColor" stroke="none"></circle></svg>',
   squash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.6c3.5.5 5.7 3.2 5.2 6.8-.5 3.5-3.6 5.7-7.2 5.2-3.5-.5-5.7-3.6-5.2-7.1.4-3 2.9-5.2 5.9-5.1"></path><path d="M8.6 14.3L3.4 21.4"></path></svg>',
   table_tennis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="9.5" r="6.3"></circle><path d="M14.7 13.8L20 19.5"></path></svg>',
+  pickleball: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="12" rx="4"></rect><path d="M12 15v6"></path></svg>',
 };
 
+// Ostatné kategórie nemajú vlastnú ikonu pre každý šport zvlášť (bolo by ich
+// 31) — jedna ikona kategórie stačí, na štítku 14px sa detail stratí.
+const KATEGORIA_IKONA = {
+  team: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"></circle><path d="M12 3.4v17.2M4 8.6h16M4 15.4h16"></path></svg>',
+  fitness: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8v8M18 8v8M3 12h1.5M19.5 12H21M6 12h12"></path></svg>',
+  individual: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5.4" r="2"></circle><path d="M12 8v5.4M12 13.4l-4 7M12 13.4l4 7M8.4 10l3.6 1.6 3.6-3"></path></svg>',
+  health: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-9.8-9.3C.6 8 2.2 4.6 5.6 4.1c2-.3 3.7.6 4.4 2 .7-1.4 2.4-2.3 4.4-2 3.4.5 5 3.9 3.4 7.6C19.5 16.4 12 21 12 21z"></path></svg>',
+};
+
+const SPORT_KATEGORIA = Object.fromEntries(SPORT_KATALOG.sports.map((s) => [s.code, s.category]));
+
+function ikonaPreSport(kod) {
+  return SPORT_IKONA[kod] || KATEGORIA_IKONA[SPORT_KATEGORIA[kod]] || '';
+}
+
 function sportPillHtml(kod, trieda) {
-  return `<span class="${trieda}">${SPORT_IKONA[kod] || ''}${esc(SPORT_NAZOV[kod] || kod)}</span>`;
+  return `<span class="${trieda}">${ikonaPreSport(kod)}${esc(SPORT_NAZOV[kod] || kod)}</span>`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -584,7 +631,7 @@ const PATICKA = `<footer>
           <img class="mark" src="/logo.webp" alt="" width="128" height="128">
           <span>Matchball</span>
         </a>
-        <p class="foot-about">Rezervácia tenisových tréningov. Hráč si nájde trénera, vyberie termín a zaplatí kartou až po potvrdení.</p>
+        <p class="foot-about">41 športov a služieb na jednom mieste. Hráč si nájde trénera, vyberie termín a zaplatí kartou až po potvrdení.</p>
       </div>
       <div>
         <h4>Stránka</h4>
@@ -984,9 +1031,25 @@ body{padding-bottom:92px}
  *
  * Pásmo 4 je otvorené („štyria a viac"), takže sa jeho celok uvádza ako „od".
  */
-function cennik(coach) {
+function cennik(coach, sportyKodmi = sportyOf(coach)) {
   const cur = coach.currency === 'CZK' ? 'CZK' : 'EUR';
-  const tiers = getTiers(coach.pricing, coach.hourly_rate);
+  const pricing = pricingZaSport(coach, sportyKodmi[0]);
+
+  // Služba (fyzioterapia a pod.) predáva úkon, nie hodinu — cenník má vlastný
+  // tvar, položky namiesto skupinových pásiem (pricing.ts:serviceItems).
+  if (jeSluzba(sportyKodmi)) {
+    const items = serviceItems(pricing);
+    const riadky = items.map((it) => ({
+      lab: it.name,
+      sub: `${it.minutes} min`,
+      val: suma(it.price, cur),
+      small: '',
+    }));
+    const odCena = items.length ? Math.min(...items.map((it) => it.price)) : Number(coach.hourly_rate) || 0;
+    return { cur, riadky, pasma: [], odCena, lacnejsiePasmo: false, vikendZaklad: false, sluzba: true };
+  }
+
+  const tiers = getTiers(pricing, coach.hourly_rate);
   const riadky = [];
   for (const t of tiers) {
     if (t.players === 1) {
@@ -1012,8 +1075,8 @@ function cennik(coach) {
   // Pásma sa počítajú z INDIVIDUÁLNEJ sadzby trénera — presne ako
   // `CoachDetailScreen` v appke (`applyBandPct(soloRate, pct)`), bez poplatku,
   // ktorý sa do zobrazenej ceny nepočíta.
-  const soloRate = groupRateFor(coach.pricing, coach.hourly_rate, 1);
-  const bands = timeBandsOf(coach.pricing);
+  const soloRate = groupRateFor(pricing, coach.hourly_rate, 1);
+  const bands = timeBandsOf(pricing);
   const pasma = [];
   if (bands && soloRate > 0) {
     for (const b of bands.bands) {
@@ -1031,12 +1094,12 @@ function cennik(coach) {
   // „od X €" na karte aj v štatistike — najlacnejšia hodina pre jedného,
   // v sadzbe trénera. `data-cena` v zozname triedi podľa toho istého čísla,
   // aké je na karte vidieť.
-  const min = minTierRate(coach.pricing, coach.hourly_rate);
-  const zaklad = groupRateFor(coach.pricing, coach.hourly_rate, 1);
+  const min = minTierRate(pricing, coach.hourly_rate);
+  const zaklad = groupRateFor(pricing, coach.hourly_rate, 1);
   const lacnejsiePasmo = min > 0 && min < zaklad;
   const odCena = lacnejsiePasmo ? min : zaklad;
 
-  return { cur, riadky, pasma, odCena, lacnejsiePasmo, vikendZaklad: bands ? bands.weekend === 'base' : false };
+  return { cur, riadky, pasma, odCena, lacnejsiePasmo, vikendZaklad: bands ? bands.weekend === 'base' : false, sluzba: false };
 }
 
 function kurtText(coach, cur, slovo = 'Kurt') {
@@ -1052,7 +1115,9 @@ function kurtText(coach, cur, slovo = 'Kurt') {
 
 function strankaTrenera(coach, ctx) {
   const cur = coach.currency === 'CZK' ? 'CZK' : 'EUR';
-  const c = cennik(coach);
+  const sportyKodmiSkoro = sportyOf(coach);
+  const sluzba = jeSluzba(sportyKodmiSkoro);
+  const c = cennik(coach, sportyKodmiSkoro);
   // Adresa, ktorú stránka NESIE: `/t/<slug>/` je to, čo GitHub Pages naozaj
   // servíruje, tak patrí do `canonical`, `og:url` aj do sitemapy.
   const url = `${WEB_ORIGIN}/t/${coach.slug}/`;
@@ -1069,20 +1134,26 @@ function strankaTrenera(coach, ctx) {
   const rating = Number(coach.avg_rating) || 0;
   const zameranie = (coach.specializations || []).map((s) => ZAMERANIE[s]).filter(Boolean);
   const jazyky = (coach.coaching_languages || []).map((l) => JAZYKY[l]).filter(Boolean);
-  const sportyKodmi = sportyOf(coach);
+  const sportyKodmi = sportyKodmiSkoro;
   const sportNazvy = sportyKodmi.map((k) => SPORT_NAZOV[k]);
-  const sportPridavne = sportyKodmi.map((k) => SPORT_PRIDAVNE[k]);
+  // Kto to poskytuje — „tréner“ pri športe, „fyzioterapeut“/„masér“/… pri službe;
+  // pri kombinácii sa berie prvý kód (rovnaké poradie ako inde).
+  const poskytovatel = SPORT_POSKYTOVATEL[sportyKodmi[0]] || 'tréner';
   const miestoSlovo = miestoSlovoPre(sportyKodmi);
-  const kurt = kurtText(coach, cur, miestoSlovo);
+  const kurt = sluzba ? '' : kurtText(coach, cur, miestoSlovo);
   const sportOznacenie = spojSpojkou(sportNazvy.map((n) => n.toLowerCase()));
-  const sportPridavneSpojene = spojSpojkou(sportPridavne);
+  // Eyebrow a popisy: pri športe „Tréning tenisu“, pri službe stací názov
+  // služby samotný — „Fyzioterapia“, nie „Tréning fyzioterapie“.
+  const cinnost = sluzba
+    ? spojSpojkou(sportNazvy)
+    : `Tréning ${spojSpojkou(sportyKodmi.map((k) => SPORT_GENITIV[k]))}`;
 
   const title = `${coach.name} – ${sportOznacenie}, ${coach.city} | Matchball`;
   const popisCasti = [
-    `${coach.name} — ${sportPridavneSpojene} tréning v meste ${coach.city}.`,
+    `${coach.name} — ${cinnost.toLowerCase()} v meste ${coach.city}.`,
     coach.training_location ? `Kde: ${coach.training_location}.` : '',
-    `Cena ${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur).replace('\u00a0', ' ')} za hodinu.`,
-    'Rezervácia a platba kartou v appke Matchball.',
+    `Cena ${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur).replace('\u00a0', ' ')}${sluzba ? '' : ' za hodinu'}.`,
+    `${sluzba ? 'Objednanie' : 'Rezervácia'} a platba kartou v appke Matchball.`,
   ].filter(Boolean);
   const popis = popisCasti.join(' ').slice(0, 300);
 
@@ -1093,7 +1164,7 @@ function strankaTrenera(coach, ctx) {
     '@type': 'Person',
     name: coach.name,
     url,
-    jobTitle: `Tréner ${spojSpojkou(sportyKodmi.map((k) => SPORT_GENITIV[k]))}`,
+    jobTitle: sluzba ? velkePismeno(poskytovatel) : `Tréner ${spojSpojkou(sportyKodmi.map((k) => SPORT_GENITIV[k]))}`,
     address: { '@type': 'PostalAddress', addressLocality: coach.city, addressCountry: cur === 'CZK' ? 'CZ' : 'SK' },
     ...(maFotku ? { image: `${WEB_ORIGIN}${fotka}` } : {}),
     ...(coach.bio ? { description: String(coach.bio).slice(0, 600) } : {}),
@@ -1115,15 +1186,15 @@ function strankaTrenera(coach, ctx) {
 
   const staty = [];
   if (Number(coach.completed_lessons) > 0) {
-    staty.push({ num: String(coach.completed_lessons), lbl: 'odtrénovaných tréningov' });
+    staty.push({ num: String(coach.completed_lessons), lbl: sluzba ? 'odbavených klientov' : 'odtrénovaných tréningov' });
   }
   if (Number(coach.years_experience) > 0) {
     const r = Number(coach.years_experience);
-    staty.push({ num: `${r} ${pocet(r, 'rok', 'roky', 'rokov')}`, lbl: 'praxe s hráčmi' });
+    staty.push({ num: `${r} ${pocet(r, 'rok', 'roky', 'rokov')}`, lbl: 'praxe s klientmi' });
   }
   staty.push({
     num: `${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur)}`,
-    lbl: 'za hodinu tréningu',
+    lbl: sluzba ? 'za úkon' : 'za hodinu tréningu',
   });
 
   const metaCasti = [];
@@ -1181,11 +1252,11 @@ ${hlavicka('treneri')}
   <div class="hero">
     <div class="hero-photo">
       <div class="hero-shot">
-        <img class="foto${maFotku ? '' : ' placeholder'}" src="${fotka}" alt="${esc(coach.name)}${maFotku ? `, ${sportPridavneSpojene} tréner — ${esc(coach.city)}` : ''}" width="600" height="600">
+        <img class="foto${maFotku ? '' : ' placeholder'}" src="${fotka}" alt="${esc(coach.name)}${maFotku ? `, ${esc(velkePismeno(poskytovatel))} — ${esc(coach.city)}` : ''}" width="600" height="600">
         <div class="hero-veil"></div>
       </div>
       <div class="hero-cap">
-        <p class="eyebrow">${esc(velkePismeno(sportPridavneSpojene))} tréning · ${esc(coach.city)}</p>
+        <p class="eyebrow">${esc(cinnost)} · ${esc(coach.city)}</p>
         <h1>${esc(coach.name)}</h1>
         ${meta ? `<div class="meta">${meta}</div>` : ''}
       </div>
@@ -1194,16 +1265,16 @@ ${hlavicka('treneri')}
     <div class="hero-body">
       ${coach.training_location ? `<div class="club-line">${IKONA.pin}${esc(coach.training_location)}, ${esc(coach.city)}</div>` : ''}
       <div class="pills" style="margin-top:14px">${sportyKodmi.map((k) => sportPillHtml(k, 'pill pill-soft pill-sport')).join('')}</div>
-      ${coach.verified ? `<div class="verified">${IKONA.fajka}Overený tréner</div>` : ''}
+      ${coach.verified ? `<div class="verified">${IKONA.fajka}Overený ${esc(poskytovatel)}</div>` : ''}
       <div class="stats">
         ${staty.map((s) => `<div class="stat"><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div>`).join('\n        ')}
       </div>
       <div class="actions">
-        <button class="btn btn-green" type="button" data-otvor="rezervovat">${IKONA.kalendar}Rezervovať tréning</button>
+        <button class="btn btn-green" type="button" data-otvor="rezervovat">${IKONA.kalendar}${sluzba ? 'Objednať sa' : 'Rezervovať tréning'}</button>
         <button class="btn btn-light" type="button" data-otvor="sprava">${IKONA.sprava}Napísať správu</button>
         <button class="icon-btn" type="button" id="zdielat" title="Zdieľať profil" aria-label="Zdieľať profil">${IKONA.zdielat}</button>
       </div>
-      <p class="note">Rezervácia prebieha v appke Matchball. Platíš až po potvrdení trénerom.</p>
+      <p class="note">${sluzba ? 'Objednanie' : 'Rezervácia'} prebieha v appke Matchball. Platíš až po potvrdení ${sluzba ? `poskytovateľom` : 'trénerom'}.</p>
     </div>
   </div>
 
@@ -1212,14 +1283,14 @@ ${hlavicka('treneri')}
       ${coach.bio ? `<div class="sec"><h2>O mne</h2><p class="bio">${esc(coach.bio)}</p></div>` : ''}
       ${zameranie.length ? `<p class="sub">Zameranie</p><div class="pills">${zameranie.map((z) => `<span class="pill pill-soft">${esc(z)}</span>`).join('')}</div>` : ''}
       ${jazyky.length ? `<p class="sub">Jazyky</p><div class="pills">${jazyky.map((j) => `<span class="pill">${esc(j)}</span>`).join('')}</div>` : ''}
-      ${pracovnyCas ? `<p class="sub">Kedy trénujem</p><div class="pills"><span class="pill">${pracovnyCas}</span></div>` : ''}
-      ${coach.training_location ? `<p class="sub" id="miesto">Kde trénujem</p>
+      ${pracovnyCas ? `<p class="sub">${sluzba ? 'Kedy ordinujem' : 'Kedy trénujem'}</p><div class="pills"><span class="pill">${pracovnyCas}</span></div>` : ''}
+      ${coach.training_location ? `<p class="sub" id="miesto">${sluzba ? 'Kde ma nájdeš' : 'Kde trénujem'}</p>
       <div class="place">
         <div class="place-map"><div class="pinwrap">${IKONA.pin}</div></div>
         <div class="place-body">
           <div class="name">${esc(coach.training_location)}</div>
           <div class="addr">${esc(coach.city)}</div>
-          <div class="tag">${IKONA.fajka}${esc(kurt)}</div>
+          ${kurt ? `<div class="tag">${IKONA.fajka}${esc(kurt)}</div>` : ''}
         </div>
       </div>` : ''}
     </div>
@@ -1227,12 +1298,12 @@ ${hlavicka('treneri')}
     <div class="sec">
       <div class="price">
         <h3>Cenník</h3>
-        <p class="cap">za hodinu</p>
+        <p class="cap">${sluzba ? 'za úkon' : 'za hodinu'}</p>
         ${c.riadky.map((r) => `<div class="prow">
           <div><div class="lab">${esc(r.lab)}</div><div class="sub2">${esc(r.sub)}</div></div>
           <div class="val">${r.val}${r.small ? `<small>${r.small}</small>` : ''}</div>
         </div>`).join('\n        ')}
-        <p class="foot" style="text-align:left">Toto sú ceny trénera — pri platbe kartou v appke sa k nim pripočíta poplatok za platbu kartou (${PLATFORM_PCT * 100} % + ${suma(fixedFor(cur), cur)}) so zárukou vrátenia a storno pravidlami.</p>
+        <p class="foot" style="text-align:left">Toto sú ceny ${sluzba ? 'poskytovateľa' : 'trénera'} — pri platbe kartou v appke sa k nim pripočíta poplatok za platbu kartou (${PLATFORM_PCT * 100} % + ${suma(fixedFor(cur), cur)}) so zárukou vrátenia a storno pravidlami.</p>
         ${c.pasma.length ? `<hr>
         ${c.pasma.map((p) => `<div class="band">
           <span class="ico">${p.zlava ? IKONA.slnko : IKONA.mesiac}</span>
@@ -1240,8 +1311,8 @@ ${hlavicka('treneri')}
           <span class="v">od ${p.val}</span>
         </div>`).join('\n        ')}
         ${c.vikendZaklad ? '<p class="foot" style="text-align:left;margin-top:8px">Cez víkend platí základná cena.</p>' : ''}` : ''}
-        <button class="btn btn-green" type="button" data-otvor="rezervovat">Rezervovať tréning</button>
-        <p class="foot">${esc(kurt)}</p>
+        <button class="btn btn-green" type="button" data-otvor="rezervovat">${sluzba ? 'Objednať sa' : 'Rezervovať tréning'}</button>
+        ${kurt ? `<p class="foot">${esc(kurt)}</p>` : ''}
       </div>
     </div>
   </div>
@@ -1252,7 +1323,7 @@ ${hlavicka('treneri')}
         <div class="stars" aria-hidden="true">${hviezdy(rating)}</div>
         <h2 id="hodnotenia-nadpis">${hodnotenie(rating)} z 5 · ${pocetHodnoteni} ${pocet(pocetHodnoteni, 'hodnotenie', 'hodnotenia', 'hodnotení')}</h2>
       </div>
-      <p class="lead">Hodnotiť môže len hráč, ktorý si tréning naozaj odtrénoval.</p>
+      <p class="lead">${sluzba ? 'Hodnotiť môže len klient, ktorý si úkon naozaj vyskúšal.' : 'Hodnotiť môže len hráč, ktorý si tréning naozaj odtrénoval.'}</p>
     </div>
     <div class="revs">
       ${hodnotenia.map((r) => `<article class="rev">
@@ -1265,7 +1336,7 @@ ${hlavicka('treneri')}
       </article>`).join('\n      ')}
       ${pocetHodnoteni > hodnotenia.length ? `<div class="rev" style="background:transparent;border-style:dashed;box-shadow:none">
         <h3 style="margin-bottom:8px">Zvyšných ${pocetHodnoteni - hodnotenia.length} ${pocet(pocetHodnoteni - hodnotenia.length, 'hodnotenie', 'hodnotenia', 'hodnotení')}</h3>
-        <p style="color:var(--muted)">Celé vlákna aj s odpoveďami trénera nájdeš v appke.</p>
+        <p style="color:var(--muted)">Celé vlákna aj s odpoveďami ${sluzba ? 'poskytovateľa' : 'trénera'} nájdeš v appke.</p>
         <button class="rev-more" type="button" data-otvor="hodnotenia">Zobraziť všetkých ${pocetHodnoteni} v appke${IKONA.sipka}</button>
       </div>` : ''}
     </div>
@@ -1273,7 +1344,7 @@ ${hlavicka('treneri')}
 
   <section class="cta">
     <div>
-      <h2>Rezervuj si tréning</h2>
+      <h2>${sluzba ? 'Objednaj sa' : 'Rezervuj si tréning'}</h2>
       <p class="lead">Stiahni si Matchball, vyber termín a zaplať kartou až po potvrdení.</p>
       <div class="row">
         <a class="btn btn-lime" href="${ctx.appStore}">${IKONA.apple}Stiahnuť pre iPhone</a>
@@ -1290,7 +1361,7 @@ ${hlavicka('treneri')}
 ${PATICKA}
 
 <div class="dock">
-  <button class="btn btn-green" type="button" data-otvor="rezervovat">${IKONA.kalendar}Rezervovať tréning</button>
+  <button class="btn btn-green" type="button" data-otvor="rezervovat">${IKONA.kalendar}${sluzba ? 'Objednať sa' : 'Rezervovať tréning'}</button>
   <button class="msg" type="button" data-otvor="sprava" aria-label="Napísať správu">${IKONA.sprava}<span>Napísať</span></button>
 </div>
 
@@ -1566,13 +1637,13 @@ function krizovyOdkaz(href, nadpis, popis) {
 
 function kartaTrenera(coach) {
   const cur = coach.currency === 'CZK' ? 'CZK' : 'EUR';
-  const c = cennik(coach);
+  const sportyKodmi = sportyOf(coach);
+  const c = cennik(coach, sportyKodmi);
   const rating = Number(coach.avg_rating) || 0;
   const pocetH = Number(coach.review_count) || 0;
   const url = `/t/${coach.slug}/`;
   const maFotku = !!coach.fotoSubor;
   const tagy = (coach.specializations || []).map((s) => ZAMERANIE[s]).filter(Boolean).slice(0, 3);
-  const sportyKodmi = sportyOf(coach);
   const ukazSporty = sportyKodmi.length > 1 || sportyKodmi[0] !== 'tennis';
 
   const metaCasti = [];
@@ -1595,7 +1666,7 @@ function kartaTrenera(coach) {
           ${maFotku
     ? `<img class="portret" src="${url}${coach.fotoSubor}" alt="${esc(coach.name)}" width="600" height="600" loading="lazy">`
     : '<img class="znak" src="/logo.webp" alt="" width="128" height="128" loading="lazy">'}
-          ${coach.verified ? `<span class="badge-verified">${IKONA.fajka}Overený tréner</span>` : ''}
+          ${coach.verified ? `<span class="badge-verified">${IKONA.fajka}Overený ${SPORT_POSKYTOVATEL[sportyKodmi[0]] || 'tréner'}</span>` : ''}
         </div>
         <div class="coach-body">
           <h3><a href="${url}">${esc(coach.name)}</a></h3>
@@ -1603,7 +1674,7 @@ function kartaTrenera(coach) {
           ${ukazSporty ? `<div class="coach-tags">${sportyKodmi.map((k) => sportPillHtml(k, 'tag tag-sport')).join('')}</div>` : ''}
           ${tagy.length ? `<div class="coach-tags">${tagy.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
           <div class="coach-foot">
-            <div class="coach-price"><b>${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur)}</b><span>za hodinu</span></div>
+            <div class="coach-price"><b>${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur)}</b><span>${c.sluzba ? 'za úkon' : 'za hodinu'}</span></div>
             <a class="btn btn-green btn-sm" href="${url}">Zobraziť profil</a>
           </div>
         </div>
@@ -1668,7 +1739,7 @@ function strankaZoznamu({ mesto, sport, coaches, ostatneMesta, sportyVScope, sku
       `<a class="fpill" href="${jeMesto ? `/treneri/${mesto.slug}/` : '/treneri/'}" aria-pressed="${sport ? 'false' : 'true'}">Všetky športy</a>`,
       ...sportyVScope.map((k) => {
         const href = jeMesto ? `/treneri/${SPORT_SLUG[k]}/${mesto.slug}/` : `/treneri/${SPORT_SLUG[k]}/`;
-        return `<a class="fpill" href="${href}" aria-pressed="${sport === k ? 'true' : 'false'}">${SPORT_IKONA[k]}${esc(SPORT_NAZOV[k])}</a>`;
+        return `<a class="fpill" href="${href}" aria-pressed="${sport === k ? 'true' : 'false'}">${ikonaPreSport(k)}${esc(SPORT_NAZOV[k])}</a>`;
       }),
     ].join('\n    ');
 
