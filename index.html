@@ -23,7 +23,7 @@
 <meta name="description" content="Chceš hrať častejšie? Nájdi si trénera, parťáka na sparing alebo partiu vo svojom meste. 41 športov a služieb, účet zadarmo, tréner dostane celú cenu.">
 <meta property="og:title" content="Matchball – tvoj najlepší match na tréningu aj v živote">
 <meta property="og:description" content="Chceš hrať častejšie, ale nemáš s kým? Nájdi si trénera, parťáka na sparing alebo partiu vo svojom meste. 41 športov a služieb, účet zadarmo a z ceny trénera si neberieme nič.">
-<meta property="og:image" content="https://matchballapp.com/logo.webp">
+<meta property="og:image" content="https://matchballapp.com/hero.webp">
 <meta property="og:image:alt" content="Matchball">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="sk_SK">
@@ -185,24 +185,24 @@ p{margin:0}
   background:radial-gradient(ellipse at 50% 48%,rgba(6,10,7,.58),rgba(6,10,7,.32) 48%,transparent 78%);
   pointer-events:none;
 }
-.hero-text > *{text-shadow:0 2px 22px rgba(6,10,7,.35)}
-/* Hero stojí na tmavozelenom gradiente appky, nie na fotke — snímky z appky sú
-   preč (neaktuálne, nahradí ich nová sada), tak nesie farbu a značku samu.
-   Dve žiary (limetková hore vpravo, zelená dole vľavo) dávajú hĺbku bez
-   toho, aby čokoľvek rozptyľovalo od nadpisu. */
+.hero-text > *{text-shadow:0 2px 22px rgba(6,10,7,.6)}
+/* Hero stojí na fotke, nie na kreslených kruhoch — je to tá istá loptička ako
+   v ikone appky, len nafotená aj s kurtom a raketou. Tmavý prekryv nad ňou drží
+   biele písmo čitateľné aj tam, kde je fotka najsvetlejšia. */
 .hero-bg{
   position:absolute;inset:0;z-index:-2;
-  background:
-    radial-gradient(ellipse 60% 50% at 82% 8%,rgba(201,242,78,.16),transparent 60%),
-    radial-gradient(ellipse 70% 60% at 10% 100%,rgba(26,122,74,.35),transparent 65%),
-    linear-gradient(160deg,var(--ink) 0%,var(--green-dark) 62%,var(--ink-soft) 100%);
+  width:100%;height:100%;object-fit:cover;object-position:center 46%;
+}
+.hero-scrim{
+  position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(6,10,7,.78) 0%,rgba(6,10,7,.26) 26%,rgba(6,10,7,.22) 58%,rgba(6,10,7,.88) 100%);
 }
 .hero-grain{
   position:absolute;inset:0;z-index:-1;opacity:.5;pointer-events:none;
   background-image:radial-gradient(rgba(255,255,255,.16) .6px,transparent .6px);
   background-size:4px 4px;mix-blend-mode:overlay;
 }
-.hero-mark{width:52px;height:52px;border-radius:14px;margin:0 auto 22px;box-shadow:0 10px 28px -10px rgba(6,10,7,.6)}
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:.85;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.09)}}
 
@@ -219,14 +219,7 @@ p{margin:0}
   background:linear-gradient(100deg,var(--lime),#7ED957 60%,var(--lime));
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
-.hero-sub{margin:24px auto 0;max-width:34rem;color:rgba(255,255,255,.82);font-size:clamp(1.02rem,1.6vw,1.2rem)}
-/* Tvrdý argument pod mäkkým mottom. Oddelený vlasovou linkou, aby sa čítal ako
-   fakt, nie ako ďalšia veta reklamy. */
-/* ── Prečo hrať ─────────────────────────────────────────────
-   Emocionálny argument stojí pred funkčným: najprv PREČO vôbec hrať,
-   až potom AKO to v appke chodí. */
-/* Pruh o dlhovekosti pred výzvou na stiahnutie. Jedna veta, nie sekcia —
-   preto stred, väčšie písmo než bežný text a zdroj drobným pod ňou. */
+.hero-sub{margin:24px auto 0;max-width:38rem;color:rgba(255,255,255,.82);font-size:clamp(1.02rem,1.6vw,1.2rem);text-wrap:balance}
 .hero-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:36px}
 .hero-actions .btn-lime{background:var(--lime);color:#0B100D;box-shadow:0 12px 30px -12px rgba(201,242,78,.8)}
 .hero-actions .btn-lime:hover{transform:translateY(-2px);box-shadow:0 20px 40px -14px rgba(201,242,78,.9)}
@@ -271,6 +264,14 @@ p{margin:0}
 /* ── Kroky ──────────────────────────────────────────────────── */
 .how{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(28px,4vw,56px);align-items:start}
 .steps{display:grid;gap:12px}
+/* Tri kroky vedľa seba. V sekcii „Ako to funguje" nestojí vedľa nich nič iné,
+   takže si môžu vziať celú šírku — pod sebou by z troch viet bol zbytočne
+   dlhý stĺpec. */
+.steps-3{grid-template-columns:repeat(3,1fr)}
+.steps-3 .step{flex-direction:column;gap:14px}
+/* V stĺpci je `flex-basis` výška, nie šírka — bez tohto by sa zo štvorčeka
+   s číslom roztiahol pás cez celú kartu. */
+.steps-3 .step .no{flex:0 0 auto;width:42px;align-self:flex-start}
 .step{
   display:flex;gap:20px;padding:24px 26px;border-radius:var(--radius-lg);
   background:var(--card);border:1px solid var(--line);
@@ -331,15 +332,8 @@ p{margin:0}
 .why-tabs button:hover{transform:translateY(-2px)}
 .why-tabs button[aria-selected="true"]{background:var(--lime);color:#0B100D;border-color:var(--lime)}
 .why-body{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(24px,4vw,54px);align-items:center;position:relative}
-/* Balíčky nemajú vedľa textu ani fotku, ani číslo — panel je preto jeden
-   stĺpec. Šírka je zastavená, nech riadok neprebehne cez celú kartu. */
-#why-3{grid-template-columns:minmax(0,46rem)}
 .why-body h3{font-size:clamp(1.5rem,3vw,2.1rem);color:#fff;font-weight:700}
 .why-body p{margin-top:16px;color:rgba(255,255,255,.7);font-size:1.06rem}
-.why-list{margin:24px 0 0;padding:0;list-style:none;display:grid;gap:11px}
-.why-list li{display:flex;gap:12px;align-items:flex-start;color:rgba(255,255,255,.78);font-size:.99rem}
-.why-list li::before{content:"";flex:0 0 20px;height:20px;margin-top:3px;border-radius:50%;background:rgba(201,242,78,.15);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 10.5l3 3 6-7' fill='none' stroke='%23C9F24E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
 .why-visual{
   aspect-ratio:4/3;border-radius:var(--radius-lg);position:relative;overflow:hidden;
   background:linear-gradient(150deg,rgba(255,255,255,.09),rgba(255,255,255,.02));
@@ -498,50 +492,20 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 .why .inline-link{color:var(--lime);border-bottom-color:rgba(201,242,78,.4)}
 .why .inline-link:hover{border-bottom-color:var(--lime)}
 
-/* ── Tri veci v jednej appke ────────────────────────────────
-   Tréner, parťák a skupina sú tri rovnocenné odpovede na tú istú otázku
-   („s kým si dnes zahrám"), takže sú to tri rovnaké karty vedľa seba —
-   nie jedna hlavná a dve poznámky pod ňou. */
-.trio{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2vw,24px);align-items:stretch}
-.trio-card{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--radius-xl);
-  padding:clamp(26px,3vw,36px);display:flex;flex-direction:column;gap:14px;
-  box-shadow:var(--shadow-soft);
-  transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .25s;
-}
-.trio-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift);border-color:rgba(26,122,74,.28)}
-/* Ikona namiesto poradového čísla: karty nie sú kroky za sebou, dá sa začať
-   ktoroukoľvek. Číslo by tvrdilo opak. */
-.trio-icon{
-  width:46px;height:46px;border-radius:15px;display:grid;place-items:center;
-  background:var(--green-soft);color:var(--green);flex:0 0 auto;
-}
-.trio-card h3{font-size:clamp(1.2rem,2vw,1.5rem)}
-.trio-card p{color:var(--muted);font-size:1rem;line-height:1.6}
-
-/* ── Platby ─────────────────────────────────────────────────
-   Tri spôsoby vedľa seba, nie zoznam pod sebou: sú to alternatívy, medzi
-   ktorými si človek vyberá, a rovnaká šírka to hovorí bez slov. Prvá karta
-   je zvýraznená — QR priamo trénerovi je to, čo appka odporúča. */
-.pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2vw,22px);margin-bottom:clamp(36px,5vw,58px)}
-.pay-card{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
-  padding:clamp(24px,2.8vw,32px);display:flex;flex-direction:column;gap:12px;
-  box-shadow:var(--shadow-soft);
-}
-.pay-card.lead-card{border-color:rgba(26,122,74,.35);box-shadow:var(--shadow-lift)}
-.pay-tag{
-  align-self:flex-start;display:inline-flex;align-items:center;gap:7px;
-  padding:6px 13px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);
-  font-size:.82rem;font-weight:600;letter-spacing:.02em;
-}
-.pay-card h3{font-size:1.12rem}
-.pay-card p{color:var(--muted);font-size:.99rem;line-height:1.6}
-.pay-card .fee{
-  margin-top:auto;padding-top:14px;border-top:1px solid var(--line);
-  font-size:.92rem;color:var(--muted);
-}
-.pay-card .fee b{color:var(--fg);font-weight:600}
+/* ── Súvislý text ───────────────────────────────────────────
+   Sekcie pre trénera, pre hráča a pre partie nie sú zoznamy hesiel, ale
+   odseky celými vetami. Majú preto širší riadok a väčšie medzery medzi
+   odsekmi než bežný text v karte — číta sa to ako list, nie ako prospekt. */
+.prose{max-width:40rem}
+.prose p{color:var(--muted);font-size:1.06rem;line-height:1.7}
+.prose p + p{margin-top:18px}
+.prose .quiet{font-size:.98rem;opacity:.85}
+.prose .cta-row{margin-top:30px;display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center}
+/* V tmavej sekcii pre trénerov musí ten istý odsek zostať svetlý. `.why-body p`
+   stojí v hárku vyššie a má rovnakú váhu, takže by ho `.prose p` prebilo
+   tmavou farbou a text by na čiernom podklade zmizol. */
+.why .prose p{color:rgba(255,255,255,.74)}
+.why .prose p:first-child{margin-top:0}
 
 /* ── Chýba ti šport? ───────────────────────────────────────── */
 .sport-missing{margin:14px 0 0;font-size:.95rem;color:#5E7367}
@@ -604,11 +568,9 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 .mock-ball.dim{background:radial-gradient(circle at 32% 28%,#fff,#D7DED9 75%);opacity:.6}
 
 /* ── Menšie obrazovky ───────────────────────────────────────── */
-@media (max-width:1180px) and (min-width:761px){
-  .trio{grid-template-columns:repeat(2,1fr)}
-}
 @media (max-width:980px){
-  .pay-grid{grid-template-columns:1fr}
+  .steps-3{grid-template-columns:1fr}
+  .steps-3 .step{flex-direction:row}
   .next-grid{grid-template-columns:1fr}
   .hero h1{max-width:none}
   .how{grid-template-columns:1fr}
@@ -630,7 +592,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   .nav-burger{display:flex}
   .mobile-menu{display:flex}
   .nav{padding:8px 8px 8px 18px}
-  .trio{grid-template-columns:1fr}
   .acc-inner{padding-left:0}
   .acc-btn{gap:14px}
   .acc-btn .idx{display:none}
@@ -639,6 +600,11 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   .fact > :not(.fact-num){grid-column:auto}
   .foot-grid{grid-template-columns:1fr}
   .hero-actions .btn{width:100%}
+  /* Na úzkej obrazovke je fotka orezaná natesno okolo loptičky, takže je
+     svetlejšia než na širokej — prekryv musí hore aj v strede pritlačiť viac,
+     inak sa biele písmo na jej svetlej strane stratí. */
+  .hero-scrim{background:linear-gradient(180deg,
+    rgba(6,10,7,.72) 0%,rgba(6,10,7,.34) 26%,rgba(6,10,7,.34) 58%,rgba(6,10,7,.9) 100%)}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
@@ -659,7 +625,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       "name": "Matchball",
       "url": "https://matchballapp.com/",
       "logo": "https://matchballapp.com/icon-512.png",
-      "email": "matchball.app@gmail.com",
+      "email": "support@matchballapp.com",
       "areaServed": ["SK", "CZ"]
     },
     {
@@ -698,14 +664,17 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       <img class="mark" src="logo.webp" alt="" width="128" height="128">
       <span>Matchball</span>
     </a>
+    <!-- Šesť odkazov je maximum, čo sa do panela zmestí bez zalomenia. Poradie
+         kopíruje stránku: najprv obe strany appky, potom partie, potom to,
+         čo si človek vie pozrieť aj bez appky. Služby a „Ako to funguje"
+         sú v pätičke — kto ich hľadá, doroluje. -->
     <div class="nav-links">
+      <a href="#trenerom">Pre trénerov</a>
+      <a href="#hracom">Pre hráčov</a>
+      <a href="#partie">Partie</a>
       <a href="/treneri/">Tréneri</a>
       <a href="/skupiny/">Skupiny</a>
-      <a href="#preco">Čo appka vie</a>
-      <a href="#ako">Ako to funguje</a>
-      <a href="#partie">Pre partie</a>
       <a href="#ceny">Platby</a>
-      <a href="#trenerom">Pre trénerov</a>
     </div>
     <a class="btn btn-dark btn-sm nav-cta" href="#stiahnut">Stiahnuť</a>
     <button class="nav-burger" id="burger" aria-label="Menu" aria-expanded="false"><span></span></button>
@@ -713,27 +682,26 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 </div>
 
 <div class="mobile-menu" id="mobileMenu">
+  <a href="#trenerom">Pre trénerov</a>
+  <a href="#hracom">Pre hráčov</a>
+  <a href="#partie">Partie</a>
   <a href="/treneri/">Tréneri</a>
   <a href="/skupiny/">Skupiny</a>
-  <a href="#preco">Čo appka vie</a>
-  <a href="#ako">Ako to funguje</a>
-  <a href="#partie">Pre partie</a>
   <a href="#ceny">Platby</a>
-  <a href="#trenerom">Pre trénerov</a>
   <a class="btn btn-lime" style="background:var(--lime);color:#0B100D" href="#stiahnut">Stiahnuť appku</a>
 </div>
 
 <!-- ── Hero ─────────────────────────────────────────────────── -->
 <header class="hero" id="top">
   <div class="hero-card">
-    <div class="hero-bg" aria-hidden="true"></div>
+    <img class="hero-bg" src="hero.webp" alt="" width="1600" height="854" fetchpriority="high">
+    <div class="hero-scrim"></div>
     <div class="hero-grain"></div>
 
     <div class="hero-inner">
       <div class="hero-text">
-        <img class="hero-mark" src="logo.webp" alt="" width="128" height="128">
         <h1 id="motto">Tvoj najlepší match<br><span class="glow">na tréningu aj v živote.</span></h1>
-        <p class="hero-sub" id="motto-sub">Chceš hrať častejšie, ale nemáš s kým? Nájdi si trénera, parťáka na sparing alebo partiu vo svojom meste – na 41 športov a služieb.</p>
+        <p class="hero-sub" id="motto-sub">Nájdi si trénera, parťáka na sparing alebo partiu vo svojom meste.</p>
         <div class="hero-actions">
           <a class="btn btn-lime" href="https://apps.apple.com/sk/app/matchball/id6804171137">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.8c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.6.9-.7 0-1.9-.9-3.1-.8-1.6 0-3 .9-3.8 2.4-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3.1-.7 1.4 0 1.8.7 3.1.7 1.3 0 2.1-1.1 2.9-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.6-3.7zM14 5.9c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3z"/></svg>
@@ -741,88 +709,258 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
           </a>
           <a class="btn btn-ghost" href="https://play.google.com/store/apps/details?id=sk.matchball.app"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.3c-.3.3-.5.8-.5 1.4v16.6c0 .6.2 1.1.5 1.4l.1.1 9.3-9.3v-.2L3.7 2.9l-.1-.1zm12.1 6.2L4.9 2.3l8.9 8.9 1.9-1.9zM17.9 9.7l-2.2-1.3-2.1 2.1 2.1 2.1 2.2-1.3c.7-.4.7-1.2 0-1.6zM4.9 21.7l10.8-6.2-1.9-1.9-8.9 8.1z"/></svg> Stiahnuť pre Android</a>
         </div>
-        <p class="hero-note">Účet zadarmo. Koľko si tréner vypýta, toľko dostane.</p>
+        <p class="hero-note">Appka aj účet sú zadarmo a z ceny trénera si neberieme nič.</p>
       </div>
     </div>
 
-    <a class="scroll-cue" href="#preco">
+    <a class="scroll-cue" href="#trenerom">
       Viac nižšie
       <span class="arrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span>
     </a>
   </div>
 </header>
 
+<!-- ── Pre trénerov ─────────────────────────────────────────
+     Prvá sekcia po hero patrí trénerovi, nie hráčovi: kým nie je ku komu
+     prísť, hráčovi appka nič neponúka. A je to zároveň jediná vec, ktorú
+     iné appky nerobia — peniaze idú rovno trénerovi a my si z nich
+     neberieme nič. Preto to stojí hore a celými vetami, nie v odrážkach. -->
+<section class="section" id="trenerom">
+  <div class="wrap">
+    <div class="why reveal">
+      <span class="eyebrow">Pre trénerov</span>
+      <h2>Si v niečom naozaj dobrý a chceš si privyrobiť?</h2>
 
-<!-- ── Tri veci v jednej appke ──────────────────────────────
-     Toto je jadro stránky: čo sa v appke naozaj dá. Tri karty, tri rôzne
-     odpovede na tú istú otázku — „s kým si dnes zahrám". Ďalej na stránke sa
-     už žiadna z nich neopakuje; platby majú vlastnú sekciu a tréneri tiež. -->
-<section class="section" id="preco">
+      <div class="why-body" style="margin-top:36px">
+        <div class="prose">
+          <p>Založ si účet zadarmo, nastav si vlastný cenník a trénuj. Hráč ti zaplatí priamo na tvoj účet QR kódom alebo ti dá peniaze v hotovosti a my si z toho neberieme ani cent. Koľko si vypýtaš, toľko ti aj zostane.</p>
+          <p>Kalendár, rezervácie aj chat s hráčom máš na jednej obrazovke a voľnú hodinu vieš kedykoľvek pustiť so zľavou. Na webe ti vznikne vlastná stránka s cenníkom a hodnoteniami, ktorú nájde aj Google, takže ťa objaví aj niekto, kto o appke nikdy nepočul. Ohodnotiť ťa pritom môže len ten, kto u teba naozaj bol.</p>
+          <p>Ak chceš mať hodiny isté dopredu, predáš hráčovi balíček piatich, desiatich alebo dvadsiatich tréningov so zľavou. Licenciu na nič z toho nepotrebuješ, stačí, že si dobrý a vieš to odovzdať ďalej.</p>
+          <p class="cta-row why-cta">
+            <a class="btn btn-lime" href="#stiahnut">Založ si účet zadarmo</a>
+            <a class="inline-link" href="/treneri/">Pozri, ako vyzerá stránka trénera</a>
+          </p>
+        </div>
+        <div class="why-visual" style="padding:clamp(20px,3vw,32px);align-items:stretch;aspect-ratio:auto">
+          <div class="mock-card" style="width:100%;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);box-shadow:none">
+            <div class="mock-row">
+              <span class="mock-avatar">KN</span>
+              <div>
+                <div class="mock-name" style="color:#fff">Katka Nováková</div>
+                <div class="mock-meta" style="color:rgba(255,255,255,.6)">Tenis · Košice</div>
+              </div>
+              <span class="mock-stars">★ 4,7</span>
+            </div>
+            <div class="mock-tags"><span class="mock-tag" style="background:rgba(201,242,78,.16);color:var(--lime)">Overená</span><span class="mock-tag" style="background:rgba(201,242,78,.16);color:var(--lime)">37 hodnotení</span></div>
+            <div class="mock-foot" style="border-top-color:rgba(255,255,255,.14)">
+              <div class="mock-price" style="color:#fff">od 16&nbsp;€<span style="color:rgba(255,255,255,.55)">za hodinu</span></div>
+              <span class="mock-btn" style="background:var(--lime);color:#0B100D">Rezervovať</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pre hráčov ───────────────────────────────────────────
+     Druhá strana tej istej appky. Tréner, parťák aj partia sú tu v texte,
+     nie v troch kartách — partia a služby majú vlastnú sekciu hneď nižšie
+     a tri karty by tú istú vec na jednej stránke povedali dvakrát. -->
+<section class="section" id="hracom" style="padding-top:0">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="eyebrow">Čo appka vie</span>
-      <h2>Nech hráš čokoľvek, niekoho tu nájdeš.</h2>
-      <p class="lead">41 športov a služieb – od tenisu cez volejbal po masáž. Jeden účet, svoju úroveň si nastavíš pre každý šport zvlášť.</p>
-      <div class="sport-cats">
+      <span class="eyebrow">Pre hráčov</span>
+      <h2>Chceš hrať častejšie, ale nemáš s kým?</h2>
+    </div>
+
+    <div class="how">
+      <div class="prose reveal">
+        <p>V jednej appke nájdeš trénera vo svojom meste, ktorý má cenník na profile ešte predtým, než mu vôbec napíšeš. Nájdeš v nej aj parťáka na sparing, ktorý hráva na tvojej úrovni, a partiu, ktorá sa schádza pravidelne. Vyberáš si podľa mesta, úrovne aj času, ktorý ti sadne.</p>
+        <p>Trénerovi platíš priamo – QR kódom zo svojej bankovej appky alebo v hotovosti – a províziu neplatíš nikomu. Ak sa ti nechce riešiť prevod, zaplatíš kartou priamo v appke a my ti sumu podržíme až do tréningu, takže o peniaze neprídeš, ani keď sa termín zruší.</p>
+        <p>Za každý odohraný tréning aj sparing ti padne loptička s maskotom a postupne ti rastie level od jednotky až po päťdesiatku. Je to malá radosť navyše, ale práve tá ťa vytiahne von aj v týždni, keď sa ti veľmi nechce.</p>
+        <p class="quiet">Tvoj profil pritom zostáva súkromný: nájdu ťa len ľudia v appke a cez Google na teba nikto nenarazí.</p>
+        <p class="cta-row">
+          <a class="btn btn-green" href="#stiahnut">Stiahnuť appku</a>
+          <a class="inline-link" href="/treneri/">Pozrieť trénerov aj bez appky</a>
+        </p>
+      </div>
+
+      <!-- Náhrada za snímky z appky (tie sú neaktuálne a zmazané): karty
+           poskladané z HTML, ktoré ukazujú tvar tej istej obrazovky. -->
+      <div class="phone-col reveal">
+        <div class="mock-stack">
+          <div class="mock-card">
+            <div class="mock-row">
+              <span class="mock-avatar">SK</span>
+              <div>
+                <div class="mock-name">Simona K.</div>
+                <div class="mock-meta">Volejbal · Bratislava</div>
+              </div>
+              <span class="mock-stars">★ 4,8</span>
+            </div>
+            <div class="mock-tags"><span class="mock-tag">Dospelí</span><span class="mock-tag">Overená</span></div>
+            <div class="mock-foot">
+              <div class="mock-price">24&nbsp;€<span>za hodinu</span></div>
+              <span class="mock-btn">Rezervovať</span>
+            </div>
+          </div>
+          <div class="mock-card">
+            <div class="mock-row">
+              <span class="mock-avatar alt">12</span>
+              <div>
+                <div class="mock-name">Tvoj level</div>
+                <div class="mock-meta">Tenis · 34 odohraných tréningov</div>
+              </div>
+            </div>
+            <div class="mock-ballrow">
+              <span class="mock-ball"></span><span class="mock-ball"></span><span class="mock-ball dim"></span>
+              <span class="mock-meta" style="margin-left:6px">2 nové loptičky za tento týždeň</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Máš partiu? ──────────────────────────────────────────
+     Tretie publikum popri hráčoch a trénerkách: kto ťahá pravidelnú partiu
+     a dnes rieši dochádzku aj peniaze v skupinovom chate. Úvod je odsek,
+     štyri veci pod ním sú štyri celé vety, nie heslá. -->
+<section class="section" id="partie" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Pre organizátorov</span>
+      <h2>Máš partiu na volejbal, futsal alebo iný šport?</h2>
+    </div>
+
+    <div class="how">
+      <div>
+        <div class="prose reveal" style="max-width:none;margin-bottom:30px">
+          <p>Ak ťaháš partiu, ktorá hráva každý týždeň, poznáš to: v jednom chate zháňaš, kto príde, a v druhom naháňaš, kto ešte nezaplatil. V Matchballe máš oboje priamo pri termíne a nemusíš nikomu nič pripomínať dvakrát. Partiu si môžeš nechať verejnú, aby sa k vám pridal niekto nový, alebo ju otvoríš len na kód pozvánky pre svojich.</p>
+        </div>
+        <div class="steps">
+          <article class="step reveal">
+            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="5" width="17.6" height="15.8" rx="3.2"/><path d="M8 3v4M16 3v4M3.2 10h17.6M7 14h4M13 14h4M7 17h4"/></svg></div>
+            <div>
+              <h3>Termíny vznikajú dopredu</h3>
+              <p>Pravidelný termín sa vytvorí dopredu sám a každý z partie na ňom ťukne, či príde.</p>
+            </div>
+          </article>
+          <article class="step reveal">
+            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 19.5c0-3.4 2.8-5.8 6.2-5.8s6.2 2.4 6.2 5.8"/><circle cx="17.6" cy="8.6" r="2.6"/><path d="M16.4 13.9c2.8.4 4.8 2.6 4.8 5.6"/></svg></div>
+            <div>
+              <h3>Hrá sa, keď sa vás zíde dosť</h3>
+              <p>Hrá sa vtedy, keď sa vás prihlási aspoň osem, a ten počet si nastavíš sám podľa toho, koľko vás na ihrisko treba.</p>
+            </div>
+          </article>
+          <article class="step reveal">
+            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 6.5c0-1.9-2-3-5-3s-5 1.2-5 3 2 2.6 5 3 5 1.1 5 3-2 3-5 3-5-1.1-5-3"/></svg></div>
+            <div>
+              <h3>Vidíš, kto už poslal peniaze</h3>
+              <p>Pri každom termíne vidíš, koľko platí jeden človek a kto už peniaze poslal, či to bolo QR kódom, zľavovou kartou alebo v hotovosti.</p>
+            </div>
+          </article>
+          <article class="step reveal">
+            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.8h16v11.4H9.6L5 20V16.2H4z"/></svg></div>
+            <div>
+              <h3>Nástenka a chat sú pri termíne</h3>
+              <p>Oznam pre celú partiu aj spoločný chat nájdeš priamo pri termíne, takže na ne nepotrebuješ ďalšiu skupinu na Messengeri.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="phone-col reveal">
+        <div class="mock-stack">
+          <div class="mock-card">
+            <div class="mock-row">
+              <span class="mock-avatar alt">9/12</span>
+              <div>
+                <div class="mock-name">Futsal · štvrtky</div>
+                <div class="mock-meta">Št 20:00 · Športová hala</div>
+              </div>
+            </div>
+            <div class="mock-when"><b>9 z 12 ide</b> · aspoň 8 hráčov</div>
+            <div class="mock-foot">
+              <div class="mock-price">3&nbsp;€<span>koľko platí každý</span></div>
+              <span class="mock-btn">Zaplatiť</span>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top:22px"><a class="btn btn-green" href="#stiahnut">Založiť partiu v appke</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Služby ───────────────────────────────────────────────
+     Fyzioterapeut a masér nie sú tréneri: predávajú vyšetrenie alebo
+     terapiu, nie hodinu. Preto majú vlastnú sekciu a vlastnú mock kartu
+     s dvoma položkami cenníka namiesto jednej hodinovej sadzby. -->
+<section class="section" id="sluzby" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Zdravie a služby</span>
+      <h2>Nie si tréner, ale pomáhaš športovcom?</h2>
+    </div>
+
+    <div class="how">
+      <div class="prose reveal">
+        <p>Ak si fyzioterapeut, masér, výživový poradca alebo športový psychológ, nastavíš si cenník podľa vyšetrenia či terapie, nie podľa hodiny. Človek sa k tebe objedná presne tak, ako sa objednáva na tréning, takže mu na to stačí pár ťuknutí. A športovci z tvojho okolia ťa nájdu vtedy, keď ich niečo bolí.</p>
+        <p class="cta-row"><a class="btn btn-green" href="#stiahnut">Založ si účet zadarmo</a></p>
+      </div>
+
+      <div class="phone-col reveal">
+        <div class="mock-stack">
+          <div class="mock-card">
+            <div class="mock-row">
+              <span class="mock-avatar alt">KB</span>
+              <div>
+                <div class="mock-name">Katarína Baková</div>
+                <div class="mock-meta">Fyzioterapia · Bratislava</div>
+              </div>
+              <span class="mock-stars">★ 4,9</span>
+            </div>
+            <div class="mock-when"><b>Vstupné vyšetrenie</b> · 60 min · 45&nbsp;€</div>
+            <div class="mock-when"><b>Terapia</b> · 45 min · 35&nbsp;€</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 41 športov ───────────────────────────────────────────
+     Nie zoznam 41 mien, ale jedna veta a päť kategórií. Odkaz na napísanie
+     stojí priamo v tej vete: kto svoj šport nenašiel, nemá ďalej hľadať. -->
+<section class="section" id="sporty" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Športy</span>
+      <h2>Matchball ti ponúka 41 športov a služieb.</h2>
+      <p class="lead">Vyber si z raketových, loptových, fitnes, individuálnych aj zo zdravia a služieb – a ak ten svoj nenájdeš, <a class="inline-link" href="mailto:support@matchballapp.com?subject=Ch%C3%BDba%20mi%20%C5%A1port">napíš nám</a> a my ti ho tam pridáme. Jeden účet ti stačí na všetky a svoju úroveň si pri každom športe nastavíš zvlášť.</p>
+    </div>
+
+    <!-- Chipy stoja mimo `.section-head`: tá drží riadok textu na 44 rem, čo je
+         dobré na čítanie, ale päť kategórií by pod sebou spravilo stĺpec cez
+         pol obrazovky. Na plnej šírke sa zmestia do dvoch radov. -->
+    <div class="sport-cats reveal" style="margin-top:0">
         <span class="sport-cat"><span class="dot" style="background:#1A7A4A"></span><b>Raketové</b><span>tenis, bedminton, padel, squash, stolný tenis, pickleball</span></span>
         <span class="sport-cat"><span class="dot" style="background:#2F7BD1"></span><b>Loptové a tímové</b><span>futbal, volejbal, basketbal, hokej…</span></span>
         <span class="sport-cat"><span class="dot" style="background:#C9F24E"></span><b>Fitnes a telo</b><span>joga, box, tanec, pilates…</span></span>
         <span class="sport-cat"><span class="dot" style="background:#E8B93B"></span><b>Individuálne a outdoor</b><span>beh, plávanie, lyžovanie, golf…</span></span>
         <span class="sport-cat"><span class="dot" style="background:#D1685C"></span><b>Zdravie a služby</b><span>fyzioterapia, masáže, výživa…</span></span>
-      </div>
-      <p class="sport-missing">Chýba ti tvoj šport? <a href="mailto:matchball.app@gmail.com?subject=Ch%C3%BDba%20mi%20%C5%A1port">Napíš nám</a> a doplníme ho.</p>
-    </div>
-
-    <div class="trio">
-      <article class="trio-card reveal">
-        <span class="trio-icon" aria-hidden="true">
-          <!-- Raketa, nie lupa: kruh so strunami a rukoväťou. Bez tých dvoch čiar
-               vnútri to na malej ploche vyzeralo ako ikona hľadania. -->
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="14" cy="8" rx="5.6" ry="6.4" transform="rotate(38 14 8)"/><path d="M9.9 12.1 4.2 19.8" stroke-width="2"/><path d="M10.4 4.6 17.6 11.4M17.5 4.7 10.6 11.5" stroke-width="1.1" opacity=".6"/></svg>
-        </span>
-        <h3>Tréner</h3>
-        <p>Chceš sa v niečom posunúť, ale nevieš, u koho začať?</p>
-        <p>Cenník má na profile vopred, hodnotenia sú len od ľudí, čo u neho naozaj boli.</p>
-      </article>
-
-      <article class="trio-card reveal">
-        <span class="trio-icon" aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 19.5c0-3.4 2.8-5.8 6.2-5.8s6.2 2.4 6.2 5.8"/><circle cx="17.6" cy="8.6" r="2.6"/><path d="M16.4 13.9c2.8.4 4.8 2.6 4.8 5.6"/></svg>
-        </span>
-        <h3>Parťák na sparing</h3>
-        <p>Chuť hrať máš, ale partner ti zase napísal, že nemôže?</p>
-        <p>Prehľadáš hráčov vo svojom meste podľa úrovne a pošleš žiadosť na sparing.</p>
-        <p>Nikto ťa cez Google nenájde a odmietnutie sa nikde neukáže.</p>
-      </article>
-
-      <article class="trio-card reveal">
-        <span class="trio-icon" aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="5" width="17.6" height="15.8" rx="3.2"/><path d="M8 3v4M16 3v4M3.2 10h17.6M9.3 15.2l2 2 3.6-3.8"/></svg>
-        </span>
-        <h3>Partia / skupina</h3>
-        <p>Ťaháš partiu a zháňaš ľudí každý týždeň nanovo?</p>
-        <p>Založ partiu, termíny sa vytvoria dopredu a každý ťukne, či príde.</p>
-        <p>Koľko platí každý a kto už poslal peniaze, vidíš na jednom mieste.</p>
-      </article>
-
-      <article class="trio-card reveal">
-        <span class="trio-icon" aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-9.8-9.3C.6 8 2.2 4.6 5.6 4.1c2-.3 3.7.6 4.4 2 .7-1.4 2.4-2.3 4.4-2 3.4.5 5 3.9 3.4 7.6C19.5 16.4 12 21 12 21z"/></svg>
-        </span>
-        <h3>Služby</h3>
-        <p>Máš ordináciu a chceš, aby ťa našli športovci z okolia?</p>
-        <p>Fyzioterapeut, masér aj výživový poradca si nastaví cenník podľa vyšetrenia alebo terapie, nie podľa hodiny.</p>
-        <p>Keď niečo bolí teba, objednáš sa rovnako ako na tréning.</p>
-      </article>
     </div>
   </div>
 </section>
 
 <!-- ── Kam ďalej ────────────────────────────────────────────
-     Hráč už vie, čo appka vie (predošlá sekcia) — teraz mu treba dať
-     konkrétnu odpoveď na „kto ma naučí" alebo „s kým si zahrám". Obe majú na
-     webe vlastnú stránku, tak sem patria ako dve veľké dlaždice — a mestá pod
-     nimi dopĺňa nočný generátor, nech vedú rovno tam, kde niekto naozaj je. -->
+     Kto sa nechce hneď rozhodovať, si trénerov aj skupiny pozrie na webe.
+     Dlaždice miest medzi značkami `mesta-treneri` / `mesta-skupiny` dopĺňa
+     nočný generátor (`scripts/generuj-stranky-trenerov.mjs`), ručne sa do
+     nich nepíše. -->
 <section class="section" id="kam" style="padding-top:0">
   <div class="wrap">
     <div class="next-grid reveal">
@@ -858,266 +996,108 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   </div>
 </section>
 
-<!-- ── Ako to funguje (taby) ────────────────────────────────── -->
+<!-- ── Ako to funguje (taby) ────────────────────────────────
+     Tri kroky, každý jedna veta. Vedľa krokov už nestojí galéria kariet
+     (tie sú vyššie pri sekciách, ku ktorým patria), takže si kroky berú
+     celú šírku a tlačidlá tabov nevymieňajú nič iné než panely. -->
 <section class="section" id="ako" style="padding-top:0">
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Ako to funguje</span>
       <h2>Prvýkrát ti to zaberie pár minút.</h2>
-      <p class="lead">Potom už len ťukáš. Tá istá appka, dva pohľady – prepni si ten svoj.</p>
+      <p class="lead">Potom už len ťukáš. Je to tá istá appka v dvoch pohľadoch, tak si prepni ten svoj.</p>
     </div>
 
     <div class="reveal" style="margin-bottom:38px">
       <div class="tabbar" role="tablist" aria-label="Ako to funguje" data-tabs>
         <span class="glider" aria-hidden="true"></span>
-        <button role="tab" id="tab-hrac" aria-controls="panel-hrac" data-shots="galHrac" aria-selected="true">Pre hráčov</button>
-        <button role="tab" id="tab-trener" aria-controls="panel-trener" data-shots="galTrener" aria-selected="false">Pre trénerov</button>
+        <button role="tab" id="tab-hrac" aria-controls="panel-hrac" aria-selected="true">Pre hráčov</button>
+        <button role="tab" id="tab-trener" aria-controls="panel-trener" aria-selected="false">Pre trénerov</button>
       </div>
     </div>
 
-    <div class="how">
-      <div>
-        <div class="tabpanel" role="tabpanel" id="panel-hrac" aria-labelledby="tab-hrac">
-          <div class="steps">
-            <article class="step reveal">
-              <div class="no">01</div>
-              <div>
-                <h3>Povedz, kde a čo hráš</h3>
-                <p>Tréneri, hráči aj partie nájdeš na jednej obrazovke, filtrovanej podľa toho, čo potrebuješ.</p>
-              </div>
-            </article>
-            <article class="step reveal">
-              <div class="no">02</div>
-              <div>
-                <h3>Ťukni na voľnú hodinu</h3>
-                <p>Vyberieš si termín v kalendári trénera, pošleš žiadosť a platíš, až keď ju potvrdí.</p>
-              </div>
-            </article>
-            <article class="step reveal">
-              <div class="no">03</div>
-              <div>
-                <h3>Choď hrať</h3>
-                <p>Deň vopred ti pripomenieme termín aj počasie, po tréningu ti padne loptička.</p>
-              </div>
-            </article>
+    <div class="tabpanel" role="tabpanel" id="panel-hrac" aria-labelledby="tab-hrac">
+      <div class="steps steps-3">
+        <article class="step reveal">
+          <div class="no">01</div>
+          <div>
+            <h3>Povedz, kde a čo hráš</h3>
+            <p>Vyberieš si šport a mesto a na jednej obrazovke uvidíš trénerov, hráčov aj partie, ktorí sú pri tebe.</p>
           </div>
-        </div>
-
-        <div class="tabpanel" role="tabpanel" id="panel-trener" aria-labelledby="tab-trener" hidden>
-          <div class="steps">
-            <article class="step">
-              <div class="no">01</div>
-              <div>
-                <h3>Nastav si cenník</h3>
-                <p>Cenník nastavíš raz – za hodinu, inak doobeda a inak večer – a už to neriešiš.</p>
-              </div>
-            </article>
-            <article class="step">
-              <div class="no">02</div>
-              <div>
-                <h3>Potvrď žiadosť</h3>
-                <p>Kalendár, rezervácie aj chat s hráčom máš na jednej obrazovke, potvrdíš jedným ťuknutím.</p>
-              </div>
-            </article>
-            <article class="step">
-              <div class="no">03</div>
-              <div>
-                <h3>Peniaze máš po tréningu</h3>
-                <p>QR kód a hotovosť idú rovno tebe, čo zaplatia kartou v appke, si pošleš na účet, kedy chceš.</p>
-              </div>
-            </article>
+        </article>
+        <article class="step reveal">
+          <div class="no">02</div>
+          <div>
+            <h3>Ťukni na voľnú hodinu</h3>
+            <p>Ťukneš na voľný termín v kalendári trénera, pošleš mu žiadosť a platíš až vtedy, keď ti ju potvrdí.</p>
           </div>
-        </div>
-      </div>
-
-      <!-- Náhrada za screenshoty z appky (neaktuálne, mazané): karty poskladané
-           z HTML/CSS, ktoré ukazujú tvar tej istej obrazovky pre hráča
-           a pre trénera — bez toho, aby predstierali skutočný záber appky. -->
-      <div class="phone-col reveal">
-        <div class="mock-stack" id="galHrac">
-          <div class="mock-card">
-            <div class="mock-row">
-              <span class="mock-avatar">SK</span>
-              <div>
-                <div class="mock-name">Simona K.</div>
-                <div class="mock-meta">Volejbal · Bratislava</div>
-              </div>
-              <span class="mock-stars">★ 4,8</span>
-            </div>
-            <div class="mock-tags"><span class="mock-tag">Dospelí</span><span class="mock-tag">Overená</span></div>
-            <div class="mock-foot">
-              <div class="mock-price">24&nbsp;€<span>za hodinu</span></div>
-              <span class="mock-btn">Rezervovať</span>
-            </div>
+        </article>
+        <article class="step reveal">
+          <div class="no">03</div>
+          <div>
+            <h3>Choď hrať</h3>
+            <p>Deň vopred ti pripomenieme termín aj počasie a po tréningu ti padne loptička.</p>
           </div>
-          <div class="mock-card">
-            <div class="mock-row">
-              <span class="mock-avatar alt">9/12</span>
-              <div>
-                <div class="mock-name">Volejbal v utorky</div>
-                <div class="mock-meta">Hala Mladosť · aspoň 8 hráčov</div>
-              </div>
-            </div>
-            <div class="mock-when"><b>Utorok 18:00</b> · plocha č. 2</div>
-            <div class="mock-ballrow">
-              <span class="mock-ball"></span><span class="mock-ball"></span><span class="mock-ball dim"></span>
-              <span class="mock-meta" style="margin-left:6px">2 nové loptičky za tento týždeň</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Trénerská sada. Skrytá, kým sa neprepne tab „Pre trénerov" —
-             ten istý koncept, len z druhej strany. -->
-        <div class="mock-stack" id="galTrener" hidden>
-          <div class="mock-card">
-            <div class="mock-row">
-              <span class="mock-avatar">TN</span>
-              <div>
-                <div class="mock-name">Dnešné tréningy</div>
-                <div class="mock-meta">3 potvrdené · 1 čaká na teba</div>
-              </div>
-            </div>
-            <div class="mock-tags"><span class="mock-tag">09:00 Peter</span><span class="mock-tag">17:30 Katka</span></div>
-            <div class="mock-foot">
-              <div class="mock-price">184&nbsp;€<span>zostatok na výber</span></div>
-              <span class="mock-btn">Poslať</span>
-            </div>
-          </div>
-          <div class="mock-card">
-            <div class="mock-row">
-              <span class="mock-avatar alt">KB</span>
-              <div>
-                <div class="mock-name">Katarína Baková</div>
-                <div class="mock-meta">Fyzioterapia · Bratislava</div>
-              </div>
-              <span class="mock-stars">★ 4,9</span>
-            </div>
-            <div class="mock-when"><b>Vstupné vyšetrenie</b> · 60 min · 45&nbsp;€</div>
-            <div class="mock-when"><b>Terapia</b> · 45 min · 35&nbsp;€</div>
-          </div>
-        </div>
+        </article>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- ── Máš partiu? ──────────────────────────────────────────
-     Ďalšie dôležité publikum popri hráčoch a trénerkách: organizátori
-     pravidelných partií (volejbal, futsal…), ktorí dnes riešia dochádzku
-     a peniaze v skupinovom chate a tabuľke. Rovnaký tvar ako „Ako to
-     funguje" — kroky vľavo, mock karta skupiny vpravo. -->
-<section class="section" id="partie" style="padding-top:0">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="eyebrow">Pre organizátorov</span>
-      <h2>Máš partiu na volejbal alebo futsal?</h2>
-      <p class="lead">Zháňaš každý týždeň ľudí v Messengeri a naháňaš, kto zaplatil? Toto ti to zoberie z hlavy.</p>
-    </div>
-
-    <div class="how">
-      <div>
-        <div class="steps">
-          <article class="step reveal">
-            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="5" width="17.6" height="15.8" rx="3.2"/><path d="M8 3v4M16 3v4M3.2 10h17.6M7 14h4M13 14h4M7 17h4"/></svg></div>
-            <div>
-              <h3>Termíny a kto príde</h3>
-              <p>Pravidelný termín sa vytvorí dopredu sám a každý ťukne, či príde.</p>
-            </div>
-          </article>
-          <article class="step reveal">
-            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 6.5c0-1.9-2-3-5-3s-5 1.2-5 3 2 2.6 5 3 5 1.1 5 3-2 3-5 3-5-1.1-5-3"/></svg></div>
-            <div>
-              <h3>Kto zaplatil</h3>
-              <p>Koľko platí každý vidíš hneď pri termíne – QR prevod, MultiSport, Up či hotovosť, vždy bez poplatku.</p>
-            </div>
-          </article>
-          <article class="step reveal">
-            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.8h16v11.4H9.6L5 20V16.2H4z"/></svg></div>
-            <div>
-              <h3>Nástenka a chat</h3>
-              <p>Oznam pre celú partiu aj spoločný chat sú hneď pri termíne, nie v ďalšej skupine na Messengeri.</p>
-            </div>
-          </article>
-          <article class="step reveal">
-            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"/><path d="M8 10.5V7.2a4 4 0 0 1 8 0v3.3"/></svg></div>
-            <div>
-              <h3>Verejná alebo súkromná</h3>
-              <p>Otvorená pre každého, s tvojím potvrdením, alebo len na kód pozvánky.</p>
-            </div>
-          </article>
-        </div>
-      </div>
-
-      <div class="phone-col reveal">
-        <div class="mock-stack">
-          <div class="mock-card">
-            <div class="mock-row">
-              <span class="mock-avatar alt">9/12</span>
-              <div>
-                <div class="mock-name">Futsal · štvrtky</div>
-                <div class="mock-meta">Št 20:00 · Športová hala</div>
-              </div>
-            </div>
-            <div class="mock-when"><b>9 z 12 ide</b> · aspoň 8 hráčov</div>
-            <div class="mock-foot">
-              <div class="mock-price">3&nbsp;€<span>koľko platí každý</span></div>
-              <span class="mock-btn">Zaplatiť</span>
-            </div>
+    <div class="tabpanel" role="tabpanel" id="panel-trener" aria-labelledby="tab-trener" hidden>
+      <div class="steps steps-3">
+        <article class="step">
+          <div class="no">01</div>
+          <div>
+            <h3>Nastav si cenník</h3>
+            <p>Cenník si nastavíš raz a už ho neriešiš – doobeda môžeš mať inú cenu než večer.</p>
           </div>
-        </div>
-        <p style="margin-top:22px"><a class="btn btn-green" href="#stiahnut">Založiť skupinu v appke</a></p>
+        </article>
+        <article class="step">
+          <div class="no">02</div>
+          <div>
+            <h3>Potvrď žiadosť</h3>
+            <p>Žiadosť od hráča potvrdíš jedným ťuknutím a kalendár aj chat s ním máš na tej istej obrazovke.</p>
+          </div>
+        </article>
+        <article class="step">
+          <div class="no">03</div>
+          <div>
+            <h3>Peniaze máš po tréningu</h3>
+            <p>Peniaze z QR kódu a z hotovosti máš hneď, a čo ti hráč zaplatí kartou, si pošleš na účet, kedy chceš.</p>
+          </div>
+        </article>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ── Platby ───────────────────────────────────────────────
-     Jediné miesto na stránke, kde sa hovorí o peniazoch. Predtým to bolo
-     rozdelené medzi sekciu „Ceny“ a kartu vo výhodách, takže tá istá veta
-     o nulovej provízii stála na stránke dvakrát a zakaždým trochu inak.
-     Karty sú tri spôsoby platby, akordeón pod nimi je drobné písmo. -->
+     Jediné miesto na stránke, kde sa hovorí o peniazoch — jeden odsek
+     namiesto troch kariet s heslami, pod ním dve veci, ktoré sa človek
+     pýta až vtedy, keď ho zaujímajú. -->
 <section class="section" id="ceny" style="padding-top:0">
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Platby</span>
       <h2>Z ceny trénera si neberieme nič.</h2>
-      <p class="lead">Koľko si tréner vypýta, toľko dostane – a ty za to neplatíš províziu nikomu. Vyberáš si len to, ako mu peniaze dáš.</p>
     </div>
 
-    <div class="pay-grid reveal">
-      <div class="pay-card lead-card">
-        <span class="pay-tag">Bez poplatku</span>
-        <h3>QR kódom priamo trénerovi</h3>
-        <p>Tréner ti ukáže QR kód, banková appka ho načíta a peniaze sú na jeho účte. Zaplatíš presne jeho cenu – alebo mu ju dáš v hotovosti.</p>
-        <p class="fee"><b>0 € navyše.</b> My tie peniaze nedržíme ani nevidíme; že prišli, potvrdí tréner.</p>
-      </div>
-
-      <div class="pay-card">
-        <span class="pay-tag">So zárukou vrátenia</span>
-        <h3>Kartou v appke</h3>
-        <p>Nechce sa ti riešiť prevod? Zaplať kartou, sumu podržíme do tréningu a keď sa zruší, peniaze idú späť.</p>
-        <p class="fee"><b>5 % + 0,30 €</b> si vezme platobná brána – jediný poplatok v celej appke a uvidíš ho pred zaplatením. Tréner aj tak dostane celú svoju cenu.</p>
-      </div>
-
-      <div class="pay-card">
-        <span class="pay-tag">Bez poplatku</span>
-        <h3>Podiel v skupine</h3>
-        <p>Svoj podiel pošleš QR kódom rovno organizátorovi, alebo cez MultiSport či Up doplatíš len rozdiel.</p>
-        <p class="fee"><b>0 € navyše.</b> Kto už zaplatil, vidí organizátor na prehľade termínu.</p>
-      </div>
+    <div class="prose reveal" style="margin-bottom:clamp(32px,5vw,52px)">
+      <p>Z toho, čo si tréner vypýta, si neberieme ani cent, takže koľko stojí hodina, toľko mu aj zostane. Keď mu zaplatíš QR kódom alebo v hotovosti, neplatíš navyše nič a peniaze idú rovno na jeho účet. Zarábať chceme na tom, čo appka pridá navyše, nie na tom, čo si tréner odučí.</p>
+      <p>Ak sa ti nechce riešiť prevod, zaplatíš kartou priamo v appke a pripočíta sa jediný poplatok v celej appke – 5 % a 0,30 € pre platobnú bránu. Uvidíš ho ešte pred zaplatením a tréner aj tak dostane celú svoju cenu.</p>
+      <p>Tréner ti môže predať aj balíček piatich, desiatich alebo dvadsiatich hodín so zľavou. Platí rok, dá sa darovať a čo z neho nevyčerpáš, ti preplatíme.</p>
     </div>
 
     <div class="acc reveal" data-acc>
       <div class="acc-item">
         <button class="acc-btn" aria-expanded="false">
           <span class="idx">(01)</span>
-          <span class="ttl">Predplatené balíčky hodín</span>
+          <span class="ttl">Čo keď tréning zrušíš</span>
           <span class="sign" aria-hidden="true"></span>
         </button>
         <div class="acc-panel">
           <div class="acc-inner">
-            <p>Tréner ti predá 5, 10 alebo 20 hodín so zľavou, platia rok a dajú sa aj darovať.</p>
-            <p>Čo nevyčerpáš, preplatíme ti.</p>
+            <p>Ak zrušíš tréning šestnásť a viac hodín vopred, dostaneš celú sumu späť; ak menej ako šesť hodín pred ním, prichádzaš o ňu celú.</p>
+            <p>Platí to len pri platbe kartou – keď si platil QR kódom alebo v hotovosti, dohodneš sa priamo s trénerom.</p>
           </div>
         </div>
       </div>
@@ -1125,72 +1105,13 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       <div class="acc-item">
         <button class="acc-btn" aria-expanded="false">
           <span class="idx">(02)</span>
-          <span class="ttl">Zrušenie a vrátenie peňazí</span>
+          <span class="ttl">Kedy má tréner peniaze z karty</span>
           <span class="sign" aria-hidden="true"></span>
         </button>
         <div class="acc-panel">
           <div class="acc-inner">
-            <p>Zrušíš 16 a viac hodín vopred a dostaneš všetko späť, menej ako 6 hodín pred tréningom prichádzaš o celú sumu.</p>
-            <p>Platí to len pri platbe kartou – pri QR alebo hotovosti sa dohodneš priamo s trénerom.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="acc-item">
-        <button class="acc-btn" aria-expanded="false">
-          <span class="idx">(03)</span>
-          <span class="ttl">Výplata trénerovi pri platbe kartou</span>
-          <span class="sign" aria-hidden="true"></span>
-        </button>
-        <div class="acc-panel">
-          <div class="acc-inner">
-            <p>Sumu uvoľníme 12 hodín po tréningu alebo hneď, ako hráč potvrdí, že bolo v poriadku.</p>
-            <p>Tréner si ju potom pošle na účet, kedy chce – výber od 100 € je vždy zadarmo.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Pre trénerov ─────────────────────────────────────────
-     Stránka musí prehovoriť k obom stranám, inak nebude ku komu chodiť.
-     Kroky vyššie hovoria, ako to chodí; tu je to, čo tréner dostane navyše.
-     O peniazoch tu už ani slovo — tie majú vlastnú sekciu. -->
-<section class="section" id="trenerom" style="padding-top:0">
-  <div class="wrap">
-    <div class="why reveal">
-      <span class="eyebrow">Pre trénerov</span>
-      <h2>Si v niečom naozaj dobrý a chceš si privyrobiť?</h2>
-
-      <div class="why-body" style="margin-top:36px">
-        <div>
-          <p>Založ si účet zadarmo, nastav cenník a trénuj – z každého eura dostaneš celé euro.</p>
-          <p>Licenciu nepotrebuješ, stačí že to vieš a baví ťa to ukázať ďalším.</p>
-          <ul class="why-list">
-            <li>Verejná stránka s cenníkom a hodnoteniami, ktorú nájde aj Google.</li>
-            <li>Kalendár, kde voľné okno so zľavou uvidia hráči hneď.</li>
-            <li>Prehľad, koľko si zarobil a čo ti ešte príde.</li>
-            <li>Zelená fajočka, keď ťa nájdeme v štátnom registri športu.</li>
-          </ul>
-          <p class="why-cta"><a class="btn btn-lime" href="#stiahnut">Založ si účet zadarmo</a></p>
-          <p style="margin-top:24px"><a class="inline-link" href="/treneri/">Pozri, ako vyzerá stránka trénera</a></p>
-        </div>
-        <div class="why-visual" style="padding:clamp(20px,3vw,32px);align-items:stretch;aspect-ratio:auto">
-          <div class="mock-card" style="width:100%;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);box-shadow:none">
-            <div class="mock-row">
-              <span class="mock-avatar">KN</span>
-              <div>
-                <div class="mock-name" style="color:#fff">Katka Nováková</div>
-                <div class="mock-meta" style="color:rgba(255,255,255,.6)">Tenis · Košice</div>
-              </div>
-              <span class="mock-stars">★ 4,7</span>
-            </div>
-            <div class="mock-tags"><span class="mock-tag" style="background:rgba(201,242,78,.16);color:var(--lime)">Overená</span><span class="mock-tag" style="background:rgba(201,242,78,.16);color:var(--lime)">37 hodnotení</span></div>
-            <div class="mock-foot" style="border-top-color:rgba(255,255,255,.14)">
-              <div class="mock-price" style="color:#fff">od 16&nbsp;€<span style="color:rgba(255,255,255,.55)">za hodinu</span></div>
-              <span class="mock-btn" style="background:var(--lime);color:#0B100D">Rezervovať</span>
-            </div>
+            <p>Sumu uvoľníme dvanásť hodín po tréningu alebo hneď, ako hráč potvrdí, že bolo všetko v poriadku.</p>
+            <p>Tréner si ju potom pošle na svoj účet, kedy chce, a výber od 100 € je vždy zadarmo.</p>
           </div>
         </div>
       </div>
@@ -1256,13 +1177,15 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       <div>
         <h4>Stránka</h4>
         <div class="foot-links">
+          <a href="#trenerom">Pre trénerov</a>
+          <a href="#hracom">Pre hráčov</a>
+          <a href="#partie">Partie</a>
+          <a href="#sluzby">Služby</a>
+          <a href="#sporty">41 športov</a>
           <a href="/treneri/">Tréneri</a>
           <a href="/skupiny/">Skupiny</a>
-          <a href="#preco">Čo appka vie</a>
           <a href="#ako">Ako to funguje</a>
-          <a href="#partie">Pre partie</a>
           <a href="#ceny">Platby</a>
-          <a href="#trenerom">Pre trénerov</a>
         </div>
       </div>
       <div>
@@ -1270,7 +1193,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         <div class="foot-links">
           <a href="./legal/privacy.html">Ochrana osobných údajov</a>
           <a href="./legal/terms.html">Podmienky používania</a>
-          <a href="mailto:matchball.app@gmail.com">matchball.app@gmail.com</a>
+          <a href="mailto:support@matchballapp.com">support@matchballapp.com</a>
         </div>
       </div>
     </div>
@@ -1328,14 +1251,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         var panel = document.getElementById(t.getAttribute('aria-controls'));
         if (panel) panel.hidden = !on;
       });
-      // Vedľa krokov sa vymení aj sada mock kariet — hráč a tréner vidia v appke
-      // iné obrazovky, takže rovnaká karta pre obe strany by klamala.
-      var gal = btn.getAttribute('data-shots');
-      if (gal) {
-        document.querySelectorAll('.mock-stack').forEach(function (g) {
-          g.hidden = g.id !== gal;
-        });
-      }
       move(btn);
     }
     tabs.forEach(function (t, i) {
