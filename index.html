@@ -257,6 +257,10 @@ p{margin:0}
   color:var(--muted);white-space:nowrap;transition:color .3s var(--ease);
 }
 .tabbar button[aria-selected="true"]{color:#fff}
+/* Oba panely stoja v jednej bunke: prepnutie tabu nemení výšku sekcie a stránka pri ňom neskočí (Martin, 11. 9.). */
+.how-panels{display:grid}
+.how-panels>.tabpanel{grid-area:1/1}
+.how-panels>.tabpanel[hidden]{display:block;visibility:hidden;pointer-events:none}
 .tabpanel[hidden]{display:none}
 .tabpanel{animation:fadeUp .5s var(--ease) both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
@@ -738,7 +742,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
           <p>Ak chceš mať hodiny isté dopredu, predáš hráčovi balíček piatich, desiatich alebo dvadsiatich tréningov so zľavou. Licenciu na nič z toho nepotrebuješ, stačí, že si dobrý a vieš to odovzdať ďalej.</p>
           <p class="cta-row why-cta">
             <a class="btn btn-lime" href="#stiahnut">Založ si účet zadarmo</a>
-            <a class="inline-link" href="/treneri/">Pozri, ako vyzerá stránka trénera</a>
           </p>
         </div>
         <div class="why-visual" style="padding:clamp(20px,3vw,32px);align-items:stretch;aspect-ratio:auto">
@@ -781,7 +784,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         <p>Za každý odohraný tréning aj sparing ti padne loptička s maskotom a postupne ti rastie level od jednotky až po päťdesiatku. Je to malá radosť navyše, ale práve tá ťa vytiahne von aj v týždni, keď sa ti veľmi nechce.</p>
         <p class="cta-row">
           <a class="btn btn-green" href="#stiahnut">Stiahnuť appku</a>
-          <a class="inline-link" href="/treneri/">Pozrieť trénerov aj bez appky</a>
         </p>
       </div>
 
@@ -1015,6 +1017,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       </div>
     </div>
 
+    <div class="how-panels">
     <div class="tabpanel" role="tabpanel" id="panel-hrac" aria-labelledby="tab-hrac">
       <div class="steps steps-3">
         <article class="step reveal">
@@ -1067,6 +1070,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       </div>
     </div>
   </div>
+    </div>
 </section>
 
 <!-- ── Platby ───────────────────────────────────────────────
