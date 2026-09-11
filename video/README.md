@@ -1,9 +1,9 @@
 # Videá s ukážkami
 
-Tri krátke videá pre sekcie na hlavnej stránke (`#trenerom`, `#hracom`,
-`#partie`). Kým súbor chýba, `index.html` namiesto neho zobrazuje mock kartu
-danej sekcie so štítkom „Ukážka čoskoro“ – `<video>` je v HTML zakomentované
-a čaká tu na súbor.
+Štyri krátke videá pre sekcie na hlavnej stránke (`#trenerom`, `#hracom`,
+`#partie`, `#sluzby`). Kým súbor chýba, `index.html` namiesto neho zobrazuje
+mock kartu danej sekcie so štítkom „Ukážka čoskoro“ – `<video>` je v HTML
+zakomentované a čaká tu na súbor.
 
 ## Súbory
 
@@ -12,9 +12,10 @@ a čaká tu na súbor.
 | `treneri.mp4`      | Pre trénerov | ako tréner potvrdí žiadosť, nastaví cenník alebo dostane platbu QR kódom |
 | `hraci.mp4`        | Pre hráčov   | ako hráč nájde trénera/partiu, pošle žiadosť a dostane loptičku po tréningu |
 | `skupiny.mp4`      | Pre skupiny  | ako organizátor partie vidí, kto príde a kto zaplatil |
+| `sluzby.mp4`       | Zdravie a služby | ako fyzioterapeut alebo masér nastaví cenník vyšetrenia a potvrdí objednávku |
 
 Voliteľne k nim patrí statický náhľad (prehráva sa až po kliknutí):
-`treneri.jpg`, `hraci.jpg`, `skupiny.jpg` (atribút `poster` na `<video>`).
+`treneri.jpg`, `hraci.jpg`, `skupiny.jpg`, `sluzby.jpg` (atribút `poster` na `<video>`).
 
 ## Formát
 

@@ -240,42 +240,9 @@ p{margin:0}
 .stat .num{font-size:clamp(1.9rem,3.4vw,2.6rem);font-weight:700;letter-spacing:-.03em;color:var(--green)}
 .stat .lbl{margin-top:6px;color:var(--muted);font-size:.95rem;line-height:1.45}
 
-/* ── Taby ───────────────────────────────────────────────────── */
-.tabbar{
-  display:inline-flex;gap:4px;padding:5px;border-radius:999px;
-  background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-soft);
-  position:relative;max-width:100%;overflow-x:auto;scrollbar-width:none;
-}
-.tabbar::-webkit-scrollbar{display:none}
-.tabbar .glider{
-  position:absolute;top:5px;bottom:5px;left:0;width:0;border-radius:999px;
-  background:var(--ink);transition:transform .45s var(--ease),width .45s var(--ease);z-index:0;
-}
-.tabbar button{
-  position:relative;z-index:1;border:0;background:transparent;cursor:pointer;
-  padding:11px 22px;border-radius:999px;font-weight:600;font-size:.97rem;
-  color:var(--muted);white-space:nowrap;transition:color .3s var(--ease);
-}
-.tabbar button[aria-selected="true"]{color:#fff}
-/* Oba panely stoja v jednej bunke: prepnutie tabu nemení výšku sekcie a stránka pri ňom neskočí (Martin, 11. 9.). */
-.how-panels{display:grid}
-.how-panels>.tabpanel{grid-area:1/1}
-.how-panels>.tabpanel[hidden]{display:block;visibility:hidden;pointer-events:none}
-.tabpanel[hidden]{display:none}
-.tabpanel{animation:fadeUp .5s var(--ease) both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-
 /* ── Kroky ──────────────────────────────────────────────────── */
 .how{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(28px,4vw,56px);align-items:start}
 .steps{display:grid;gap:12px}
-/* Tri kroky vedľa seba. V sekcii „Ako to funguje" nestojí vedľa nich nič iné,
-   takže si môžu vziať celú šírku — pod sebou by z troch viet bol zbytočne
-   dlhý stĺpec. */
-.steps-3{grid-template-columns:repeat(3,1fr)}
-.steps-3 .step{flex-direction:column;gap:14px}
-/* V stĺpci je `flex-basis` výška, nie šírka — bez tohto by sa zo štvorčeka
-   s číslom roztiahol pás cez celú kartu. */
-.steps-3 .step .no{flex:0 0 auto;width:42px;align-self:flex-start}
 .step{
   display:flex;gap:20px;padding:24px 26px;border-radius:var(--radius-lg);
   background:var(--card);border:1px solid var(--line);
@@ -309,31 +276,28 @@ p{margin:0}
   font-size:.78rem;font-weight:600;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow-soft);
 }
 
-/* ── Rozbaľovacie položky ───────────────────────────────────── */
-.acc{border-top:1px solid var(--line)}
-.acc-item{border-bottom:1px solid var(--line)}
-.acc-btn{
-  width:100%;display:flex;align-items:flex-start;gap:20px;text-align:left;
-  background:transparent;border:0;cursor:pointer;padding:30px 0;
-  transition:padding .4s var(--ease);
+/* ── Platby ───────────────────────────────────────────────────
+   Tri spôsoby platby vedľa seba (Martin, 11. 9. — späť na karty
+   namiesto rozbaľovacích položiek). */
+.pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2vw,22px)}
+.pay-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  padding:clamp(24px,2.8vw,32px);display:flex;flex-direction:column;gap:12px;
+  box-shadow:var(--shadow-soft);
 }
-.acc-btn .idx{font-size:.85rem;font-weight:600;color:var(--muted);padding-top:8px;min-width:34px}
-.acc-btn .ttl{font-size:clamp(1.25rem,2.6vw,1.85rem);font-weight:600;letter-spacing:-.02em;line-height:1.2;transition:color .3s}
-.acc-btn:hover .ttl{color:var(--green)}
-.acc-btn .sign{
-  margin-left:auto;flex:0 0 38px;height:38px;border-radius:50%;border:1px solid var(--line);
-  display:grid;place-items:center;position:relative;transition:background .35s var(--ease),border-color .35s,transform .45s var(--ease);
+.pay-card.lead-card{border-color:rgba(26,122,74,.35);box-shadow:var(--shadow-lift)}
+.pay-tag{
+  align-self:flex-start;display:inline-flex;align-items:center;gap:7px;
+  padding:6px 13px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);
+  font-size:.82rem;font-weight:600;letter-spacing:.02em;
 }
-.acc-btn .sign::before,.acc-btn .sign::after{content:"";position:absolute;background:var(--fg);border-radius:2px;transition:transform .45s var(--ease),background .3s}
-.acc-btn .sign::before{width:13px;height:1.8px}
-.acc-btn .sign::after{width:1.8px;height:13px}
-.acc-item.open .acc-btn .sign{background:var(--ink);border-color:var(--ink);transform:rotate(180deg)}
-.acc-item.open .acc-btn .sign::before,.acc-item.open .acc-btn .sign::after{background:#fff}
-.acc-item.open .acc-btn .sign::after{transform:scaleY(0)}
-.acc-panel{overflow:hidden;height:0;transition:height .5s var(--ease)}
-.acc-inner{padding:0 0 32px 54px;max-width:52rem}
-.acc-inner p{color:var(--muted)}
-.acc-inner p + p{margin-top:14px}
+.pay-card h3{font-size:1.12rem}
+.pay-card p{color:var(--muted);font-size:.99rem;line-height:1.6}
+.pay-card .fee{
+  margin-top:auto;padding-top:14px;border-top:1px solid var(--line);
+  font-size:.92rem;color:var(--muted);
+}
+.pay-card .fee b{color:var(--fg);font-weight:600}
 
 /* ── Zaujímavosti ───────────────────────────────────────────── */
 /* Jedna karta, nie mriežka. Aby to nevyzeralo ako zvyšok po dvoch zmazaných,
@@ -448,29 +412,10 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 }
 .next-go svg{transition:transform .35s var(--ease)}
 .next-card:hover .next-go svg{transform:translateX(3px)}
-/* Textové odkazy pod tlačidlami v záverečnej výzve. */
-.cta-links{
-  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 16px;
-  margin-top:22px;position:relative;font-size:.98rem;
-}
-.cta-links a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.45);
-  padding-bottom:2px;transition:border-color .25s,opacity .25s}
-.cta-links a:hover{border-color:var(--lime);opacity:.9}
-.cta-links .dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.45)}
 /* Odkaz z odstavca — v krokoch aj vo výhodách. */
 .inline-link{color:var(--green);text-decoration:none;font-weight:600;
   border-bottom:1px solid rgba(26,122,74,.35);transition:border-color .25s}
 .inline-link:hover{border-color:var(--green)}
-
-/* ── Súvislý text ───────────────────────────────────────────
-   Sekcie pre trénera, pre hráča a pre partie nie sú zoznamy hesiel, ale
-   odseky celými vetami. Majú preto širší riadok a väčšie medzery medzi
-   odsekmi než bežný text v karte — číta sa to ako list, nie ako prospekt. */
-.prose{max-width:40rem}
-.prose p{color:var(--muted);font-size:1.06rem;line-height:1.7}
-.prose p + p{margin-top:18px}
-.prose .quiet{font-size:.98rem;opacity:.85}
-.prose .cta-row{margin-top:30px;display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center}
 
 /* ── Chýba ti šport? ───────────────────────────────────────── */
 .sport-missing{margin:14px 0 0;font-size:.95rem;color:#5E7367}
@@ -492,8 +437,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
    Fotky a video appky sú preč (neaktuálne); tieto karty ukazujú TVAR
    obrazovky — rovnaké prvky, aké appka naozaj kreslí — bez toho, aby
    predstierali skutočný záber. */
-.mock-stack{display:grid;gap:16px}
-.mock-stack[hidden]{display:none}
 .mock-card{
   background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
   padding:20px;box-shadow:var(--shadow-lift);
@@ -536,8 +479,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 
 /* ── Menšie obrazovky ───────────────────────────────────────── */
 @media (max-width:980px){
-  .steps-3{grid-template-columns:1fr}
-  .steps-3 .step{flex-direction:row}
+  .pay-grid{grid-template-columns:1fr}
   .next-grid{grid-template-columns:1fr}
   .hero h1{max-width:none}
   .how{grid-template-columns:1fr}
@@ -557,9 +499,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   .nav-burger{display:flex}
   .mobile-menu{display:flex}
   .nav{padding:8px 8px 8px 18px}
-  .acc-inner{padding-left:0}
-  .acc-btn{gap:14px}
-  .acc-btn .idx{display:none}
   /* Na úzkej obrazovke by veľké číslo vedľa textu nechalo na text pár znakov. */
   .fact{grid-template-columns:1fr}
   .fact > :not(.fact-num){grid-column:auto}
@@ -684,6 +623,30 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
     </a>
   </div>
 </header>
+
+<!-- ── 41 športov ───────────────────────────────────────────
+     Nie zoznam 41 mien, ale jedna veta a päť kategórií. Odkaz na napísanie
+     stojí priamo v tej vete: kto svoj šport nenašiel, nemá ďalej hľadať. -->
+<section class="section" id="sporty">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Športy</span>
+      <h2>Matchball ti momentálne ponúka 41 športov a služieb.</h2>
+      <p class="lead">Vyber si z raketových, loptových, fitnes, individuálnych aj zo zdravia a služieb – a ak ten svoj nenájdeš, <a class="inline-link" href="mailto:support@matchballapp.com?subject=Ch%C3%BDba%20mi%20%C5%A1port">napíš nám</a> a my ti ho tam pridáme. Jeden účet ti stačí na všetky a svoju úroveň si pri každom športe nastavíš zvlášť.</p>
+    </div>
+
+    <!-- Chipy stoja mimo `.section-head`: tá drží riadok textu na 44 rem, čo je
+         dobré na čítanie, ale päť kategórií by pod sebou spravilo stĺpec cez
+         pol obrazovky. Na plnej šírke sa zmestia do dvoch radov. -->
+    <div class="sport-cats reveal" style="margin-top:0">
+        <span class="sport-cat"><span class="dot" style="background:#1A7A4A"></span><b>Raketové</b><span>tenis, bedminton, padel, squash, stolný tenis, pickleball</span></span>
+        <span class="sport-cat"><span class="dot" style="background:#2F7BD1"></span><b>Loptové a tímové</b><span>futbal, volejbal, basketbal, hokej…</span></span>
+        <span class="sport-cat"><span class="dot" style="background:#C9F24E"></span><b>Fitnes a telo</b><span>joga, box, tanec, pilates…</span></span>
+        <span class="sport-cat"><span class="dot" style="background:#E8B93B"></span><b>Individuálne a outdoor</b><span>beh, plávanie, lyžovanie, golf…</span></span>
+        <span class="sport-cat"><span class="dot" style="background:#D1685C"></span><b>Zdravie a služby</b><span>fyzioterapia, masáže, výživa…</span></span>
+    </div>
+  </div>
+</section>
 
 <!-- ── Pre trénerov ─────────────────────────────────────────
      Prvá sekcia po hero patrí trénerovi, nie hráčovi: kým nie je ku komu
@@ -920,64 +883,80 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 
 <!-- ── Služby ───────────────────────────────────────────────
      Fyzioterapeut a masér nie sú tréneri: predávajú vyšetrenie alebo
-     terapiu, nie hodinu. Preto majú vlastnú sekciu a vlastnú mock kartu
-     s dvoma položkami cenníka namiesto jednej hodinovej sadzby. -->
+     terapiu, nie hodinu. Rovnaké rozloženie ako tréneri, hráči a skupiny
+     vyššie: hore odsek, potom vľavo ukážka a vpravo karty s výhodami.
+     Video ešte nie je natočené (pozri video/README.md), tak namiesto
+     neho stojí mock karta s dvoma položkami cenníka. -->
 <section class="section" id="sluzby" style="padding-top:0">
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Zdravie a služby</span>
-      <h2>Nie si tréner, ale pomáhaš športovcom?</h2>
+      <h2>Máš ordináciu a chceš, aby ťa našli športovci z okolia?</h2>
+      <p class="lead">Ak si fyzioterapeut, masér, výživový poradca alebo športový psychológ, nastavíš si cenník podľa vyšetrenia či terapie, nie podľa hodiny. Keď niečo bolí teba, objednáš sa v appke rovnako – ako na tréning.</p>
     </div>
 
-    <div class="how">
-      <div class="prose reveal">
-        <p>Ak si fyzioterapeut, masér, výživový poradca alebo športový psychológ, nastavíš si cenník podľa vyšetrenia či terapie, nie podľa hodiny. Človek sa k tebe objedná presne tak, ako sa objednáva na tréning, takže mu na to stačí pár ťuknutí. A športovci z tvojho okolia ťa nájdu vtedy, keď ich niečo bolí.</p>
-        <p class="cta-row"><a class="btn btn-green" href="#stiahnut">Založ si účet zadarmo</a></p>
-      </div>
-
+    <div class="how how-demo">
       <div class="phone-col reveal">
-        <div class="mock-stack">
+        <figure class="demo">
+          <!-- odkomentuj, keď je súbor v `video/` (pozri video/README.md)
+          <video class="demo-video" poster="video/sluzby.jpg" controls preload="none" playsinline>
+            <source src="video/sluzby.mp4" type="video/mp4">
+          </video>
+          -->
           <div class="mock-card">
             <div class="mock-row">
-              <span class="mock-avatar alt">KB</span>
+              <span class="mock-avatar alt">KH</span>
               <div>
-                <div class="mock-name">Katarína Baková</div>
-                <div class="mock-meta">Fyzioterapia · Bratislava</div>
+                <div class="mock-name">Klaudia Hricová</div>
+                <div class="mock-meta">Fyzioterapeutka</div>
               </div>
-              <span class="mock-stars">★ 4,9</span>
             </div>
             <div class="mock-when"><b>Vstupné vyšetrenie</b> · 60 min · 45&nbsp;€</div>
             <div class="mock-when"><b>Terapia</b> · 45 min · 35&nbsp;€</div>
           </div>
+          <span class="demo-badge">Ukážka čoskoro</span>
+        </figure>
+      </div>
+
+      <div>
+        <div class="steps">
+          <article class="step reveal">
+            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="5" width="17.6" height="15.8" rx="3.2"/><path d="M8 3v4M16 3v4M3.2 10h17.6M7 14h4M13 14h4M7 17h4"/></svg></div>
+            <div>
+              <h3>Cenník podľa vyšetrenia alebo terapie</h3>
+              <p>Cenu si nastavíš podľa toho, čo naozaj predávaš, nie podľa hodiny.</p>
+            </div>
+          </article>
+          <article class="step reveal">
+            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.4v5l3.4 2"/></svg></div>
+            <div>
+              <h3>Klient sa objedná ako na tréning</h3>
+              <p>Pošle ti žiadosť na voľný termín a ty ju jedným ťuknutím potvrdíš.</p>
+            </div>
+          </article>
+          <article class="step reveal">
+            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.4" cy="10.4" r="6.4"/><path d="M19.6 19.6l-4.7-4.7"/></svg></div>
+            <div>
+              <h3>Nájdu ťa športovci z okolia</h3>
+              <p>V appke aj cez Google – vtedy, keď ich niečo bolí.</p>
+            </div>
+          </article>
+          <article class="step reveal">
+            <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 6.5c0-1.9-2-3-5-3s-5 1.2-5 3 2 2.6 5 3 5 1.1 5 3-2 3-5 3-5-1.1-5-3"/></svg></div>
+            <div>
+              <h3>Platí ti priamo, bez poplatku</h3>
+              <p>QR kódom alebo v hotovosti – peniaze idú rovno tebe.</p>
+            </div>
+          </article>
         </div>
+        <p class="cta-row">
+          <a class="btn btn-green" href="#stiahnut">Založ si účet zadarmo</a>
+        </p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── 41 športov ───────────────────────────────────────────
-     Nie zoznam 41 mien, ale jedna veta a päť kategórií. Odkaz na napísanie
-     stojí priamo v tej vete: kto svoj šport nenašiel, nemá ďalej hľadať. -->
-<section class="section" id="sporty" style="padding-top:0">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="eyebrow">Športy</span>
-      <h2>Matchball ti ponúka 41 športov a služieb.</h2>
-      <p class="lead">Vyber si z raketových, loptových, fitnes, individuálnych aj zo zdravia a služieb – a ak ten svoj nenájdeš, <a class="inline-link" href="mailto:support@matchballapp.com?subject=Ch%C3%BDba%20mi%20%C5%A1port">napíš nám</a> a my ti ho tam pridáme. Jeden účet ti stačí na všetky a svoju úroveň si pri každom športe nastavíš zvlášť.</p>
-    </div>
-
-    <!-- Chipy stoja mimo `.section-head`: tá drží riadok textu na 44 rem, čo je
-         dobré na čítanie, ale päť kategórií by pod sebou spravilo stĺpec cez
-         pol obrazovky. Na plnej šírke sa zmestia do dvoch radov. -->
-    <div class="sport-cats reveal" style="margin-top:0">
-        <span class="sport-cat"><span class="dot" style="background:#1A7A4A"></span><b>Raketové</b><span>tenis, bedminton, padel, squash, stolný tenis, pickleball</span></span>
-        <span class="sport-cat"><span class="dot" style="background:#2F7BD1"></span><b>Loptové a tímové</b><span>futbal, volejbal, basketbal, hokej…</span></span>
-        <span class="sport-cat"><span class="dot" style="background:#C9F24E"></span><b>Fitnes a telo</b><span>joga, box, tanec, pilates…</span></span>
-        <span class="sport-cat"><span class="dot" style="background:#E8B93B"></span><b>Individuálne a outdoor</b><span>beh, plávanie, lyžovanie, golf…</span></span>
-        <span class="sport-cat"><span class="dot" style="background:#D1685C"></span><b>Zdravie a služby</b><span>fyzioterapia, masáže, výživa…</span></span>
-    </div>
-  </div>
-</section>
 
 <!-- ── Kam ďalej ────────────────────────────────────────────
      Kto sa nechce hneď rozhodovať, si trénerov aj skupiny pozrie na webe.
@@ -1019,126 +998,37 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   </div>
 </section>
 
-<!-- ── Ako to funguje (taby) ────────────────────────────────
-     Tri kroky, každý jedna veta. Vedľa krokov už nestojí galéria kariet
-     (tie sú vyššie pri sekciách, ku ktorým patria), takže si kroky berú
-     celú šírku a tlačidlá tabov nevymieňajú nič iné než panely. -->
-<section class="section" id="ako" style="padding-top:0">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="eyebrow">Ako to funguje</span>
-      <h2>Prvýkrát ti to zaberie pár minút.</h2>
-      <p class="lead">Potom už len ťukáš. Je to tá istá appka v dvoch pohľadoch, tak si prepni ten svoj.</p>
-    </div>
-
-    <div class="reveal" style="margin-bottom:38px">
-      <div class="tabbar" role="tablist" aria-label="Ako to funguje" data-tabs>
-        <span class="glider" aria-hidden="true"></span>
-        <button role="tab" id="tab-hrac" aria-controls="panel-hrac" aria-selected="true">Pre hráčov</button>
-        <button role="tab" id="tab-trener" aria-controls="panel-trener" aria-selected="false">Pre trénerov</button>
-      </div>
-    </div>
-
-    <div class="how-panels">
-    <div class="tabpanel" role="tabpanel" id="panel-hrac" aria-labelledby="tab-hrac">
-      <div class="steps steps-3">
-        <article class="step reveal">
-          <div class="no">01</div>
-          <div>
-            <h3>Povedz, kde a čo hráš</h3>
-            <p>Vyberieš si šport a mesto a na jednej obrazovke uvidíš trénerov, hráčov aj partie, ktorí sú pri tebe.</p>
-          </div>
-        </article>
-        <article class="step reveal">
-          <div class="no">02</div>
-          <div>
-            <h3>Ťukni na voľnú hodinu</h3>
-            <p>Ťukneš na voľný termín v kalendári trénera, pošleš mu žiadosť a platíš až vtedy, keď ti ju potvrdí.</p>
-          </div>
-        </article>
-        <article class="step reveal">
-          <div class="no">03</div>
-          <div>
-            <h3>Choď hrať</h3>
-            <p>Deň vopred ti pripomenieme termín aj počasie a po tréningu ti padne loptička.</p>
-          </div>
-        </article>
-      </div>
-    </div>
-
-    <div class="tabpanel" role="tabpanel" id="panel-trener" aria-labelledby="tab-trener" hidden>
-      <div class="steps steps-3">
-        <article class="step">
-          <div class="no">01</div>
-          <div>
-            <h3>Nastav si cenník</h3>
-            <p>Cenník si nastavíš raz a už ho neriešiš – doobeda môžeš mať inú cenu než večer.</p>
-          </div>
-        </article>
-        <article class="step">
-          <div class="no">02</div>
-          <div>
-            <h3>Potvrď žiadosť</h3>
-            <p>Žiadosť od hráča potvrdíš jedným ťuknutím a kalendár aj chat s ním máš na tej istej obrazovke.</p>
-          </div>
-        </article>
-        <article class="step">
-          <div class="no">03</div>
-          <div>
-            <h3>Peniaze máš po tréningu</h3>
-            <p>Peniaze z QR kódu a z hotovosti máš hneď, a čo ti hráč zaplatí kartou, si pošleš na účet, kedy chceš.</p>
-          </div>
-        </article>
-      </div>
-    </div>
-  </div>
-    </div>
-</section>
-
 <!-- ── Platby ───────────────────────────────────────────────
-     Jediné miesto na stránke, kde sa hovorí o peniazoch — jeden odsek
-     namiesto troch kariet s heslami, pod ním dve veci, ktoré sa človek
-     pýta až vtedy, keď ho zaujímajú. -->
+     Jediné miesto na stránke, kde sa hovorí o peniazoch — tri spôsoby,
+     ako môže hráč trénerovi zaplatiť, vedľa seba. -->
 <section class="section" id="ceny" style="padding-top:0">
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Platby</span>
       <h2>Z ceny trénera si neberieme nič.</h2>
+      <p class="lead">Koľko si tréner vypýta, toľko dostane – vyberáš si len to, ako mu peniaze dáš.</p>
     </div>
 
-    <div class="prose reveal" style="margin-bottom:clamp(32px,5vw,52px)">
-      <p>Z toho, čo si tréner vypýta, si neberieme ani cent, takže koľko stojí hodina, toľko mu aj zostane. Keď mu zaplatíš QR kódom alebo v hotovosti, neplatíš navyše nič a peniaze idú rovno na jeho účet. Zarábať chceme na tom, čo appka pridá navyše, nie na tom, čo si tréner odučí.</p>
-      <p>Ak sa ti nechce riešiť prevod, zaplatíš kartou priamo v appke a pripočíta sa jediný poplatok v celej appke – 5 % a 0,30 € pre platobnú bránu. Uvidíš ho ešte pred zaplatením a tréner aj tak dostane celú svoju cenu.</p>
-      <p>Tréner ti môže predať aj balíček piatich, desiatich alebo dvadsiatich hodín so zľavou. Platí rok, dá sa darovať a čo z neho nevyčerpáš, ti preplatíme.</p>
-    </div>
-
-    <div class="acc reveal" data-acc>
-      <div class="acc-item">
-        <button class="acc-btn" aria-expanded="false">
-          <span class="idx">(01)</span>
-          <span class="ttl">Čo keď tréning zrušíš</span>
-          <span class="sign" aria-hidden="true"></span>
-        </button>
-        <div class="acc-panel">
-          <div class="acc-inner">
-            <p>Ak zrušíš tréning šestnásť a viac hodín vopred, dostaneš celú sumu späť; ak menej ako šesť hodín pred ním, prichádzaš o ňu celú.</p>
-            <p>Platí to len pri platbe kartou – keď si platil QR kódom alebo v hotovosti, dohodneš sa priamo s trénerom.</p>
-          </div>
-        </div>
+    <div class="pay-grid reveal">
+      <div class="pay-card lead-card">
+        <span class="pay-tag">Bez poplatku</span>
+        <h3>QR prevod priamo trénerovi</h3>
+        <p>Naskenuješ jeho kód v bankovej appke a peniaze idú rovno na jeho účet.</p>
+        <p class="fee"><b>0 € navyše.</b></p>
       </div>
 
-      <div class="acc-item">
-        <button class="acc-btn" aria-expanded="false">
-          <span class="idx">(02)</span>
-          <span class="ttl">Kedy má tréner peniaze z karty</span>
-          <span class="sign" aria-hidden="true"></span>
-        </button>
-        <div class="acc-panel">
-          <div class="acc-inner">
-            <p>Sumu uvoľníme dvanásť hodín po tréningu alebo hneď, ako hráč potvrdí, že bolo všetko v poriadku.</p>
-            <p>Tréner si ju potom pošle na svoj účet, kedy chce, a výber od 100 € je vždy zadarmo.</p>
-          </div>
-        </div>
+      <div class="pay-card">
+        <span class="pay-tag">Poplatok brány</span>
+        <h3>Kartou v appke</h3>
+        <p>Suma sa strhne až po tom, čo tréner potvrdí, že tréning prebehol.</p>
+        <p class="fee"><b>5 % + 0,30 €</b> je poplatok platobnej brány, nie náš – tréner dostane celú svoju cenu.</p>
+      </div>
+
+      <div class="pay-card">
+        <span class="pay-tag">Bez poplatku</span>
+        <h3>Hotovosť</h3>
+        <p>Peniaze dáš trénerovi na mieste a v appke to len potvrdíš.</p>
+        <p class="fee"><b>0 € navyše.</b></p>
       </div>
     </div>
   </div>
@@ -1159,13 +1049,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         Stiahnuť z Google Play
       </a>
     </div>
-
-    <!-- Kto ešte appku sťahovať nechce, si vie oboje pozrieť aj na webe. -->
-    <p class="cta-links">
-      <a href="/treneri/">Pozrieť trénerov</a>
-      <span class="dot" aria-hidden="true"></span>
-      <a href="/skupiny/">Pozrieť skupiny</a>
-    </p>
 
     <!-- QR kódy. Stránku si ľudia otvárajú aj na počítači, kde je tlačidlo do
          obchodu na nič — telefón ho namieri a má appku. Kódy sú vykreslené
@@ -1255,43 +1138,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   menu.addEventListener('click', function (e) { if (e.target.tagName === 'A') closeMenu(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
 
-  /* ── Taby s posuvným podkladom ─────────────────────────
-     Podklad („glider") sa nepočíta z CSS, ale z reálnej šírky
-     tlačidla — inak by pri dlhších názvoch sedel len náhodou. */
-  document.querySelectorAll('[data-tabs]').forEach(function (bar) {
-    var glider = bar.querySelector('.glider');
-    var tabs = [].slice.call(bar.querySelectorAll('[role="tab"]'));
-
-    function move(btn) {
-      glider.style.width = btn.offsetWidth + 'px';
-      glider.style.transform = 'translateX(' + (btn.offsetLeft - bar.scrollLeft - 5) + 'px)';
-    }
-    function select(btn) {
-      tabs.forEach(function (t) {
-        var on = t === btn;
-        t.setAttribute('aria-selected', on ? 'true' : 'false');
-        var panel = document.getElementById(t.getAttribute('aria-controls'));
-        if (panel) panel.hidden = !on;
-      });
-      move(btn);
-    }
-    tabs.forEach(function (t, i) {
-      t.addEventListener('click', function () { select(t); });
-      t.addEventListener('keydown', function (e) {
-        var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-        if (!d) return;
-        e.preventDefault();
-        var next = tabs[(i + d + tabs.length) % tabs.length];
-        next.focus(); select(next);
-      });
-    });
-    // Prvé umiestnenie až po načítaní písma — inak sa meria užšie tlačidlo.
-    var init = function () { move(bar.querySelector('[aria-selected="true"]')); };
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(init); else init();
-    window.addEventListener('resize', init);
-    bar.addEventListener('scroll', init, { passive: true });
-  });
-
   /* ── Taby „Prečo Matchball" ────────────────────────────── */
   document.querySelectorAll('[data-why]').forEach(function (bar) {
     var tabs = [].slice.call(bar.querySelectorAll('[role="tab"]'));
@@ -1312,43 +1158,6 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         tabs[(i + d + tabs.length) % tabs.length].click();
       });
     });
-  });
-
-  /* ── Rozbaľovacie položky ──────────────────────────────
-     Výška sa nastavuje v pixeloch, aby sa dala animovať; po
-     otvorení sa uvoľní na auto, nech dlhší text nepretečie. */
-  document.querySelectorAll('[data-acc]').forEach(function (acc) {
-    var items = [].slice.call(acc.querySelectorAll('.acc-item'));
-    items.forEach(function (item) {
-      var btn = item.querySelector('.acc-btn');
-      var panel = item.querySelector('.acc-panel');
-      btn.addEventListener('click', function () {
-        var open = item.classList.contains('open');
-        items.forEach(function (o) {
-          if (o === item) return;
-          o.classList.remove('open');
-          o.querySelector('.acc-btn').setAttribute('aria-expanded', 'false');
-          o.querySelector('.acc-panel').style.height = '0px';
-        });
-        if (open) {
-          panel.style.height = panel.scrollHeight + 'px';
-          requestAnimationFrame(function () { panel.style.height = '0px'; });
-          item.classList.remove('open');
-          btn.setAttribute('aria-expanded', 'false');
-        } else {
-          item.classList.add('open');
-          btn.setAttribute('aria-expanded', 'true');
-          panel.style.height = panel.scrollHeight + 'px';
-          panel.addEventListener('transitionend', function once(e) {
-            if (e.propertyName !== 'height') return;
-            panel.removeEventListener('transitionend', once);
-            if (item.classList.contains('open')) panel.style.height = 'auto';
-          });
-        }
-      });
-    });
-    // Prvá položka otvorená — prázdny zoznam nadpisov nepovie nič.
-    if (items[0]) items[0].querySelector('.acc-btn').click();
   });
 
   /* ── Odhalenie pri rolovaní ────────────────────────────── */
