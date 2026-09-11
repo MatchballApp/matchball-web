@@ -616,7 +616,7 @@ function hlavicka(aktivna) {
     <div class="nav-links">
       ${odkaz('/#trenerom', 'Pre trénerov')}
       ${odkaz('/#hracom', 'Pre hráčov')}
-      ${odkaz('/#partie', 'Partie')}
+      ${odkaz('/#partie', 'Pre skupiny')}
       ${odkaz('/treneri/', 'Tréneri', aktivna === 'treneri')}
       ${odkaz('/skupiny/', 'Skupiny', aktivna === 'skupiny')}
       ${odkaz('/#ceny', 'Platby')}
@@ -641,7 +641,7 @@ const PATICKA = `<footer>
         <div class="foot-links">
           <a href="/#trenerom">Pre trénerov</a>
           <a href="/#hracom">Pre hráčov</a>
-          <a href="/#partie">Partie</a>
+          <a href="/#partie">Pre skupiny</a>
           <a href="/treneri/">Tréneri</a>
           <a href="/skupiny/">Skupiny</a>
           <a href="/#ceny">Platby</a>
