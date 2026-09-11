@@ -613,13 +613,13 @@ function hlavicka(aktivna) {
     </a>
     <!-- Presne tie isté odkazy v tom istom poradí ako na domovskej stránke —
          menu sa pri prechode na Trénerov či Skupiny nesmie meniť (Martin, 11. 9.). -->
+    <!-- Tie isté štyri odkazy ako na domovskej stránke; na zozname trénerov
+         či skupín svieti „Nájdi vo svojom meste" (Martin, 11. 9.). -->
     <div class="nav-links">
       ${odkaz('/#trenerom', 'Pre trénerov')}
       ${odkaz('/#hracom', 'Pre hráčov')}
       ${odkaz('/#partie', 'Pre skupiny')}
-      ${odkaz('/treneri/', 'Tréneri', aktivna === 'treneri')}
-      ${odkaz('/skupiny/', 'Skupiny', aktivna === 'skupiny')}
-      ${odkaz('/#ceny', 'Platby')}
+      ${odkaz('/#kam', 'Nájdi vo svojom meste', aktivna === 'treneri' || aktivna === 'skupiny')}
     </div>
     <a class="btn btn-dark btn-sm nav-cta" href="/#stiahnut">Stiahnuť</a>
   </nav>
@@ -642,6 +642,8 @@ const PATICKA = `<footer>
           <a href="/#trenerom">Pre trénerov</a>
           <a href="/#hracom">Pre hráčov</a>
           <a href="/#partie">Pre skupiny</a>
+          <a href="/#sluzby">Zdravie a služby</a>
+          <a href="/#sporty">41 športov</a>
           <a href="/treneri/">Tréneri</a>
           <a href="/skupiny/">Skupiny</a>
           <a href="/#ceny">Platby</a>
