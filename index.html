@@ -264,7 +264,10 @@ p{margin:0}
    v telefónnom pomere, vpravo karty s výhodami – preto je prvý stĺpec
    užší než v `.how`, kde je vľavo text. Kým video nie je natočené
    (video/README.md), namiesto neho stojí mock karta so štítkom. */
-.how-demo{grid-template-columns:.85fr 1.15fr}
+/* Karty vľavo, video vpravo (Martin, 11. 9.); na mobile ide video hore. */
+.how-demo{grid-template-columns:1.15fr .85fr}
+.how-demo .phone-col{order:2}
+.how-demo .cta-row{margin:28px 0 0}
 .demo{
   position:relative;margin:0 auto;max-width:360px;aspect-ratio:9/16;
   border-radius:28px;overflow:hidden;background:var(--card);border:1px solid var(--line);
@@ -483,7 +486,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   .next-grid{grid-template-columns:1fr}
   .hero h1{max-width:none}
   .how{grid-template-columns:1fr}
-  .phone-col{position:static;order:-1;margin-bottom:8px}
+  .phone-col,.how-demo .phone-col{position:static;order:-1;margin-bottom:8px}
   .foot-grid{grid-template-columns:1fr 1fr;gap:32px}
 }
 /* Odkazy sa skrývajú skôr než zvyšok mobilného rozloženia: medzi 760 a 940 px
