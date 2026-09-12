@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sparingové skupiny na Slovensku a v Česku | Matchball</title>
-<meta name="description" content="Sparingové skupiny sú partie, ktoré hrávajú pravidelne a berú nových hráčov. Prvé skupiny vznikajú v appke Matchball.">
+<meta name="description" content="Sparingové skupiny podľa miest: partie, ktoré hrávajú pravidelne a hľadajú ďalších hráčov. Pozri si deň, čas a úroveň — pridáš sa v appke Matchball.">
 <link rel="canonical" href="https://matchballapp.com/skupiny/">
 <link rel="icon" href="/favicon.ico?v=2" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png?v=2">
@@ -14,7 +14,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://matchballapp.com/skupiny/">
 <meta property="og:title" content="Skupiny | Matchball">
-<meta property="og:description" content="Sparingové skupiny sú partie, ktoré hrávajú pravidelne a berú nových hráčov. Prvé skupiny vznikajú v appke Matchball.">
+<meta property="og:description" content="Sparingové skupiny podľa miest: partie, ktoré hrávajú pravidelne a hľadajú ďalších hráčov. Pozri si deň, čas a úroveň — pridáš sa v appke Matchball.">
 <meta property="og:image" content="https://matchballapp.com/hero.webp">
 <meta property="og:locale" content="sk_SK">
 <meta name="twitter:card" content="summary_large_image">
@@ -258,7 +258,7 @@ footer .brand{font-size:1.14rem}
   .grid-groups.solo{margin-bottom:64px}
 }
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Skupiny","url":"https://matchballapp.com/skupiny/","numberOfItems":0,"itemListElement":[]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Skupiny","url":"https://matchballapp.com/skupiny/","numberOfItems":1,"itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"SportsEvent","name":"Sunday Running Club","url":"https://matchballapp.com/skupiny/kosice/","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode","location":{"@type":"Place","name":"Park Anicka","address":{"@type":"PostalAddress","addressLocality":"Košice"}},"startDate":"2026-09-13T08:00:00+00:00","organizer":{"@type":"Person","name":"Martin"}}}]}</script>
 </head>
 <body>
 <a class="skip" href="#obsah">Preskočiť na obsah</a>
@@ -268,6 +268,10 @@ footer .brand{font-size:1.14rem}
       <img class="mark" src="/logo.webp" alt="" width="128" height="128">
       <span>Matchball</span>
     </a>
+    <!-- Presne tie isté odkazy v tom istom poradí ako na domovskej stránke —
+         menu sa pri prechode na Trénerov či Skupiny nesmie meniť (Martin, 11. 9.). -->
+    <!-- Tie isté štyri odkazy ako na domovskej stránke; na zozname trénerov
+         či skupín svieti „Nájdi vo svojom meste" (Martin, 11. 9.). -->
     <div class="nav-links">
       <a href="/#trenerom">Pre trénerov</a>
       <a href="/#hracom">Pre hráčov</a>
@@ -283,10 +287,33 @@ footer .brand{font-size:1.14rem}
   <header class="sec-head">
     <p class="eyebrow">Skupiny</p>
     <h1>Skupiny</h1>
-    <p class="lead">Sparingové skupiny sú partie, ktoré hrávajú pravidelne a berú nových hráčov. Prvé skupiny vznikajú v appke Matchball.</p>
+    <p class="lead">Sparingové skupiny podľa miest: partie, ktoré hrávajú pravidelne a hľadajú ďalších hráčov. Pozri si deň, čas a úroveň — pridáš sa v appke Matchball.</p>
   </header>
 
-  <p class="prazdno">Založ svoju v appke — a nechaj ju nájsť ďalších hráčov.</p>
+  <section class="city-groups">
+    <h2>Košice <span>1 skupina</span></h2>
+    <div class="grid-groups">
+      <article class="group-card">
+        <div class="group-head">
+          <img class="group-avatar" src="/avatary/mc1.jpg" alt="" width="224" height="224" loading="lazy">
+          <div>
+            <h3>Sunday Running Club</h3>
+            <p class="group-when">Park Anicka · Nedeľa 10:00–11:00</p>
+          </div>
+        </div>
+        <div class="group-tags">
+          <span class="tag tag-sport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5.4" r="2"></circle><path d="M12 8v5.4M12 13.4l-4 7M12 13.4l4 7M8.4 10l3.6 1.6 3.6-3"></path></svg>Beh</span>
+          <span class="tag">Všetky úrovne</span>
+        </div>
+        <p class="group-desc">Rekreačná skupina amatérských bežcov.</p>
+        <p class="group-org"><img src="/avatary/mc1.jpg" alt="" width="224" height="224" loading="lazy">Organizuje Martin</p>
+        <div class="group-foot">
+          <div class="group-spots"><b>1 člen</b><span>pridá sa, kto chce</span></div>
+          <a class="btn btn-green btn-sm" href="#pridat-sa">Pridať sa v appke</a>
+        </div>
+      </article>
+    </div>
+  </section>
 
   
 

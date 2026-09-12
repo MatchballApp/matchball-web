@@ -234,6 +234,10 @@ footer .brand{font-size:1.14rem}
       <img class="mark" src="/logo.webp" alt="" width="128" height="128">
       <span>Matchball</span>
     </a>
+    <!-- Presne tie isté odkazy v tom istom poradí ako na domovskej stránke —
+         menu sa pri prechode na Trénerov či Skupiny nesmie meniť (Martin, 11. 9.). -->
+    <!-- Tie isté štyri odkazy ako na domovskej stránke; na zozname trénerov
+         či skupín svieti „Nájdi vo svojom meste" (Martin, 11. 9.). -->
     <div class="nav-links">
       <a href="/#trenerom">Pre trénerov</a>
       <a href="/#hracom">Pre hráčov</a>
@@ -258,7 +262,9 @@ footer .brand{font-size:1.14rem}
 
   <div class="filters">
     <a class="fpill" href="/treneri/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.5s7-5.9 7-11.4a7 7 0 1 0-14 0c0 5.5 7 11.4 7 11.4z"></path><circle cx="12" cy="10" r="2.6"></circle></svg>Košice</a>
-    <span class="fpill static">Tenis</span>
+    <a class="fpill" href="/treneri/kosice/" aria-pressed="true">Všetky športy</a>
+    <a class="fpill" href="/treneri/tenis/kosice/" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"></circle><path d="M4.6 7c2.8 2.2 2.8 7.8 0 10M19.4 7c-2.8 2.2-2.8 7.8 0 10"></path></svg>Tenis</a>
+    <a class="fpill" href="/treneri/box-a-kickbox/kosice/" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8v8M18 8v8M3 12h1.5M19.5 12H21M6 12h12"></path></svg>Box a kickbox</a>
     <button class="fpill" type="button" id="len-overeni" aria-pressed="false"><span class="switch" aria-hidden="true"></span>Len overení</button>
     <span class="spacer"></span>
     <label class="sort-wrap">Zoradiť
@@ -282,7 +288,7 @@ footer .brand{font-size:1.14rem}
         <div class="coach-body">
           <h3><a href="/t/martin-mucha/">Martin Mucha</a></h3>
           <p class="coach-meta">Košice · Ntc</p>
-          
+          <div class="coach-tags"><span class="tag tag-sport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"></circle><path d="M4.6 7c2.8 2.2 2.8 7.8 0 10M19.4 7c-2.8 2.2-2.8 7.8 0 10"></path></svg>Tenis</span><span class="tag tag-sport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8v8M18 8v8M3 12h1.5M19.5 12H21M6 12h12"></path></svg>Box a kickbox</span></div>
           
           <div class="coach-foot">
             <div class="coach-price"><b>15 €</b><span>za hodinu</span></div>
@@ -300,7 +306,7 @@ footer .brand{font-size:1.14rem}
     </div>
   </section>
 
-  <a class="krizom" href="/skupiny/">
+  <a class="krizom" href="/skupiny/kosice/">
     <span class="txt"><b>Hľadáš partiu? Skupiny v meste Košice</b><span>Sparingové skupiny hrávajú pravidelne a berú nových hráčov.</span></span>
     <span class="sip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12h15M13.5 6l6 6-6 6"></path></svg></span>
   </a>

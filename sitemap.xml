@@ -26,6 +26,11 @@
     <priority>0.75</priority>
   </url>
   <url>
+    <loc>https://matchballapp.com/treneri/box-a-kickbox/</loc>
+    <lastmod>2026-09-11</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
     <loc>https://matchballapp.com/treneri/tenis/kosice/</loc>
     <lastmod>2026-09-11</lastmod>
     <priority>0.7</priority>
@@ -36,9 +41,19 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://matchballapp.com/treneri/box-a-kickbox/kosice/</loc>
+    <lastmod>2026-09-11</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://matchballapp.com/skupiny/</loc>
     <lastmod>2026-09-11</lastmod>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/skupiny/kosice/</loc>
+    <lastmod>2026-09-11</lastmod>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/t/ing-michal-kazimir/</loc>
@@ -47,7 +62,7 @@
   </url>
   <url>
     <loc>https://matchballapp.com/t/martin-mucha/</loc>
-    <lastmod>2026-09-09</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <priority>0.7</priority>
   </url>
 </urlset>
