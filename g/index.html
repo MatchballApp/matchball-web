@@ -31,8 +31,8 @@ footer a{color:var(--muted)}
 [hidden]{display:none!important}
 </style>
 <main>
-  <div class="mark">🏐</div>
-  <h1>Poď hrať s nami</h1>
+  <div class="mark" id="mark">🏅</div>
+  <h1 id="heading">Poď hrať s nami</h1>
   <p class="lead">Partia ťa pozýva do Matchballu. Uvidíš, kedy sa hrá, kto príde a koľko to je na osobu — a zaplatíš QR kódom priamo organizátorovi.</p>
 
   <div class="code" id="codeBox" hidden>
@@ -79,14 +79,69 @@ footer a{color:var(--muted)}
 (function () {
   'use strict';
 
-  // Adresa nesie IBA kód partie. Názov partie tu zámerne nie je: odkaz sa
-  // preposiela ďalej a končí v histórii prehliadača, a kto s kým hráva, je
-  // vec tej partie, nie našej adresy.
+  // Ikona a výzva podľa športu (13. 9. 2026) — bez JS (crawler, náhľad odkazu
+  // bez skriptov) ostáva stránka neutrálna: 🏅 „Poď hrať s nami" sedí na
+  // hocijaký šport, aj keď nie je celkom presné. Zoznam kopíruje
+  // `sports.invite` z appky (src/i18n/sk.json), nech sa netreba prehŕňať
+  // v dvoch repách naraz pri každom novom športe.
+  var SPORTY = {
+    tennis: ['🎾', 'Poď hrať s nami'],
+    badminton: ['🏸', 'Poď hrať s nami'],
+    padel: ['🎾', 'Poď hrať s nami'],
+    squash: ['🎾', 'Poď hrať s nami'],
+    table_tennis: ['🏓', 'Poď hrať s nami'],
+    pickleball: ['🏓', 'Poď hrať s nami'],
+    football: ['⚽', 'Poď hrať s nami'],
+    futsal: ['⚽', 'Poď hrať s nami'],
+    volleyball: ['🏐', 'Poď hrať s nami'],
+    beach_volleyball: ['🏐', 'Poď hrať s nami'],
+    basketball: ['🏀', 'Poď hrať s nami'],
+    handball: ['🤾', 'Poď hrať s nami'],
+    floorball: ['🏑', 'Poď hrať s nami'],
+    ice_hockey: ['🏒', 'Poď hrať s nami'],
+    football_tennis: ['⚽', 'Poď hrať s nami'],
+    fitness: ['🏋️', 'Poď si s nami zacvičiť'],
+    functional_training: ['🏋️', 'Poď si s nami zacvičiť'],
+    group_fitness: ['🤸', 'Poď si s nami zacvičiť'],
+    conditioning: ['🏃', 'Poď si s nami zacvičiť'],
+    yoga: ['🧘', 'Poď cvičiť s nami'],
+    pilates: ['🧘', 'Poď cvičiť s nami'],
+    boxing: ['🥊', 'Poď trénovať s nami'],
+    martial_arts: ['🥋', 'Poď trénovať s nami'],
+    self_defense: ['🥋', 'Poď si s nami zacvičiť'],
+    dance: ['💃', 'Poď si s nami zatancovať'],
+    running: ['🏃', 'Poď si s nami zabehať'],
+    cycling: ['🚴', 'Poď si s nami zabicyklovať'],
+    swimming: ['🏊', 'Poď si s nami zaplávať'],
+    triathlon: ['🏊', 'Poď trénovať s nami'],
+    climbing: ['🧗', 'Poď si s nami zaliezť'],
+    skiing: ['⛷️', 'Poď s nami na svah'],
+    snowboarding: ['🏂', 'Poď s nami na svah'],
+    golf: ['⛳', 'Poď hrať s nami'],
+    skating: ['⛸️', 'Poď si s nami zakorčuľovať'],
+    horse_riding: ['🐎', 'Poď jazdiť s nami'],
+    chess: ['♟️', 'Poď hrať s nami']
+  };
+
+  // Adresa nesie IBA kód partie (a nepovinne šport). Názov partie tu zámerne
+  // nie je: odkaz sa preposiela ďalej a končí v histórii prehliadača, a kto
+  // s kým hráva, je vec tej partie, nie našej adresy.
   var kod = '';
   try {
     var m = location.search.match(/[?&](?:kod|code)=([^&#]+)/i);
     if (m) kod = decodeURIComponent(m[1]).replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 12);
   } catch (e) { /* pokazená adresa nie je dôvod nezobraziť stránku */ }
+
+  try {
+    var sm = location.search.match(/[?&]sport=([^&#]+)/i);
+    var sport = sm ? decodeURIComponent(sm[1]) : '';
+    var info = SPORTY[sport];
+    if (info) {
+      document.getElementById('mark').textContent = info[0];
+      document.getElementById('heading').textContent = info[1];
+      document.title = info[1] + ' — Matchball';
+    }
+  } catch (e) { /* neznámy alebo chýbajúci šport = neutrálna stránka */ }
 
   function otvorAppku(href) {
     [].forEach.call(document.querySelectorAll('.open-app'), function (a) { a.href = href; });
