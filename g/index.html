@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="sk">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pozvánka do partie — Matchball</title>
+<meta name="description" content="Partia ťa pozýva do Matchballu. Uvidíš, kedy sa hrá, kto príde a koľko to je na osobu.">
+<meta property="og:title" content="Poď hrať s nami">
+<meta property="og:description" content="Pozvánka do partie na Matchballe: kedy sa hrá, kto príde a koľko to je na osobu.">
+<style>
+:root{--bg:#fff;--fg:#16241c;--muted:#5b6b61;--line:#e3e8e4;--accent:#1f6b45;--card:#f6f9f7}
+@media(prefers-color-scheme:dark){:root{--bg:#101613;--fg:#e8efe9;--muted:#9db0a4;--line:#25322b;--accent:#4fbb84;--card:#16201b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+main{max-width:30rem;margin:0 auto;padding:3rem 1.25rem 4rem;text-align:center}
+.mark{font-size:3.4rem;line-height:1;margin-bottom:.75rem}
+h1{font-size:1.55rem;margin:0 0 .5rem}
+p{margin:0 0 1rem;color:var(--muted)}
+p.lead{color:var(--fg)}
+.code{background:var(--card);border:1.5px solid var(--accent);border-radius:.9rem;padding:1rem;margin:1.5rem 0}
+.code .lbl{display:block;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.code .val{display:block;font-size:2rem;font-weight:800;letter-spacing:.25em;color:var(--accent);margin-top:.15rem}
+.btn{display:block;width:100%;padding:.95rem 1.25rem;border-radius:.85rem;border:0;background:var(--accent);color:#fff;
+     font-size:1rem;font-weight:600;text-decoration:none;cursor:pointer;margin-bottom:.75rem;font-family:inherit}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);font-weight:500}
+.hint{font-size:.85rem;color:var(--muted)}
+.perks{text-align:left;background:var(--card);border-radius:.9rem;padding:1rem 1.15rem;margin:0 0 1.5rem}
+.perks li{margin:.35rem 0}
+.perks ul{margin:0;padding-left:1.1rem}
+footer{margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+footer a{color:var(--muted)}
+[hidden]{display:none!important}
+</style>
+<main>
+  <div class="mark">🏐</div>
+  <h1>Poď hrať s nami</h1>
+  <p class="lead">Partia ťa pozýva do Matchballu. Uvidíš, kedy sa hrá, kto príde a koľko to je na osobu — a zaplatíš QR kódom priamo organizátorovi.</p>
+
+  <div class="code" id="codeBox" hidden>
+    <span class="lbl">Kód partie</span>
+    <span class="val" id="codeVal"></span>
+  </div>
+  <p class="hint" id="codeHint" hidden>Po inštalácii sa sem vráť a ťukni na „Appku už mám“ — do partie ťa vloží sama. Alebo kód zadaj v appke: Hľadať → Skupiny → „+“ → Mám kód.</p>
+
+  <div class="perks">
+    <ul>
+      <li>Jedno ťuknutie a partia vie, že prídeš.</li>
+      <li>Prehľad, kto zaplatil a kto ešte nie.</li>
+      <li>Nástenka a chat celej partie na jednom mieste.</li>
+      <li>Účet je zadarmo, Matchball si z platieb neberie nič.</li>
+    </ul>
+  </div>
+
+  <!-- iOS -->
+  <div id="ios" hidden>
+    <a class="btn" href="https://apps.apple.com/sk/app/matchball/id6804171137">Stiahnuť z App Store</a>
+    <a class="btn ghost open-app" href="#">Appku už mám — otvoriť</a>
+  </div>
+
+  <!-- Android -->
+  <div id="android" hidden>
+    <a class="btn" href="https://play.google.com/store/apps/details?id=sk.matchball.app">Stiahnuť z Obchodu Play</a>
+    <a class="btn ghost open-app" href="#">Appku už mám — otvoriť</a>
+  </div>
+
+  <!-- Počítač alebo neznáme zariadenie -->
+  <div id="other" hidden>
+    <p class="lead">Otvor tento odkaz v telefóne, alebo si appku nájdi v obchode.</p>
+    <a class="btn" href="https://apps.apple.com/sk/app/matchball/id6804171137">Matchball pre iPhone</a>
+    <a class="btn ghost" href="https://play.google.com/store/apps/details?id=sk.matchball.app">Matchball pre Android</a>
+  </div>
+
+  <footer>
+    <strong>Matchball</strong> — tvoj najlepší match na tréningu aj v živote<br>
+    <a href="../">o službe</a> · <a href="../legal/privacy.html">ochrana údajov</a>
+  </footer>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  // Adresa nesie IBA kód partie. Názov partie tu zámerne nie je: odkaz sa
+  // preposiela ďalej a končí v histórii prehliadača, a kto s kým hráva, je
+  // vec tej partie, nie našej adresy.
+  var kod = '';
+  try {
+    var m = location.search.match(/[?&](?:kod|code)=([^&#]+)/i);
+    if (m) kod = decodeURIComponent(m[1]).replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 12);
+  } catch (e) { /* pokazená adresa nie je dôvod nezobraziť stránku */ }
+
+  function otvorAppku(href) {
+    [].forEach.call(document.querySelectorAll('.open-app'), function (a) { a.href = href; });
+  }
+
+  if (kod) {
+    document.getElementById('codeVal').textContent = kod;
+    document.getElementById('codeBox').hidden = false;
+    document.getElementById('codeHint').hidden = false;
+    // `mecbal://` otvorí appku len tomu, kto ju už má — preto je to odkaz, na
+    // ktorý sa ťuká, nie automatické presmerovanie. Bez appky by naň prehliadač
+    // odpovedal chybovým oknom a to je horšie než nič.
+    otvorAppku('mecbal://group?kod=' + encodeURIComponent(kod));
+  } else {
+    otvorAppku('mecbal://group');
+  }
+
+  var ua = navigator.userAgent || '';
+  var isAndroid = /Android/i.test(ua);
+  // iPadOS 13+ sa hlási ako Macintosh; rozlíši ho len dotyková obrazovka.
+  var isIOS = /iPhone|iPad|iPod/i.test(ua)
+    || (/Macintosh/i.test(ua) && typeof document.ontouchend !== 'undefined');
+
+  document.getElementById(isAndroid ? 'android' : isIOS ? 'ios' : 'other').hidden = false;
+})();
+</script>
+</html>
