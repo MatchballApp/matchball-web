@@ -260,7 +260,7 @@ p{margin:0}
 .phone-col{}
 
 /* ── Ukážka (video vľavo) ─────────────────────────────────────
-   Rovnaké rozloženie pre trénerov, hráčov aj skupiny: vľavo ukážka
+   Rovnaké rozloženie pre trénerov, hráčov aj partie: vľavo ukážka
    v telefónnom pomere, vpravo karty s výhodami – preto je prvý stĺpec
    užší než v `.how`, kde je vľavo text. Kým video nie je natočené
    (video/README.md), namiesto neho stojí mock karta so štítkom. */
@@ -477,7 +477,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
    pod seba zmestia bez toho, aby prekrývali tlačidlo vedľa nich. */
 .mock-price span{display:block;color:var(--muted);font-weight:500;font-size:.8rem;margin-left:4px}
 .mock-btn{flex:0 0 auto;padding:9px 16px;border-radius:999px;background:var(--ink);color:#fff;font-size:.85rem;font-weight:600}
-/* Skupina — avatary v rade a odznak obsadenosti. */
+/* Partia — avatary v rade a odznak obsadenosti. */
 .mock-avatars{display:flex}
 .mock-avatars .mock-avatar{width:34px;height:34px;font-size:.78rem;margin-left:-10px;border:2px solid var(--card)}
 .mock-avatars .mock-avatar:first-child{margin-left:0}
@@ -583,13 +583,13 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       <span>Matchball</span>
     </a>
     <!-- Štyri odkazy: tri publiká a jedna cesta k zoznamom (Martin, 11. 9.).
-         „Pre skupiny" a „Skupiny" vedľa seba vyzerali ako preklep — zoznamy
+         „Pre partie" a „Partie" vedľa seba vyzerali ako preklep — zoznamy
          trénerov aj partií sú teraz za jedným „Nájdi vo svojom meste". Platby,
          služby a 41 športov sú v toku stránky a v pätičke. -->
     <div class="nav-links">
       <a href="#trenerom">Pre trénerov</a>
       <a href="#hracom">Pre hráčov</a>
-      <a href="#partie">Pre skupiny</a>
+      <a href="#partie">Pre partie</a>
       <a href="#kam">Nájdi vo svojom meste</a>
     </div>
     <a class="btn btn-dark btn-sm nav-cta" href="#stiahnut">Stiahnuť</a>
@@ -600,7 +600,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 <div class="mobile-menu" id="mobileMenu">
   <a href="#trenerom">Pre trénerov</a>
   <a href="#hracom">Pre hráčov</a>
-  <a href="#partie">Pre skupiny</a>
+  <a href="#partie">Pre partie</a>
   <a href="#kam">Nájdi vo svojom meste</a>
   <a class="btn btn-lime" style="background:var(--lime);color:#0B100D" href="#stiahnut">Stiahnuť appku</a>
 </div>
@@ -671,7 +671,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 <!-- ── Pre trénerov ─────────────────────────────────────────
      Prvá sekcia po hero patrí trénerovi, nie hráčovi: kým nie je ku komu
      prísť, hráčovi appka nič neponúka. Rovnaké rozloženie ako pre hráčov
-     a skupiny nižšie: hore odsek, potom vľavo ukážka a vpravo karty
+     a partie nižšie: hore odsek, potom vľavo ukážka a vpravo karty
      s výhodami. Video ešte nie je natočené (pozri video/README.md), tak
      namiesto neho stojí mock karta s štítkom „Ukážka čoskoro". -->
 <section class="section" id="trenerom">
@@ -750,7 +750,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 
 <!-- ── Pre hráčov ───────────────────────────────────────────
      Druhá strana tej istej appky, v tom istom rozložení ako tréneri
-     a skupiny: hore odsek, vľavo ukážka, vpravo karty. -->
+     a partie: hore odsek, vľavo ukážka, vpravo karty. -->
 <section class="section" id="hracom" style="padding-top:0">
   <div class="wrap">
     <div class="section-head reveal">
@@ -823,15 +823,15 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
   </div>
 </section>
 
-<!-- ── Pre skupiny ──────────────────────────────────────────
+<!-- ── Pre partie ──────────────────────────────────────────
      Tretie publikum popri hráčoch a trénerkách: kto ťahá pravidelnú partiu
-     a dnes rieši dochádzku aj peniaze v skupinovom chate. Rovnaké
+     a dnes rieši dochádzku aj peniaze v chate partie. Rovnaké
      rozloženie ako vyššie – `id="partie"` ostáva kvôli existujúcim
-     odkazom, nadpis aj štítok hovoria „Pre skupiny". -->
+     odkazom, nadpis aj štítok hovoria „Pre partie". -->
 <section class="section" id="partie" style="padding-top:0">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="eyebrow">Pre skupiny</span>
+      <span class="eyebrow">Pre partie</span>
       <h2>Máš partiu na volejbal, futsal alebo iný šport?</h2>
       <p class="lead">Ak ťaháš partiu, ktorá hráva každý týždeň, poznáš to: v jednom chate zháňaš, kto príde, a v druhom naháňaš, kto ešte nezaplatil. V Matchballe máš oboje na jednom mieste a do partie sa môže pridať, koľko ľudí chce. Partiu si necháš verejnú, aby sa k vám pridal niekto nový, alebo ju otvoríš len na kód pozvánky pre svojich.</p>
     </div>
@@ -888,8 +888,8 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
           <article class="step reveal">
             <div class="no" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.8h16v11.4H9.6L5 20V16.2H4z"/></svg></div>
             <div>
-              <h3>Nástenka s oznamami a skupinový chat</h3>
-              <p>Oznam pre celú partiu pripneš na nástenku a na všetko ostatné máte spoločný chat priamo v skupine, takže už nepotrebujete ďalšiu skupinu na Messengeri.</p>
+              <h3>Nástenka s oznamami a chat partie</h3>
+              <p>Oznam pre celú partiu pripneš na nástenku a na všetko ostatné máte spoločný chat priamo v partii, takže už nepotrebujete ďalšiu skupinu na Messengeri.</p>
             </div>
           </article>
         </div>
@@ -903,7 +903,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 
 <!-- ── Služby ───────────────────────────────────────────────
      Fyzioterapeut a masér nie sú tréneri: predávajú vyšetrenie alebo
-     terapiu, nie hodinu. Rovnaké rozloženie ako tréneri, hráči a skupiny
+     terapiu, nie hodinu. Rovnaké rozloženie ako tréneri, hráči a partie
      vyššie: hore odsek, potom vľavo ukážka a vpravo karty s výhodami.
      Video ešte nie je natočené (pozri video/README.md), tak namiesto
      neho stojí mock karta s dvoma položkami cenníka. -->
@@ -979,7 +979,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
 
 
 <!-- ── Kam ďalej ────────────────────────────────────────────
-     Kto sa nechce hneď rozhodovať, si trénerov aj skupiny pozrie na webe.
+     Kto sa nechce hneď rozhodovať, si trénerov aj partie pozrie na webe.
      Dlaždice miest medzi značkami `mesta-treneri` / `mesta-skupiny` dopĺňa
      nočný generátor (`scripts/generuj-stranky-trenerov.mjs`), ručne sa do
      nich nepíše. -->
@@ -1001,15 +1001,15 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
       </div>
 
       <div class="next-card">
-        <span class="eyebrow" style="margin-bottom:0">Skupiny</span>
-        <h2><a href="/skupiny/">Nájdi skupinu vo svojom meste</a></h2>
+        <span class="eyebrow" style="margin-bottom:0">Partie</span>
+        <h2><a href="/skupiny/">Nájdi partiu vo svojom meste</a></h2>
         <p>Chceš hrávať pravidelne s tou istou partiou? Tieto berú nových – deň, čas aj úroveň vidíš vopred.</p>
         <div class="next-cities">
           <!-- mesta-skupiny:start -->
           <a class="city-chip" href="/skupiny/kosice/">Košice <span>1</span></a>
           <!-- mesta-skupiny:end -->
         </div>
-        <span class="next-go">Pozrieť všetky skupiny
+        <span class="next-go">Pozrieť všetky partie
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </span>
       </div>
@@ -1106,7 +1106,7 @@ footer{padding:clamp(56px,7vw,96px) 0 44px}
         <div class="foot-links">
           <a href="#trenerom">Pre trénerov</a>
           <a href="#hracom">Pre hráčov</a>
-          <a href="#partie">Pre skupiny</a>
+          <a href="#partie">Pre partie</a>
           <a href="#kam">Nájdi vo svojom meste</a>
           <a href="#stiahnut">Stiahnuť</a>
         </div>
