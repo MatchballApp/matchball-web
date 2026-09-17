@@ -592,10 +592,10 @@ function hviezdy(rating, triedaOff = 'off') {
 
 // Ikony sú tie isté ako v `index.html`, len absolútnou cestou — stránky trénerov
 // sedia o dva priečinky hlbšie a relatívne cesty by hľadali `t/katka/favicon.ico`.
-const FAVICONY = `<link rel="icon" href="/favicon.ico?v=4" sizes="48x48">
-<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png?v=4">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=4">
-<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=4">
+const FAVICONY = `<link rel="icon" href="/favicon-srdce.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-srdce-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-srdce-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-srdce-180.png">
 <meta name="theme-color" content="#071A13">`;
 
 // Náhľad odkazu. Jeden obrázok pre celý web — ten istý, aký má hlavná stránka.
