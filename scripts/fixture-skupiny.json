@@ -1,0 +1,53 @@
+[
+  {
+    "id": "aa11",
+    "name": "Štvrtkový tenis Čermeľ",
+    "sport": "tennis",
+    "city": "Košice",
+    "city_key": "kosice",
+    "venue": "Tenisový klub Čermeľ",
+    "description": "Hrávame štvorhry, po hre pivo. Berieme každého, kto udrží raketu a príde načas.",
+    "recurrence": { "type": "weekly", "weekday": 4, "start_min": 1080, "end_min": 1200 },
+    "level_min": 3,
+    "level_max": 6,
+    "capacity": 8,
+    "members_count": 11,
+    "avatar_id": "fc3",
+    "organizer_first_name": "Martin",
+    "organizer_avatar": "fc7"
+  },
+  {
+    "id": "bb22",
+    "name": "Ranný badminton",
+    "sport": "badminton",
+    "city": "Košice",
+    "city_key": "kosice",
+    "venue": "Hala Angels",
+    "description": "Pred prácou, o šiestej. Kto sa raz zobudí, už chodí.",
+    "recurrence": { "type": "weekly", "weekday": 2, "start_min": 360, "end_min": 450 },
+    "level_min": 1,
+    "level_max": 10,
+    "capacity": 4,
+    "members_count": 6,
+    "avatar_id": null,
+    "organizer_first_name": "Zuzana",
+    "organizer_avatar": "fc12"
+  },
+  {
+    "id": "cc33",
+    "name": "Volejbal na Zlatých pieskoch",
+    "sport": "beach_volleyball",
+    "city": "Bratislava",
+    "city_key": "bratislava",
+    "venue": "Zlaté piesky",
+    "description": "Cez leto každú nedeľu. V zime chodíme do haly.",
+    "recurrence": { "type": "weekly", "weekday": 0, "start_min": 600, "end_min": 720 },
+    "level_min": 5,
+    "level_max": 8,
+    "capacity": 12,
+    "members_count": 1,
+    "avatar_id": "fc21",
+    "organizer_first_name": "Peter",
+    "organizer_avatar": null
+  }
+]

@@ -3,16 +3,34 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Matchball — potvrdenie e-mailu</title>
+<link rel="icon" href="/favicon.ico?v=4" sizes="48x48">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=4">
+<meta name="theme-color" content="#071A13">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fff;--fg:#16241c;--muted:#5b6b61;--line:#e3e8e4;--accent:#1f6b45}
-@media(prefers-color-scheme:dark){:root{--bg:#101613;--fg:#e8efe9;--muted:#9db0a4;--line:#25322b}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-main{max-width:28rem;margin:0 auto;padding:4rem 1.25rem;text-align:center}
-.icon{font-size:2.5rem;line-height:1}
-h1{font-size:1.4rem;margin:1rem 0 .5rem}
+/* Ten istý vzhľad ako matchballapp.com od 17. 9. 2026 — svetlá stránka,
+   zelená z loga, písmo Outfit. Bez tmavého režimu: web má jednu identitu. */
+:root{--ink:#071A13;--paper:#F5F8F5;--card:#FFFFFF;--green:#15803D;
+  --green-soft:#E9F5ED;--fg:#0F1F17;--muted:#47594F;--line:#DFE8E2}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--fg);
+  font-family:"Outfit",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;align-items:center;min-height:100vh}
+img{display:block;max-width:100%}
+.znacka{display:flex;align-items:center;gap:10px;padding:26px 20px 0;
+  font-weight:700;font-size:1.06rem;letter-spacing:-.02em;text-decoration:none;color:inherit}
+.znacka img{width:30px;height:30px;flex:0 0 30px}
+main{width:100%;max-width:30rem;margin:auto;padding:36px 20px 64px;text-align:center}
+.icon{width:72px;height:72px;margin:0 auto 18px;border-radius:50%;
+  background:var(--green-soft);display:grid;place-items:center;font-size:2rem;line-height:1}
+h1{font-size:clamp(1.5rem,5vw,1.9rem);font-weight:800;letter-spacing:-.028em;
+  word-spacing:.05em;line-height:1.12;margin:0 0 .6rem}
 p{margin:0 0 .9rem;color:var(--muted)}
 </style>
+<a class="znacka" href="/"><img src="/logo.webp" alt="" width="192" height="192"><span>Matchball</span></a>
 <main>
   <div id="state">
     <p>Overujem…</p>

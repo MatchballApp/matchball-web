@@ -426,7 +426,7 @@ function kedyText(recurrence) {
 
 /** Slovenské skloňovanie počtu skupín. */
 function pocetSkupin(n) {
-  return `${n} ${pocet(n, 'skupina', 'skupiny', 'skupín')}`;
+  return `${n} ${pocet(n, 'partia', 'partie', 'partií')}`;
 }
 
 /**
@@ -552,7 +552,7 @@ function qrSvg(text, { size, label }) {
   }
   return `<svg viewBox="0 0 ${n} ${n}" width="${size}" height="${size}" shape-rendering="crispEdges" role="img" aria-label="${esc(label)}">`
     + `<rect width="${n}" height="${n}" fill="#fff"></rect>`
-    + `<path fill="#0B100D" d="${parts.join('')}"></path></svg>`;
+    + `<path fill="#071A13" d="${parts.join('')}"></path></svg>`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -592,36 +592,44 @@ function hviezdy(rating, triedaOff = 'off') {
 
 // Ikony sú tie isté ako v `index.html`, len absolútnou cestou — stránky trénerov
 // sedia o dva priečinky hlbšie a relatívne cesty by hľadali `t/katka/favicon.ico`.
-const FAVICONY = `<link rel="icon" href="/favicon.ico?v=2" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png?v=2">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=2">
-<meta name="theme-color" content="#0B100D">`;
+const FAVICONY = `<link rel="icon" href="/favicon.ico?v=4" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png?v=4">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=4">
+<meta name="theme-color" content="#071A13">`;
+
+// Náhľad odkazu. Jeden obrázok pre celý web — ten istý, aký má hlavná stránka.
+// (Stránka trénera si ho prepíše jeho fotkou; kto fotku nemá, dostane tento.)
+const OG_OBRAZOK = `${WEB_ORIGIN}/og.jpg`;
+
+// Zástupná fotka trénera či partie: tmavozelený kruh so srdcom, nie holé logo.
+// Logo je priehľadné srdce — v okrúhlom rámčeku by z neho ostali odseknuté
+// krídla na bielom. Tento obrázok je štvorec, takže ho `object-fit:cover`
+// oreže na čistý kruh a v tmavej ploche srdce svieti.
+const ZASTUPNA_FOTKA = '/avatar-zastupny.webp';
 
 const PISMO = `<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">`;
 
-function hlavicka(aktivna) {
-  const odkaz = (href, text, on) =>
-    `<a${on ? ' class="on" aria-current="page"' : ''} href="${href}">${text}</a>`;
+function hlavicka() {
   return `<div class="nav-shell">
   <nav class="nav">
     <a class="brand" href="/">
-      <img class="mark" src="/logo.webp" alt="" width="128" height="128">
+      <img class="mark" src="/logo.webp" alt="" width="192" height="192">
       <span>Matchball</span>
     </a>
     <!-- Presne tie isté odkazy v tom istom poradí ako na domovskej stránke —
-         menu sa pri prechode na Trénerov či Skupiny nesmie meniť (Martin, 11. 9.). -->
-    <!-- Tie isté štyri odkazy ako na domovskej stránke; na zozname trénerov
-         či skupín svieti „Nájdi vo svojom meste" (Martin, 11. 9.). -->
+         menu sa pri prechode na Trénerov či Partie nesmie meniť (Martin, 11. 9.).
+         Od 17. 9. sú to tri položky a tlačidlo; „V tvojom meste" z lišty vypadlo.
+         Žiadna položka sa tu nezvýrazňuje ako aktívna: všetky tri vedú na sekcie
+         domovskej stránky a podstránka trénerov ani partií ňou nie je. -->
     <div class="nav-links">
-      ${odkaz('/#trenerom', 'Pre trénerov')}
-      ${odkaz('/#hracom', 'Pre hráčov')}
-      ${odkaz('/#partie', 'Pre skupiny')}
-      ${odkaz('/#kam', 'Nájdi vo svojom meste', aktivna === 'treneri' || aktivna === 'skupiny')}
+      <a href="/#trenerom">Pre trénerov</a>
+      <a href="/#hracom">Pre hráčov</a>
+      <a href="/#partie">Partie</a>
     </div>
-    <a class="btn btn-dark btn-sm nav-cta" href="/#stiahnut">Stiahnuť</a>
+    <a class="btn btn-lime btn-sm nav-cta" href="/#stiahnut">Stiahnuť</a>
   </nav>
 </div>`;
 }
@@ -630,31 +638,31 @@ const PATICKA = `<footer>
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <a class="brand" href="/" style="font-size:1.25rem">
-          <img class="mark" src="/logo.webp" alt="" width="128" height="128">
+        <a class="brand" href="/" style="font-size:1.2rem">
+          <img class="mark" src="/logo.webp" alt="" width="192" height="192" loading="lazy" decoding="async">
           <span>Matchball</span>
         </a>
-        <p class="foot-about">Nájdi si trénera, parťáka na sparing alebo partiu vo svojom meste. 41 športov a služieb, účet zadarmo.</p>
+        <p class="foot-about">Matchball spája hráčov a trénerov. Nájdi trénera alebo partiu na šport v tvojom meste. 41 športov a služieb, zadarmo pre hráčov aj trénerov.</p>
       </div>
       <div>
-        <h4>Stránka</h4>
+        <h4 class="foot-h">Stránka</h4>
         <div class="foot-links">
           <a href="/#trenerom">Pre trénerov</a>
           <a href="/#hracom">Pre hráčov</a>
-          <a href="/#partie">Pre skupiny</a>
+          <a href="/#partie">Partie</a>
           <a href="/#sluzby">Zdravie a služby</a>
-          <a href="/#sporty">41 športov</a>
-          <a href="/treneri/">Tréneri</a>
-          <a href="/skupiny/">Skupiny</a>
           <a href="/#ceny">Platby</a>
+          <a href="/#stiahnut">Stiahnuť</a>
         </div>
       </div>
       <div>
-        <h4>Dokumenty a kontakt</h4>
+        <h4 class="foot-h">Zoznamy a kontakt</h4>
         <div class="foot-links">
+          <a href="/treneri/">Tréneri podľa miest</a>
+          <a href="/skupiny/">Partie podľa miest</a>
           <a href="/legal/privacy.html">Ochrana osobných údajov</a>
           <a href="/legal/terms.html">Podmienky používania</a>
-          <a href="mailto:matchball.app@gmail.com">matchball.app@gmail.com</a>
+          <a href="mailto:support@matchballapp.com">support@matchballapp.com</a>
         </div>
       </div>
     </div>
@@ -672,97 +680,122 @@ const PATICKA = `<footer>
  * boli dva (Main.dc.html 1440 px, Mobil.dc.html 390 px), stránka je jedna.
  */
 const CSS_ZAKLAD = `:root{
-  --ink:#0B100D;--ink-soft:#141C17;--paper:#EFF2ED;--card:#FFFFFF;
-  --green:#1A7A4A;--green-dark:#125E38;--green-soft:#E8F3EC;
-  --lime:#C9F24E;--lime-dim:#A7D63B;--fg:#141F1A;--muted:#5E7367;--line:#E0E6DF;
+  /* Tá istá paleta ako hlavná stránka (web/index.html, 17. 9. 2026): zelená
+     z loga, tmavozelená namiesto čiernej, limetka a modrá zo srdca.
+     \`--green\` je zámerne tmavší odtieň #15803D — je to jediná zelená, ktorou
+     sa na bielej karte píše text (ceny, hodnotenia, odkazy) a svetlejší
+     #1E9E52 by na kontrast nestačil. Výplne tlačidiel ho znesú tiež. */
+  --ink:#071A13;--ink-soft:#0C2419;--ink-3:#123125;
+  --paper:#F5F8F5;--card:#FFFFFF;
+  --green:#15803D;--green-dark:#0F6A36;--green-soft:#E9F5ED;
+  --lime:#51E041;--lime-dim:#B7F2C9;--blue:#1378ED;
+  --fg:#0F1F17;--muted:#47594F;--line:#DFE8E2;
+  --on-dark:#EAF3ED;--on-dark-muted:#A6BEB0;
   --gold:#E8B23A;
-  --radius-xl:32px;--radius-lg:24px;--radius-md:16px;
-  --shadow-soft:0 1px 2px rgba(20,31,26,.04),0 12px 32px -12px rgba(20,31,26,.14);
-  --shadow-lift:0 2px 4px rgba(20,31,26,.06),0 24px 48px -16px rgba(20,31,26,.22);
-  --ease:cubic-bezier(.22,1,.36,1);--max:1180px;
+  --focus:#15803D;
+  --radius-xl:30px;--radius-lg:24px;--radius-md:16px;
+  --shadow-soft:0 1px 2px rgba(7,26,19,.05),0 14px 34px -16px rgba(7,26,19,.18);
+  --shadow-lift:0 2px 6px rgba(7,26,19,.07),0 28px 56px -20px rgba(7,26,19,.28);
+  --ease:cubic-bezier(.22,1,.36,1);--max:1200px;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+/* Hlavička stránku prekrýva, takže kotva (#pridat-sa) musí zastaviť pod ňou. */
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:104px}
 body{margin:0;background:var(--paper);color:var(--fg);
   font-family:"Outfit",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   font-size:17px;line-height:1.65;font-weight:400;-webkit-font-smoothing:antialiased;
-  overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}
+  overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh;
+  padding-top:80px}
 img,svg{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit}
 [hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
 .wrap{max-width:var(--max);margin:0 auto;padding:0 20px;width:100%}
-h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.03em;word-spacing:.06em;line-height:1.04}
-h1{font-size:clamp(2.4rem,8vw,4.45rem);font-weight:800}
-h2{font-size:clamp(1.75rem,4.4vw,2.6rem)}
-h3{font-size:1.16rem;line-height:1.25;letter-spacing:-.02em}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.028em;word-spacing:.05em;line-height:1.06}
+h1{font-size:clamp(2.3rem,7vw,3.9rem);font-weight:800;line-height:1.03}
+h2{font-size:clamp(1.85rem,4vw,2.8rem)}
+h3{font-size:1.16rem;line-height:1.26;letter-spacing:-.018em}
 p{margin:0}
-.lead{font-size:1.02rem;color:var(--muted);line-height:1.6}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:600;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:12px}
-.eyebrow::before{content:"";width:20px;height:2px;border-radius:2px;background:var(--green);opacity:.5}
+.lead{font-size:1.05rem;color:var(--muted);line-height:1.6}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:.78rem;font-weight:600;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:14px}
+.eyebrow::before{content:"";width:22px;height:2px;border-radius:2px;background:currentColor;opacity:.55}
 .skip{position:absolute;left:-9999px;top:0;padding:12px 18px;background:var(--ink);color:#fff;
   border-radius:0 0 12px 0;z-index:200}
 .skip:focus{left:0}
 
+/* ── Tlačidlá ───────────────────────────────────────────────
+   Jedna rodina ako na hlavnej stránke. Text sa vždy zmestí:
+   \`white-space:nowrap\` a krátke popisy, žiadne tri bodky. */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;
-  padding:15px 28px;border-radius:999px;border:0;cursor:pointer;line-height:1.2;
+  padding:15px 26px;border-radius:999px;border:0;cursor:pointer;line-height:1.2;
   font-weight:600;font-size:1rem;white-space:nowrap;text-decoration:none;
-  transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .25s}
-.btn-dark{background:var(--ink);color:#fff;box-shadow:0 10px 24px -10px rgba(11,16,13,.7)}
-.btn-dark:hover{transform:translateY(-2px);box-shadow:0 18px 34px -12px rgba(11,16,13,.8)}
-.btn-green{background:var(--green);color:#fff;box-shadow:0 10px 24px -10px rgba(26,122,74,.8)}
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .2s}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-dark:hover{transform:translateY(-2px);background:var(--ink-3)}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 10px 24px -12px rgba(21,128,61,.9)}
 .btn-green:hover{transform:translateY(-2px);background:var(--green-dark)}
-.btn-light{background:#fff;color:var(--fg);box-shadow:var(--shadow-soft);border:1px solid var(--line)}
+.btn-light{background:#fff;color:var(--fg);box-shadow:var(--shadow-soft)}
 .btn-light:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
-.btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22)}
-.btn-ghost:hover{background:rgba(255,255,255,.16)}
-.btn-lime{background:var(--lime);color:#0B100D;box-shadow:0 12px 30px -12px rgba(201,242,78,.8)}
-.btn-lime:hover{transform:translateY(-2px);box-shadow:0 20px 40px -14px rgba(201,242,78,.9)}
-.btn-sm{padding:11px 20px;font-size:.94rem}
+.btn-ghost{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.24)}
+.btn-ghost:hover{transform:translateY(-2px);background:rgba(255,255,255,.14)}
+.btn-lime{background:var(--lime);color:#06210F;box-shadow:0 12px 28px -14px rgba(81,224,65,.9)}
+.btn-lime:hover{transform:translateY(-2px);background:#6BEA5C}
+.btn-sm{padding:11px 19px;font-size:.93rem}
 .btn svg{width:19px;height:19px;flex:0 0 19px}
 
-.nav-shell{padding:14px 16px 18px}
-.nav{max-width:940px;margin:0 auto;display:flex;align-items:center;gap:12px;
-  padding:8px 8px 8px 16px;border-radius:999px;background:rgba(255,255,255,.72);
-  backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);
-  border:1px solid rgba(255,255,255,.45);
-  box-shadow:0 2px 4px rgba(20,31,26,.05),0 16px 32px -18px rgba(20,31,26,.18)}
+/* ── Plávajúca hlavička ─────────────────────────────────────
+   Tmavý sklenený panel nad obsahom, rovnaký ako na hlavnej stránke. Tmavý je
+   zámerne: pilulka tak vyzerá rovnako nad svetlým zoznamom aj nad tmavou
+   fotkou trénera a nemusí sa pri rolovaní prezliekať. */
+.nav-shell{position:fixed;top:14px;left:0;right:0;z-index:80;padding:0 16px;pointer-events:none}
+.nav{max-width:min(1060px,100%);margin:0 auto;pointer-events:auto;
+  display:flex;align-items:center;gap:12px;
+  padding:9px 9px 9px 18px;border-radius:999px;
+  background:rgba(7,26,19,.88);
+  -webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 10px 30px -14px rgba(7,26,19,.7);
+  color:#fff;--focus:var(--lime)}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.06rem;letter-spacing:-.02em}
-.brand .mark{width:28px;height:28px;flex:0 0 28px;border-radius:8px}
+.brand .mark{width:30px;height:30px;flex:0 0 30px}
 .nav-links{display:none;gap:4px;margin-left:auto}
-.nav-links a{padding:9px 16px;border-radius:999px;color:#2A3831;font-size:.95rem;font-weight:500;
-  transition:background .25s,color .25s}
-.nav-links a:hover,.nav-links a.on{background:rgba(26,122,74,.09);color:var(--green)}
+.nav-links a{padding:9px 13px;border-radius:999px;color:rgba(255,255,255,.82);font-size:.94rem;
+  font-weight:500;transition:background .2s,color .2s}
+.nav-links a:hover{background:rgba(255,255,255,.1);color:#fff}
 .nav-cta{margin-left:auto}
 
-footer{margin-top:auto;padding:44px 0 30px}
-footer .brand{font-size:1.14rem}
-.foot-grid{display:grid;gap:28px;padding-bottom:28px;border-bottom:1px solid var(--line)}
-.foot-grid h4{margin:0 0 14px;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--muted);font-weight:600}
+/* ── Pätička ────────────────────────────────────────────────
+   Tmavý pás, ten istý materiál ako hlavička — na hlavnej stránke tiež. */
+footer{margin-top:auto;background:var(--ink);color:var(--on-dark);
+  padding:52px 0 32px;--focus:var(--lime)}
+footer .brand{font-size:1.2rem;color:#fff}
+.foot-grid{display:grid;gap:30px}
+.foot-h{margin:0 0 14px;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;
+  color:#fff;opacity:.7;font-weight:600}
 .foot-links{display:grid;gap:9px}
-.foot-links a{font-size:.96rem;transition:color .25s}
-.foot-links a:hover{color:var(--green)}
-.foot-about{color:var(--muted);font-size:.94rem;margin-top:12px;max-width:26rem}
-.foot-bottom{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;padding-top:22px;
-  color:var(--muted);font-size:.88rem}
+.foot-links a{font-size:.96rem;color:var(--on-dark-muted);transition:color .2s}
+.foot-links a:hover{color:#fff}
+.foot-about{color:var(--on-dark-muted);font-size:.95rem;margin-top:14px;max-width:26rem}
+.foot-bottom{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;
+  margin-top:36px;padding-top:22px;border-top:1px solid rgba(255,255,255,.14);
+  color:var(--on-dark-muted);font-size:.88rem}
 
 @media (min-width:900px){
-  .nav-shell{padding:22px 20px 0}
-  .nav{padding:10px 10px 10px 22px;gap:20px}
+  body{padding-top:96px}
+  .nav{padding:10px 10px 10px 22px;gap:18px}
   .brand{gap:11px;font-size:1.12rem}
-  .brand .mark{width:30px;height:30px;flex:0 0 30px}
   .nav-links{display:flex}
   .nav-cta{margin-left:4px}
   .lead{font-size:1.15rem}
   .eyebrow{font-size:.8rem;margin-bottom:18px}
   h3{font-size:1.3rem}
-  footer{padding:72px 0 44px}
-  .foot-grid{grid-template-columns:1.4fr 1fr 1fr;gap:40px;padding-bottom:40px}
-  .foot-about{font-size:.98rem;margin-top:14px}
+  footer{padding:76px 0 44px}
+  .foot-grid{grid-template-columns:1.5fr 1fr 1fr;gap:40px}
+  .foot-about{font-size:.98rem}
   .foot-links a{font-size:.98rem}
-  .foot-bottom{padding-top:26px;font-size:.9rem}
+  .foot-bottom{margin-top:52px;padding-top:26px;font-size:.9rem}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -788,15 +821,15 @@ const CSS_TRENER = `main{padding-bottom:96px}
 .hero{display:grid;gap:0}
 .hero-photo{position:relative}
 .hero-shot{position:relative;border-radius:24px;overflow:hidden;height:min(360px,86vw);
-  box-shadow:0 3px 6px rgba(20,31,26,.06),0 26px 48px -22px rgba(20,31,26,.34)}
+  box-shadow:0 3px 6px rgba(7,26,19,.06),0 26px 48px -22px rgba(7,26,19,.34)}
 .hero-shot .foto{width:100%;height:100%;object-fit:cover;object-position:center 22%}
-.hero-shot .foto.placeholder{object-fit:contain;padding:22%;background:var(--green-soft)}
+.hero-shot .foto.placeholder{object-fit:cover;background:var(--ink-soft)}
 .hero-veil{position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(6,10,7,0) 34%,rgba(6,10,7,.44) 62%,rgba(6,10,7,.88) 100%)}
+  background:linear-gradient(180deg,rgba(5,18,12,0) 34%,rgba(5,18,12,.44) 62%,rgba(5,18,12,.88) 100%)}
 .hero-cap{position:absolute;left:22px;right:22px;bottom:20px;color:#fff}
 .hero-cap .eyebrow{color:var(--lime)}
 .hero-cap .eyebrow::before{background:var(--lime)}
-.hero-cap h1{color:#fff;text-shadow:0 2px 18px rgba(6,10,7,.5)}
+.hero-cap h1{color:#fff;text-shadow:0 2px 18px rgba(5,18,12,.5)}
 .meta{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin-top:9px;
   color:rgba(255,255,255,.86);font-size:.92rem}
 .meta .rate{display:inline-flex;align-items:center;gap:6px;color:#fff;font-weight:700}
@@ -805,7 +838,7 @@ const CSS_TRENER = `main{padding-bottom:96px}
 .club-line{display:flex;align-items:center;gap:7px;margin-top:16px;color:var(--muted);font-size:.94rem}
 .club-line svg{width:16px;height:16px;flex:0 0 16px;color:var(--green)}
 .verified{display:inline-flex;align-items:center;gap:8px;padding:8px 15px 8px 11px;border-radius:999px;
-  background:var(--green-soft);border:1px solid rgba(26,122,74,.18);color:var(--green-dark);
+  background:var(--green-soft);border:1px solid rgba(30,158,82,.18);color:var(--green-dark);
   font-size:.86rem;font-weight:600;margin-top:16px}
 .verified svg{width:16px;height:16px;flex:0 0 16px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
@@ -827,22 +860,22 @@ const CSS_TRENER = `main{padding-bottom:96px}
   margin:26px 0 12px}
 .pills{display:flex;flex-wrap:wrap;gap:8px}
 .pill{padding:8px 15px;border-radius:999px;background:#fff;border:1px solid var(--line);
-  font-size:.9rem;font-weight:500;box-shadow:0 1px 2px rgba(20,31,26,.04)}
-.pill-soft{background:var(--green-soft);border-color:rgba(26,122,74,.16);color:var(--green-dark);font-weight:600}
+  font-size:.9rem;font-weight:500;box-shadow:0 1px 2px rgba(7,26,19,.04)}
+.pill-soft{background:var(--green-soft);border-color:rgba(30,158,82,.16);color:var(--green-dark);font-weight:600}
 .pill-sport{display:inline-flex;align-items:center;gap:6px}
 .pill-sport svg{width:14px;height:14px;flex:0 0 14px}
 .place{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
   overflow:hidden;box-shadow:var(--shadow-soft);display:flex;flex-direction:column}
 .place-map{height:104px;flex:0 0 104px;position:relative;
   background:
-    linear-gradient(90deg,rgba(26,122,74,.12) 1px,transparent 1px) 0 0/26px 26px,
-    linear-gradient(180deg,rgba(26,122,74,.12) 1px,transparent 1px) 0 0/26px 26px,
-    linear-gradient(140deg,#DDEBE0,#EFF4EC 55%,#E4EFE6)}
+    linear-gradient(90deg,rgba(30,158,82,.12) 1px,transparent 1px) 0 0/26px 26px,
+    linear-gradient(180deg,rgba(30,158,82,.12) 1px,transparent 1px) 0 0/26px 26px,
+    linear-gradient(140deg,#DCEBE1,#F1F7F2 55%,#E3EFE7)}
 .place-map::after{content:"";position:absolute;left:0;right:0;top:62%;height:14px;
-  background:rgba(201,242,78,.5);transform:rotate(-6deg)}
+  background:rgba(81,224,65,.5);transform:rotate(-6deg)}
 .place-map .pinwrap{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
   width:36px;height:36px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;
-  box-shadow:0 8px 18px -6px rgba(26,122,74,.7);z-index:1}
+  box-shadow:0 8px 18px -6px rgba(30,158,82,.7);z-index:1}
 .place-map .pinwrap svg{width:18px;height:18px}
 .place-body{padding:18px 20px}
 .place-body .name{font-weight:700;font-size:1.04rem;letter-spacing:-.02em}
@@ -882,7 +915,7 @@ const CSS_TRENER = `main{padding-bottom:96px}
 .rev:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
 .rev .top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .rev .ava{width:42px;height:42px;flex:0 0 42px;border-radius:50%;object-fit:cover;background:var(--green-soft)}
-.rev .ava.placeholder{object-fit:contain;padding:8px}
+.rev .ava.placeholder{object-fit:cover}
 .rev .who{font-weight:700;letter-spacing:-.02em;font-size:.98rem;line-height:1.3}
 .rev .when{color:var(--muted);font-size:.8rem;line-height:1.35}
 .rev .stars{display:flex;gap:2px;margin-left:auto;color:var(--gold)}
@@ -896,7 +929,7 @@ const CSS_TRENER = `main{padding-bottom:96px}
 .rev-more svg{width:16px;height:16px}
 
 .cta{background:var(--ink);color:#fff;border-radius:var(--radius-xl);padding:30px 26px 28px;
-  margin-top:38px;text-align:center;box-shadow:0 26px 50px -26px rgba(11,16,13,.6)}
+  margin-top:38px;text-align:center;box-shadow:0 26px 50px -26px rgba(7,26,19,.6)}
 .cta h2{color:#fff}
 .cta .lead{color:rgba(255,255,255,.76);margin-top:12px;font-size:1rem}
 .cta .row{display:grid;gap:10px;margin-top:22px}
@@ -910,7 +943,7 @@ const CSS_TRENER = `main{padding-bottom:96px}
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:70;
   background:rgba(255,255,255,.92);backdrop-filter:blur(18px) saturate(160%);
   -webkit-backdrop-filter:blur(18px) saturate(160%);
-  border-top:1px solid var(--line);box-shadow:0 -6px 26px -10px rgba(20,31,26,.28);
+  border-top:1px solid var(--line);box-shadow:0 -6px 26px -10px rgba(7,26,19,.28);
   padding:12px 20px calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px}
 .dock .btn-green{flex:1;padding:15px 18px}
 .dock .msg{width:54px;height:54px;flex:0 0 54px;border-radius:50%;border:1px solid var(--line);
@@ -927,7 +960,7 @@ body{padding-bottom:92px}
   .hero{grid-template-columns:440px 1fr;gap:0 56px;padding-bottom:84px;align-items:start}
   .hero-photo{display:contents}
   .hero-shot{grid-column:1;grid-row:1 / span 2;height:440px;border-radius:32px;
-    box-shadow:0 3px 6px rgba(20,31,26,.06),0 34px 60px -26px rgba(20,31,26,.34)}
+    box-shadow:0 3px 6px rgba(7,26,19,.06),0 34px 60px -26px rgba(7,26,19,.34)}
   .hero-shot .foto{object-position:center 18%}
   .hero-veil{display:none}
   .hero-cap{position:static;grid-column:2;grid-row:1;color:inherit;padding-top:6px}
@@ -979,7 +1012,7 @@ body{padding-bottom:92px}
   .rev-head .stars svg{width:22px;height:22px}
   .rev-head .lead{max-width:22rem;text-align:right;margin-top:0}
   .cta{margin-top:96px;padding:52px 56px;display:grid;grid-template-columns:1fr auto;
-    gap:56px;align-items:center;text-align:left;box-shadow:0 30px 60px -28px rgba(11,16,13,.6)}
+    gap:56px;align-items:center;text-align:left;box-shadow:0 30px 60px -28px rgba(7,26,19,.6)}
   .cta h2{max-width:16ch}
   .cta .lead{margin-top:16px;max-width:38rem}
   .cta .row{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
@@ -991,11 +1024,11 @@ body{padding-bottom:92px}
 }
 
 /* ── Modál (počítač) a panel obchodu (telefón) ─────────────── */
-.ov{position:fixed;inset:0;background:rgba(20,31,26,.5);backdrop-filter:blur(3px);
+.ov{position:fixed;inset:0;background:rgba(7,26,19,.5);backdrop-filter:blur(3px);
   display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
 .ov.on{display:flex}
 .modal{position:relative;width:100%;max-width:520px;background:var(--card);border-radius:var(--radius-lg);
-  padding:36px 24px 30px;text-align:center;box-shadow:0 40px 80px -24px rgba(11,16,13,.5);
+  padding:36px 24px 30px;text-align:center;box-shadow:0 40px 80px -24px rgba(7,26,19,.5);
   max-height:calc(100vh - 40px);overflow:auto}
 .modal h3{font-size:1.4rem;margin-bottom:12px}
 .modal .lead{font-size:1rem;margin-bottom:22px}
@@ -1015,7 +1048,7 @@ body{padding-bottom:92px}
 }
 .toast{position:fixed;left:50%;bottom:104px;transform:translate(-50%,14px);z-index:120;
   background:var(--ink);color:#fff;padding:13px 22px;border-radius:999px;font-size:.92rem;font-weight:500;
-  display:flex;align-items:center;gap:10px;box-shadow:0 20px 40px -16px rgba(11,16,13,.7);
+  display:flex;align-items:center;gap:10px;box-shadow:0 20px 40px -16px rgba(7,26,19,.7);
   opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .3s var(--ease);
   max-width:calc(100vw - 32px)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
@@ -1131,7 +1164,7 @@ function strankaTrenera(coach, ctx) {
   // odkaz z appky sú ten istý reťazec. Bez lomky je aj QR o kúsok redšie.
   const zdielanyUrl = `${WEB_ORIGIN}/t/${coach.slug}`;
   const mestoSlug = slugify(coach.city_key || coach.city);
-  const fotka = coach.fotoSubor ? `/t/${coach.slug}/${coach.fotoSubor}` : '/logo.webp';
+  const fotka = coach.fotoSubor ? `/t/${coach.slug}/${coach.fotoSubor}` : ZASTUPNA_FOTKA;
   const maFotku = !!coach.fotoSubor;
   const hodnotenia = Array.isArray(coach.reviews) ? coach.reviews : [];
   const pocetHodnoteni = Number(coach.review_count) || 0;
@@ -1207,7 +1240,12 @@ function strankaTrenera(coach, ctx) {
     metaCasti.push(`<span>${pocetHodnoteni} ${pocet(pocetHodnoteni, 'hodnotenie', 'hodnotenia', 'hodnotení')}</span>`);
   }
   if (Number(coach.completed_lessons) > 0) {
-    metaCasti.push(`<span>${coach.completed_lessons} ${pocet(Number(coach.completed_lessons), 'tréning', 'tréningy', 'tréningov')}</span>`);
+    // Fyzioterapeut ani masér nemá „tréningy“ — má klientov. Rovnaké slovo ako
+    // v dlaždici nižšie, aby stránka o tom istom čísle nehovorila dvakrát inak.
+    const n = Number(coach.completed_lessons);
+    metaCasti.push(`<span>${coach.completed_lessons} ${sluzba
+      ? pocet(n, 'klient', 'klienti', 'klientov')
+      : pocet(n, 'tréning', 'tréningy', 'tréningov')}</span>`);
   }
   const meta = metaCasti.join('<span class="dot"></span>');
 
@@ -1229,7 +1267,7 @@ ${FAVICONY}
 <meta property="og:url" content="${url}">
 <meta property="og:title" content="${esc(coach.name)} – ${sportOznacenie}, ${esc(coach.city)}">
 <meta property="og:description" content="${esc(popis)}">
-<meta property="og:image" content="${WEB_ORIGIN}${fotka}">
+<meta property="og:image" content="${coach.fotoSubor ? `${WEB_ORIGIN}${fotka}` : OG_OBRAZOK}">
 <meta property="og:image:alt" content="${esc(coach.name)}">
 <meta property="og:locale" content="sk_SK">
 <meta name="twitter:card" content="summary_large_image">
@@ -1242,7 +1280,7 @@ ${CSS_TRENER}
 </head>
 <body>
 <a class="skip" href="#obsah">Preskočiť na obsah</a>
-${hlavicka('treneri')}
+${hlavicka()}
 
 <main id="obsah" class="wrap">
   <nav class="crumbs" aria-label="Drobčeková navigácia">
@@ -1274,11 +1312,11 @@ ${hlavicka('treneri')}
         ${staty.map((s) => `<div class="stat"><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div>`).join('\n        ')}
       </div>
       <div class="actions">
-        <button class="btn btn-green" type="button" data-otvor="rezervovat">${IKONA.kalendar}${sluzba ? 'Objednať sa' : 'Rezervovať tréning'}</button>
-        <button class="btn btn-light" type="button" data-otvor="sprava">${IKONA.sprava}Napísať správu</button>
+        <button class="btn btn-green" type="button" data-otvor="rezervovat">${IKONA.kalendar}${sluzba ? 'Objednaj sa' : 'Rezervuj tréning'}</button>
+        <button class="btn btn-light" type="button" data-otvor="sprava">${IKONA.sprava}Napíš správu</button>
         <button class="icon-btn" type="button" id="zdielat" title="Zdieľať profil" aria-label="Zdieľať profil">${IKONA.zdielat}</button>
       </div>
-      <p class="note">${sluzba ? 'Objednanie' : 'Rezervácia'} prebieha v appke Matchball. Platíš až po potvrdení ${sluzba ? `poskytovateľom` : 'trénerom'}.</p>
+      <p class="note">${sluzba ? 'Objednávaš sa' : 'Rezervuješ'} v appke Matchball. Platíš až po tom, čo ${sluzba ? 'poskytovateľ' : 'tréner'} termín potvrdí.</p>
     </div>
   </div>
 
@@ -1307,7 +1345,7 @@ ${hlavicka('treneri')}
           <div><div class="lab">${esc(r.lab)}</div><div class="sub2">${esc(r.sub)}</div></div>
           <div class="val">${r.val}${r.small ? `<small>${r.small}</small>` : ''}</div>
         </div>`).join('\n        ')}
-        <p class="foot" style="text-align:left">Toto sú ceny ${sluzba ? 'poskytovateľa' : 'trénera'} — pri platbe kartou v appke sa k nim pripočíta poplatok za platbu kartou (${PLATFORM_PCT * 100} % + ${suma(fixedFor(cur), cur)}) so zárukou vrátenia a storno pravidlami.</p>
+        <p class="foot" style="text-align:left">Toto sú ceny ${sluzba ? 'poskytovateľa' : 'trénera'}. Pri platbe kartou v appke sa k nim pripočíta poplatok brány (${PLATFORM_PCT * 100} % + ${suma(fixedFor(cur), cur)}), ktorý kryje záruku vrátenia peňazí aj storno pravidlá.</p>
         ${c.pasma.length ? `<hr>
         ${c.pasma.map((p) => `<div class="band">
           <span class="ico">${p.zlava ? IKONA.slnko : IKONA.mesiac}</span>
@@ -1315,7 +1353,7 @@ ${hlavicka('treneri')}
           <span class="v">od ${p.val}</span>
         </div>`).join('\n        ')}
         ${c.vikendZaklad ? '<p class="foot" style="text-align:left;margin-top:8px">Cez víkend platí základná cena.</p>' : ''}` : ''}
-        <button class="btn btn-green" type="button" data-otvor="rezervovat">${sluzba ? 'Objednať sa' : 'Rezervovať tréning'}</button>
+        <button class="btn btn-green" type="button" data-otvor="rezervovat">${sluzba ? 'Objednaj sa' : 'Rezervuj tréning'}</button>
         ${kurt ? `<p class="foot">${esc(kurt)}</p>` : ''}
       </div>
     </div>
@@ -1327,12 +1365,12 @@ ${hlavicka('treneri')}
         <div class="stars" aria-hidden="true">${hviezdy(rating)}</div>
         <h2 id="hodnotenia-nadpis">${hodnotenie(rating)} z 5 · ${pocetHodnoteni} ${pocet(pocetHodnoteni, 'hodnotenie', 'hodnotenia', 'hodnotení')}</h2>
       </div>
-      <p class="lead">${sluzba ? 'Hodnotiť môže len klient, ktorý si úkon naozaj vyskúšal.' : 'Hodnotiť môže len hráč, ktorý si tréning naozaj odtrénoval.'}</p>
+      <p class="lead">${sluzba ? 'Hodnotí len klient, ktorý si úkon naozaj vyskúšal.' : 'Hodnotí len hráč, ktorý tu naozaj odtrénoval.'}</p>
     </div>
     <div class="revs">
       ${hodnotenia.map((r) => `<article class="rev">
         <div class="top">
-          <img class="ava${r.fotoSubor ? '' : ' placeholder'}" src="${r.fotoSubor ? `/t/${coach.slug}/${r.fotoSubor}` : '/logo.webp'}" alt="" width="160" height="160" loading="lazy">
+          <img class="ava${r.fotoSubor ? '' : ' placeholder'}" src="${r.fotoSubor ? `/t/${coach.slug}/${r.fotoSubor}` : ZASTUPNA_FOTKA}" alt="" width="160" height="160" loading="lazy">
           <div><div class="who">${esc(menoRecenzenta(r.name))}</div><div class="when">${esc(mesiacRok(r.created_at))}</div></div>
           <div class="stars" aria-label="${Number(r.rating) || 0} z 5">${hviezdy(Number(r.rating) || 0)}</div>
         </div>
@@ -1341,15 +1379,15 @@ ${hlavicka('treneri')}
       ${pocetHodnoteni > hodnotenia.length ? `<div class="rev" style="background:transparent;border-style:dashed;box-shadow:none">
         <h3 style="margin-bottom:8px">Zvyšných ${pocetHodnoteni - hodnotenia.length} ${pocet(pocetHodnoteni - hodnotenia.length, 'hodnotenie', 'hodnotenia', 'hodnotení')}</h3>
         <p style="color:var(--muted)">Celé vlákna aj s odpoveďami ${sluzba ? 'poskytovateľa' : 'trénera'} nájdeš v appke.</p>
-        <button class="rev-more" type="button" data-otvor="hodnotenia">Zobraziť všetkých ${pocetHodnoteni} v appke${IKONA.sipka}</button>
+        <button class="rev-more" type="button" data-otvor="hodnotenia">Pozri si všetkých ${pocetHodnoteni} v appke${IKONA.sipka}</button>
       </div>` : ''}
     </div>
   </section>` : ''}
 
   <section class="cta">
     <div>
-      <h2>${sluzba ? 'Objednaj sa' : 'Rezervuj si tréning'}</h2>
-      <p class="lead">Stiahni si Matchball, vyber termín a zaplať kartou až po potvrdení.</p>
+      <h2>${sluzba ? 'Objednaj sa v appke' : 'Rezervuj tréning v appke'}</h2>
+      <p class="lead">Stiahni si Matchball, vyber termín a zaplať až po tom, čo ho ${sluzba ? 'poskytovateľ' : 'tréner'} potvrdí.</p>
       <div class="row">
         <a class="btn btn-lime" href="${ctx.appStore}">${IKONA.apple}Stiahnuť pre iPhone</a>
         <a class="btn btn-ghost" href="${ctx.playStore}">${IKONA.play}Stiahnuť pre Android</a>
@@ -1365,15 +1403,15 @@ ${hlavicka('treneri')}
 ${PATICKA}
 
 <div class="dock">
-  <button class="btn btn-green" type="button" data-otvor="rezervovat">${IKONA.kalendar}${sluzba ? 'Objednať sa' : 'Rezervovať tréning'}</button>
-  <button class="msg" type="button" data-otvor="sprava" aria-label="Napísať správu">${IKONA.sprava}<span>Napísať</span></button>
+  <button class="btn btn-green" type="button" data-otvor="rezervovat">${IKONA.kalendar}${sluzba ? 'Objednaj sa' : 'Rezervuj tréning'}</button>
+  <button class="msg" type="button" data-otvor="sprava" aria-label="Napíš správu">${IKONA.sprava}<span>Napíš</span></button>
 </div>
 
 <div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="ov-nadpis" aria-hidden="true">
   <div class="modal">
     <button class="x" type="button" id="ov-zavriet" aria-label="Zavrieť">${IKONA.zavriet}</button>
     <h3 id="ov-nadpis">Otvoriť v appke Matchball</h3>
-    <p class="lead" id="ov-text">Naskenuj QR kód telefónom — otvorí sa profil v appke. Ak appku nemáš, dostaneš sa do obchodu.</p>
+    <p class="lead" id="ov-text">Naskenuj kód telefónom a profil sa otvorí v appke. Ak ju ešte nemáš, pôjdeš do obchodu.</p>
     <div class="row">
       <a class="btn btn-dark" href="${ctx.appStore}">${IKONA.apple}App Store</a>
       <a class="btn btn-light" href="${ctx.playStore}">${IKONA.play}Google Play</a>
@@ -1476,7 +1514,7 @@ function skriptTrenera(coach, zdielanyUrl) {
     var ciel = schema(co);
     poslednyCiel = ciel;
     if (!jeTelefon) {
-      ovText.textContent = 'Naskenuj QR kód telefónom — otvorí sa profil v appke. Ak appku nemáš, dostaneš sa do obchodu.';
+      ovText.textContent = 'Naskenuj kód telefónom a profil sa otvorí v appke. Ak ju ešte nemáš, pôjdeš do obchodu.';
       ukazModal(true);
       return;
     }
@@ -1486,7 +1524,7 @@ function skriptTrenera(coach, zdielanyUrl) {
     window.setTimeout(function(){
       document.removeEventListener('visibilitychange', odchod);
       if (odisiel || document.visibilityState === 'hidden') return;
-      ovText.textContent = 'Vyzerá to, že appku ešte nemáš. Stiahni si ju — profil sa v nej otvorí hneď po inštalácii.';
+      ovText.textContent = 'Appku zatiaľ nemáš. Stiahni si ju a profil sa v nej otvorí hneď po inštalácii.';
       ukazModal(false);
     }, 1500);
     window.location.href = ciel;
@@ -1534,7 +1572,7 @@ const CSS_ZOZNAM = `.sec-head{padding:26px 0 26px;max-width:44rem}
 .fpill{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;
   background:#fff;border:1px solid var(--line);font-size:.92rem;font-weight:500;color:var(--fg);
   white-space:nowrap;cursor:pointer;transition:background .25s,border-color .25s,color .25s}
-.fpill:hover{border-color:rgba(26,122,74,.35)}
+.fpill:hover{border-color:rgba(30,158,82,.35)}
 .fpill svg{width:15px;height:15px;flex:0 0 15px}
 .fpill[aria-pressed="true"]{background:var(--green-soft);border-color:transparent;color:var(--green-dark);font-weight:600}
 .switch{width:30px;height:17px;border-radius:999px;background:var(--line);position:relative;flex:0 0 30px;
@@ -1558,15 +1596,15 @@ const CSS_ZOZNAM = `.sec-head{padding:26px 0 26px;max-width:44rem}
   transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
 .coach-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
 .coach-photo{position:relative;aspect-ratio:4/3;overflow:hidden;
-  background:linear-gradient(150deg,var(--green-soft),#DCEFE3);
+  background:linear-gradient(150deg,var(--green-soft),#DBEEE3);
   display:flex;align-items:center;justify-content:center}
 .coach-photo .portret{width:100%;height:100%;object-fit:cover}
-.coach-photo .znak{position:relative;width:96px;height:96px;border-radius:50%;object-fit:contain;
-  padding:18px;background:#fff;border:4px solid rgba(255,255,255,.9);
-  box-shadow:0 10px 26px -8px rgba(11,16,13,.35)}
+.coach-photo .znak{position:relative;width:104px;height:104px;border-radius:50%;object-fit:cover;
+  border:4px solid rgba(255,255,255,.92);
+  box-shadow:0 10px 26px -8px rgba(7,26,19,.35)}
 .badge-verified{position:absolute;top:14px;left:14px;display:inline-flex;align-items:center;gap:6px;
   padding:6px 12px 6px 9px;border-radius:999px;background:var(--green);color:#fff;
-  font-size:.78rem;font-weight:600;box-shadow:0 6px 16px -6px rgba(26,122,74,.6)}
+  font-size:.78rem;font-weight:600;box-shadow:0 6px 16px -6px rgba(30,158,82,.6)}
 .badge-verified svg{width:13px;height:13px;flex:0 0 13px}
 .coach-body{padding:20px 22px 22px;display:flex;flex-direction:column;flex:1}
 .coach-meta{margin-top:6px;color:var(--muted);font-size:.92rem}
@@ -1590,7 +1628,7 @@ const CSS_ZOZNAM = `.sec-head{padding:26px 0 26px;max-width:44rem}
 .city-pill{display:inline-flex;align-items:center;gap:7px;padding:11px 18px;border-radius:999px;
   background:var(--card);border:1px solid var(--line);font-size:.95rem;font-weight:500;
   transition:border-color .25s,color .25s}
-.city-pill:hover{border-color:rgba(26,122,74,.35);color:var(--green-dark)}
+.city-pill:hover{border-color:rgba(30,158,82,.35);color:var(--green-dark)}
 .city-pill span{color:var(--muted);font-weight:400}
 
 /* Krížový odkaz medzi trénermi a skupinami. Nie je to reklama na inú stránku,
@@ -1607,15 +1645,33 @@ const CSS_ZOZNAM = `.sec-head{padding:26px 0 26px;max-width:44rem}
   align-items:center;justify-content:center;background:var(--green-soft);color:var(--green-dark)}
 .krizom .sip svg{width:18px;height:18px}
 
+/* Ako to funguje — tri kroky pod zoznamom. Kto sem príde z vyhľadávača, appku
+   nemá a nevie, čo sa stane po kliknutí na „Pozri si profil". Tri vety to
+   povedia skôr, než sa spýta. Číslo je súčasťou karty, nie ozdoba pred ňou. */
+.kroky{margin-bottom:64px}
+.kroky h2{font-size:1.45rem;margin-bottom:18px}
+.kroky ol{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:krok}
+.kroky li{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);padding:22px 24px 24px}
+.kroky li::before{counter-increment:krok;content:counter(krok);
+  display:flex;align-items:center;justify-content:center;width:34px;height:34px;
+  border-radius:50%;background:var(--green-soft);color:var(--green);
+  font-weight:700;font-size:.95rem;margin-bottom:14px}
+.kroky b{display:block;font-size:1.06rem;font-weight:600;letter-spacing:-.02em}
+.kroky p{color:var(--muted);font-size:.94rem;margin-top:6px}
+
 .cta-dark{background:var(--ink);color:#fff;border-radius:var(--radius-xl);
   padding:34px 26px;display:flex;flex-direction:column;gap:22px;
   margin-bottom:64px;position:relative;overflow:hidden}
 .cta-dark::after{content:"";position:absolute;width:460px;height:460px;right:-190px;top:-200px;
-  border-radius:50%;background:radial-gradient(circle,rgba(201,242,78,.2),transparent 65%);pointer-events:none}
+  border-radius:50%;background:radial-gradient(circle,rgba(81,224,65,.2),transparent 65%);pointer-events:none}
 .cta-dark-text{max-width:34rem;position:relative}
 .cta-dark-text h2{color:#fff;font-size:1.7rem}
 .cta-dark-text .lead{color:rgba(255,255,255,.72);margin-top:12px}
 .cta-dark-actions{display:grid;gap:10px;flex:0 0 auto;position:relative}
+/* Druhá, tichšia veta pod výzvou — pre toho, kto na stránku prišiel s inou
+   otázkou (tréner na zozname trénerov, peniaze na zozname partií). */
+.cta-dark-note{color:rgba(255,255,255,.72);font-size:.92rem;margin-top:14px;position:relative}
 
 @media (min-width:900px){
   .sec-head{padding:44px 0 40px}
@@ -1624,12 +1680,25 @@ const CSS_ZOZNAM = `.sec-head{padding:26px 0 26px;max-width:44rem}
   .filters .spacer{display:block}
   .fpill{padding:11px 18px;font-size:.94rem}
   .grid-coaches{grid-template-columns:repeat(3,1fr);gap:24px}
+  .kroky{margin-bottom:80px}
+  .kroky h2{font-size:1.7rem;margin-bottom:22px}
+  .kroky ol{grid-template-columns:repeat(3,1fr);gap:20px}
   .cta-dark{flex-direction:row;align-items:center;justify-content:space-between;gap:40px;
     padding:64px 72px;margin-bottom:80px}
   .cta-dark-text h2{font-size:2.2rem}
   .cta-dark-actions{display:flex;gap:12px}
   .cities-block{margin-bottom:96px}
 }`;
+
+/** Tri kroky pod zoznamom: `kroky` sú trojice [nadpis, veta]. */
+function akoToFunguje(kroky) {
+  return `<section class="kroky">
+    <h2>Ako to funguje</h2>
+    <ol>
+      ${kroky.map(([nadpis, veta]) => `<li><b>${esc(nadpis)}</b><p>${esc(veta)}</p></li>`).join('\n      ')}
+    </ol>
+  </section>`;
+}
 
 /** Odkaz z jedného zoznamu do druhého — jedna karta, jedna veta, šípka. */
 function krizovyOdkaz(href, nadpis, popis) {
@@ -1669,7 +1738,7 @@ function kartaTrenera(coach) {
         <div class="coach-photo">
           ${maFotku
     ? `<img class="portret" src="${url}${coach.fotoSubor}" alt="${esc(coach.name)}" width="600" height="600" loading="lazy">`
-    : '<img class="znak" src="/logo.webp" alt="" width="128" height="128" loading="lazy">'}
+    : `<img class="znak" src="${ZASTUPNA_FOTKA}" alt="" width="512" height="512" loading="lazy">`}
           ${coach.verified ? `<span class="badge-verified">${IKONA.fajka}Overený ${SPORT_POSKYTOVATEL[sportyKodmi[0]] || 'tréner'}</span>` : ''}
         </div>
         <div class="coach-body">
@@ -1679,7 +1748,7 @@ function kartaTrenera(coach) {
           ${tagy.length ? `<div class="coach-tags">${tagy.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
           <div class="coach-foot">
             <div class="coach-price"><b>${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur)}</b><span>${c.sluzba ? 'za úkon' : 'za hodinu'}</span></div>
-            <a class="btn btn-green btn-sm" href="${url}">Zobraziť profil</a>
+            <a class="btn btn-green btn-sm" href="${url}">Pozri si profil</a>
           </div>
         </div>
       </article>`;
@@ -1714,6 +1783,18 @@ function strankaZoznamu({ mesto, sport, coaches, ostatneMesta, sportyVScope, sku
     : (jeMesto
       ? `${n} ${pocet(n, 'tréner', 'tréneri', 'trénerov')} v meste ${mesto.name}. Vyber si podľa hodnotenia a ceny, rezervuj termín v appke Matchball a plať kartou až po potvrdení.`
       : 'Tréneri, ktorých si vieš rezervovať cez appku Matchball. Vyber si podľa mesta, hodnotenia a ceny — platíš kartou až po potvrdení termínu.');
+
+  // Veta pod nadpisom. Nie je to `popis`: ten je písaný pre výsledok vo
+  // vyhľadávači (kľúčové slová, celá ponuka v jednej vete), kým tu už človek
+  // na stránke stojí a potrebuje počuť svoju otázku a odpoveď na ňu.
+  const koho = sport ? `trénera ${sportGenitiv}` : 'trénera';
+  const uvod = n > 0
+    ? (jeMesto
+      ? `Hľadáš ${koho} v meste ${mesto.name}? Tu sú všetci, aj s cenníkom a hodnoteniami.`
+      : `Hľadáš ${koho}? Vyber si mesto a pozri si cenník aj hodnotenia skôr, než niekomu napíšeš.`)
+    : (jeMesto
+      ? `V meste ${mesto.name} tu zatiaľ ${koho} nemáme. Pribúdajú — skús iné mesto nižšie.`
+      : `Verejnú stránku tu zatiaľ ${koho} nemá. Prví pribúdajú, skús to o pár dní.`);
 
   const ld = {
     '@context': 'https://schema.org',
@@ -1772,7 +1853,7 @@ ${FAVICONY}
 <meta property="og:url" content="${url}">
 <meta property="og:title" content="${esc(nadpis)} | Matchball">
 <meta property="og:description" content="${esc(popis)}">
-<meta property="og:image" content="${WEB_ORIGIN}/hero.webp">
+<meta property="og:image" content="${OG_OBRAZOK}">
 <meta property="og:locale" content="sk_SK">
 <meta name="twitter:card" content="summary_large_image">
 ${PISMO}
@@ -1784,7 +1865,7 @@ ${CSS_ZOZNAM}
 </head>
 <body>
 <a class="skip" href="#obsah">Preskočiť na obsah</a>
-${hlavicka('treneri')}
+${hlavicka()}
 
 <main id="obsah" class="wrap">
   ${jeMesto || sport ? `<nav class="crumbs" aria-label="Drobčeková navigácia" style="display:flex;gap:8px;color:var(--muted);font-size:.86rem;margin-top:8px">
@@ -1793,7 +1874,7 @@ ${hlavicka('treneri')}
   <header class="sec-head">
     <p class="eyebrow">Tréneri</p>
     <h1>${esc(nadpis)}</h1>
-    <p class="lead">${esc(popis)}</p>
+    <p class="lead">${esc(uvod)}</p>
   </header>
 
   ${n > 0 ? `<div class="filters">
@@ -1819,7 +1900,13 @@ ${hlavicka('treneri')}
       ${coaches.map(kartaTrenera).join('\n      ')}
   </div>
   <p class="prazdno" id="ziadne" hidden>V tomto výbere nikto nie je. Skús vypnúť „Len overení“.</p>`
-    : '<p class="prazdno">Tu zatiaľ trénera nemáme. Skús iné mesto — pribúdajú.</p>'}
+    : ''}
+
+  ${n > 0 ? akoToFunguje([
+    ['Vyber si trénera', 'Filtruj podľa športu a zoraď podľa ceny alebo hodnotenia. Cenník vidíš hneď tu.'],
+    ['Pošli žiadosť o termín', 'V appke vyberieš deň, čas a počet hráčov. Trvá to minútu.'],
+    ['Tréner potvrdí', 'Dozvieš sa to hneď. Platíš kartou, QR kódom alebo v hotovosti.'],
+  ]) : ''}
 
   ${mestaPills ? `<section class="cities-block">
     <h2>Ďalšie mestá</h2>
@@ -1830,14 +1917,15 @@ ${hlavicka('treneri')}
 
   ${krizovyOdkaz(
     jeMesto && skupinyMesta?.has(mesto.slug) ? `/skupiny/${mesto.slug}/` : '/skupiny/',
-    jeMesto ? `Hľadáš partiu? Skupiny v meste ${mesto.name}` : 'Hľadáš partiu, nie trénera?',
-    'Sparingové skupiny hrávajú pravidelne a berú nových hráčov.',
+    jeMesto ? `Hľadáš partiu? Pozri si partie v meste ${mesto.name}` : 'Hľadáš partiu, nie trénera?',
+    'Partie hrávajú pravidelne a berú nových hráčov.',
   )}
 
   <section class="cta-dark">
     <div class="cta-dark-text">
-      <h2>Trénuješ? Buď medzi nimi.</h2>
-      <p class="lead">Založ si profil v appke Matchball, nastav si cenník a termíny. Verejná stránka ti vznikne sama.</p>
+      <h2>Rezervuj si tréning.</h2>
+      <p class="lead">Stiahni si Matchball, vyber termín a zaplať až po tom, čo ho tréner potvrdí.</p>
+      <p class="cta-dark-note">Trénuješ sám? Založ si profil v appke — verejná stránka ti vznikne sama.</p>
     </div>
     <div class="cta-dark-actions">
       <a class="btn btn-lime" href="${APP_STORE}">${IKONA.apple}Stiahnuť pre iPhone</a>
@@ -1937,8 +2025,8 @@ const CSS_SKUPINY = `.city-groups{margin-bottom:44px}
 .group-head{display:flex;align-items:center;gap:14px}
 .group-head h3{overflow-wrap:anywhere}
 .group-avatar{width:58px;height:58px;flex:0 0 58px;border-radius:50%;object-fit:cover;
-  background:var(--green-soft);border:2px solid #fff;box-shadow:0 8px 20px -10px rgba(11,16,13,.4)}
-.group-avatar.znak{object-fit:contain;padding:12px}
+  background:var(--green-soft);border:2px solid #fff;box-shadow:0 8px 20px -10px rgba(7,26,19,.4)}
+.group-avatar.znak{object-fit:cover}
 .group-when{margin-top:5px;color:var(--muted);font-size:.9rem}
 .group-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}
 .group-desc{margin-top:13px;color:var(--muted);font-size:.94rem;line-height:1.5}
@@ -1950,7 +2038,6 @@ const CSS_SKUPINY = `.city-groups{margin-bottom:44px}
 .group-spots b{font-size:1.2rem;font-weight:700;color:var(--green);letter-spacing:-.02em;
   white-space:nowrap}
 .group-spots span{display:block;color:var(--muted);font-size:.82rem;margin-top:1px}
-.cta-dark-note{color:rgba(255,255,255,.72);font-size:.92rem;margin-top:14px;position:relative}
 
 @media (min-width:900px){
   .city-groups{margin-bottom:64px}
@@ -1975,7 +2062,7 @@ function kartaSkupiny(g) {
         <div class="group-head">
           ${maskot
     ? `<img class="group-avatar" src="${maskot}" alt="" width="224" height="224" loading="lazy">`
-    : '<img class="group-avatar znak" src="/logo.webp" alt="" width="128" height="128" loading="lazy">'}
+    : `<img class="group-avatar znak" src="${ZASTUPNA_FOTKA}" alt="" width="512" height="512" loading="lazy">`}
           <div>
             <h3>${esc(g.name)}</h3>
             ${miesto ? `<p class="group-when">${miesto}</p>` : ''}
@@ -1990,7 +2077,7 @@ function kartaSkupiny(g) {
     ? `<img src="${organizator}" alt="" width="224" height="224" loading="lazy">` : ''}Organizuje ${esc(g.organizer_first_name)}</p>` : ''}
         <div class="group-foot">
           <div class="group-spots"><b>${clenov} ${clenovSlovo}</b><span>${miest > 0 ? `na termín ${miest} miest` : 'pridá sa, kto chce'}</span></div>
-          <a class="btn btn-green btn-sm" href="#pridat-sa">Pridať sa v appke</a>
+          <a class="btn btn-green btn-sm" href="#pridat-sa">Pridaj sa v appke</a>
         </div>
       </article>`;
 }
@@ -2010,7 +2097,10 @@ function strankaSkupin({ mesto, mestaPodla, maTrenerov }) {
     : mestaPodla.flatMap((m) => m.skupiny);
   const n = skupiny.length;
   const url = jeMesto ? `${WEB_ORIGIN}/skupiny/${mesto.slug}/` : `${WEB_ORIGIN}/skupiny/`;
-  const nadpis = jeMesto ? `Skupiny — ${mesto.name}` : 'Skupiny';
+  // Nadpis hovorí to isté slovo ako appka, hlavička aj pätička: partia.
+  // `title` a `description` nižšie držia aj „sparingové skupiny" — to je
+  // to, čo ľudia píšu do vyhľadávača, a stránka o ten nález prísť nemá.
+  const nadpis = jeMesto ? `Partie — ${mesto.name}` : 'Partie';
   const title = jeMesto
     ? `Sparingové skupiny ${mesto.name} | Matchball`
     : 'Sparingové skupiny na Slovensku a v Česku | Matchball';
@@ -2023,6 +2113,16 @@ function strankaSkupin({ mesto, mestaPodla, maTrenerov }) {
     : (jeMesto
       ? `V meste ${mesto.name} zatiaľ žiadna verejná skupina nie je. Prvé skupiny vznikajú v appke Matchball.`
       : 'Sparingové skupiny sú partie, ktoré hrávajú pravidelne a berú nových hráčov. Prvé skupiny vznikajú v appke Matchball.');
+
+  // Ako pri trénerov: `popis` patrí vyhľadávaču (aj slovom „sparingové
+  // skupiny", ktoré ľudia hľadajú), `uvod` človeku, ktorý už na stránke stojí.
+  const uvod = n > 0
+    ? (jeMesto
+      ? `Hľadáš partiu v meste ${mesto.name}? Tieto hrávajú pravidelne a berú nových. Deň, čas aj úroveň vidíš vopred.`
+      : 'Hľadáš partiu na šport? Tieto hrávajú pravidelne a berú nových hráčov. Vyber si mesto a pozri sa, kedy hrajú.')
+    : (jeMesto
+      ? `V meste ${mesto.name} zatiaľ partiu nemáme. Založ svoju v appke a nechaj ju nájsť ďalších hráčov.`
+      : 'Partie tu zatiaľ len vznikajú. Založ svoju v appke a nechaj ju nájsť ďalších hráčov.');
 
   // Skupina nemá vlastnú adresu, takže položkou zoznamu je samotný termín —
   // `SportsEvent` je jediný typ, ktorý o dni, mieste a kapacite vie povedať
@@ -2085,7 +2185,7 @@ ${FAVICONY}
 <meta property="og:url" content="${url}">
 <meta property="og:title" content="${esc(nadpis)} | Matchball">
 <meta property="og:description" content="${esc(popis)}">
-<meta property="og:image" content="${WEB_ORIGIN}/hero.webp">
+<meta property="og:image" content="${OG_OBRAZOK}">
 <meta property="og:locale" content="sk_SK">
 <meta name="twitter:card" content="summary_large_image">
 ${PISMO}
@@ -2098,21 +2198,27 @@ ${CSS_SKUPINY}
 </head>
 <body>
 <a class="skip" href="#obsah">Preskočiť na obsah</a>
-${hlavicka('skupiny')}
+${hlavicka()}
 
 <main id="obsah" class="wrap">
   ${jeMesto ? `<nav class="crumbs" aria-label="Drobčeková navigácia" style="display:flex;gap:8px;color:var(--muted);font-size:.86rem;margin-top:8px">
-    <a href="/skupiny/">Skupiny</a>
+    <a href="/skupiny/">Partie</a>
     <span aria-hidden="true" style="opacity:.45">›</span>
     <span style="color:var(--fg);font-weight:600">${esc(mesto.name)}</span>
   </nav>` : ''}
   <header class="sec-head">
-    <p class="eyebrow">Skupiny</p>
+    <p class="eyebrow">Partie</p>
     <h1>${esc(nadpis)}</h1>
-    <p class="lead">${esc(popis)}</p>
+    <p class="lead">${esc(uvod)}</p>
   </header>
 
-  ${n > 0 ? sekcie : '<p class="prazdno">Založ svoju v appke — a nechaj ju nájsť ďalších hráčov.</p>'}
+  ${n > 0 ? sekcie : ''}
+
+  ${n > 0 ? akoToFunguje([
+    ['Nájdi partiu', 'Pozri si deň, čas a úroveň. Hraj tam, kde ti to sadne.'],
+    ['Požiadaj o členstvo', 'Organizátor žiadosť prijme a si v partii aj v jej chate.'],
+    ['Hrajte', 'Kurt zaplatí jeden, ostatní mu pošlú svoje podiely cez QR ešte v šatni.'],
+  ]) : ''}
 
   ${mestaPills ? `<section class="cities-block">
     <h2>Ďalšie mestá</h2>
@@ -2123,14 +2229,16 @@ ${hlavicka('skupiny')}
 
   ${krizovyOdkaz(
     jeMesto && maTrenerov ? `/treneri/${mesto.slug}/` : '/treneri/',
-    jeMesto ? `Chceš sa zlepšiť? Tréneri v meste ${mesto.name}` : 'Chceš sa zlepšiť?',
+    jeMesto ? `Chceš sa zlepšiť? Pozri si trénerov v meste ${mesto.name}` : 'Chceš sa zlepšiť?',
     'Tréner ti ukáže, čo v hre opraviť. Termín si rezervuješ v appke.',
   )}
 
   <section class="cta-dark" id="pridat-sa">
     <div class="cta-dark-text">
-      <h2>Pridaj sa k partii.</h2>
-      <p class="lead">Skupinu nájdeš v appke v Hľadať › Skupiny. Napíšeš organizátorovi a hráš.</p>
+      <h2>${n > 0 ? 'Pridaj sa k partii.' : 'Založ prvú partiu.'}</h2>
+      <p class="lead">${n > 0
+    ? 'Otvor v appke Hľadať › Partie, pošli žiadosť o členstvo a hraj.'
+    : 'Otvor v appke Partie, založ novú a pozvi, s kým hrávaš. Ďalší si ťa nájdu sami.'}</p>
       <p class="cta-dark-note">Cez Matchball pri sparingu neprejde ani cent — o peniazoch sa partia dohodne sama.</p>
     </div>
     <div class="cta-dark-actions">
@@ -2332,11 +2440,20 @@ async function main() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
 
+  // Druhá fixtúra je nepovinná: skupiny majú vlastné RPC, tak majú aj vlastnú
+  // skúšobnú dávku. Bez nej sa `--fixture` chová ako doteraz — stránka partií
+  // vyjde prázdna.
+  const fixtureSkupiny = argHodnota('--fixture-skupiny');
+
   let treneri;
   let skupinySurove = [];
   if (fixture) {
     console.log(`Fixture: ${fixture}`);
     treneri = JSON.parse(fs.readFileSync(path.resolve(fixture), 'utf8'));
+    if (fixtureSkupiny) {
+      console.log(`Fixture skupín: ${fixtureSkupiny}`);
+      skupinySurove = JSON.parse(fs.readFileSync(path.resolve(fixtureSkupiny), 'utf8'));
+    }
   } else {
     if (!url || !key) {
       console.error('Chýba SUPABASE_URL alebo SUPABASE_SERVICE_KEY (alebo použi --fixture <súbor>).');

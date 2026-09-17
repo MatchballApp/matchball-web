@@ -1,25 +1,96 @@
 <!doctype html>
 <html lang="cs">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ochrana osobních údajů — Matchball</title>
+<link rel="icon" href="/favicon.ico?v=4" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png?v=4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=4">
+<meta name="theme-color" content="#071A13">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fff;--fg:#16241c;--muted:#5b6b61;--line:#e3e8e4;--accent:#1f6b45}
-@media(prefers-color-scheme:dark){:root{--bg:#101613;--fg:#e8efe9;--muted:#9db0a4;--line:#25322b}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-main{max-width:44rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
-h1{font-size:1.6rem;margin:0 0 .25rem}
-h2{font-size:1.05rem;margin:2rem 0 .4rem}
+:root{
+  --ink:#071A13;--ink-3:#123125;--paper:#F5F8F5;--card:#FFFFFF;
+  --green:#15803D;--green-dark:#0F6A36;--green-soft:#E9F5ED;
+  --lime:#51E041;--fg:#0F1F17;--muted:#47594F;--line:#DFE8E2;
+  --on-dark:#EAF3ED;--on-dark-muted:#A6BEB0;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:104px}
+body{margin:0;background:var(--paper);color:var(--fg);
+  font-family:"Outfit",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;line-height:1.7;font-weight:400;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh;padding-top:80px}
+img{display:block;max-width:100%}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--green);outline-offset:3px;border-radius:6px}
+
+/* Plávajúca tmavá hlavička — tá istá pilulka ako na zvyšku webu. */
+.nav-shell{position:fixed;top:14px;left:0;right:0;z-index:80;padding:0 16px;pointer-events:none}
+.nav{max-width:min(1060px,100%);margin:0 auto;pointer-events:auto;display:flex;align-items:center;gap:12px;
+  padding:9px 9px 9px 18px;border-radius:999px;background:rgba(7,26,19,.88);
+  -webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);
+  border:1px solid rgba(255,255,255,.12);box-shadow:0 10px 30px -14px rgba(7,26,19,.7);color:#fff}
+.nav :focus-visible{outline-color:var(--lime)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.06rem;
+  letter-spacing:-.02em;text-decoration:none}
+.brand img{width:30px;height:30px;flex:0 0 30px}
+.nav .cta{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;
+  padding:11px 19px;border-radius:999px;background:var(--lime);color:#06210F;
+  font-weight:600;font-size:.93rem;text-decoration:none;white-space:nowrap;
+  transition:transform .3s var(--ease),background .2s}
+.nav .cta:hover{transform:translateY(-2px);background:#6BEA5C}
+
+main{width:100%;max-width:46rem;margin:0 auto;padding:8px 20px 72px}
+h1{font-size:clamp(2rem,5vw,2.8rem);font-weight:800;letter-spacing:-.028em;
+  word-spacing:.05em;line-height:1.06;margin:0 0 6px}
+h2{font-size:1.14rem;font-weight:700;letter-spacing:-.018em;margin:34px 0 8px}
 p{margin:0 0 .9rem;color:var(--fg)}
-.updated{color:var(--muted);font-size:.9rem;margin-bottom:2rem}
-nav{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem}
-nav a{padding:.35rem .8rem;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--muted);font-size:.9rem}
-nav a[aria-current]{border-color:var(--accent);color:var(--accent)}
-footer{margin-top:3rem;padding-top:1.25rem;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+.updated{color:var(--muted);font-size:.94rem;margin-bottom:32px}
+nav.jazyky{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px}
+nav.jazyky a{padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:var(--card);
+  text-decoration:none;color:var(--muted);font-size:.92rem;font-weight:500;
+  transition:border-color .2s,color .2s}
+nav.jazyky a:hover{border-color:rgba(30,158,82,.45);color:var(--green-dark)}
+nav.jazyky a[aria-current]{background:var(--green-soft);border-color:transparent;
+  color:var(--green-dark);font-weight:600}
+main a{color:var(--green);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px}
+main a:hover{color:var(--green-dark)}
+
+footer{margin-top:auto;background:var(--ink);color:var(--on-dark-muted);
+  padding:40px 0 34px;font-size:.95rem}
+footer .wrap{max-width:46rem;margin:0 auto;padding:0 20px;
+  display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center}
+footer a{color:var(--on-dark-muted);text-decoration:none}
+footer a:hover{color:#fff}
+footer .odkazy{display:flex;flex-wrap:wrap;gap:10px 22px}
+footer .copy{margin-left:auto}
+footer :focus-visible{outline-color:var(--lime)}
+@media (min-width:900px){
+  body{padding-top:96px}
+  h2{font-size:1.24rem;margin:42px 0 10px}
+  main{padding:20px 20px 96px}
+  footer{padding:52px 0 44px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
 </style>
+</head>
+<body>
+<div class="nav-shell">
+  <nav class="nav" aria-label="Hlavná">
+    <a class="brand" href="/">
+      <img src="/logo.webp" alt="" width="192" height="192">
+      <span>Matchball</span>
+    </a>
+    <a class="cta" href="/#stiahnut">Stiahnuť</a>
+  </nav>
+</div>
 <main>
-<nav><a href="./privacy.sk.html">Slovensky</a><a href="./privacy.cs.html" aria-current="page">Česky</a><a href="./privacy.en.html">English</a></nav>
+<nav class="jazyky" aria-label="Jazyk"><a href="./privacy.sk.html">Slovensky</a><a href="./privacy.cs.html" aria-current="page">Česky</a><a href="./privacy.en.html">English</a></nav>
 <h1>Ochrana osobních údajů</h1>
 <p class="updated">Naposledy aktualizováno: 9. 9. 2026</p>
 <h2>Správce</h2>
@@ -48,6 +119,18 @@ footer{margin-top:3rem;padding-top:1.25rem;border-top:1px solid var(--line);colo
 <p>Pokud máš pocit, že s tvými údaji nakládáme nesprávně, můžeš podat stížnost Úřadu pro ochranu osobních údajů (uoou.cz).</p>
 <h2>Kontakt</h2>
 <p>V otázkách ochrany údajů nás kontaktuj na support@matchballapp.com.</p>
-<footer><a href="./terms.cs.html">Podmínky používání</a></footer>
+<p style="margin-top:34px"><a href="./terms.cs.html">Podmínky používání</a></p>
 </main>
+<footer>
+  <div class="wrap">
+    <div class="odkazy">
+      <a href="/">Matchball</a>
+      <a href="/legal/privacy.html">Ochrana osobných údajov</a>
+      <a href="/legal/terms.html">Podmienky používania</a>
+      <a href="mailto:support@matchballapp.com">support@matchballapp.com</a>
+    </div>
+    <span class="copy">© 2026 Matchball</span>
+  </div>
+</footer>
+</body>
 </html>

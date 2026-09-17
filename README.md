@@ -6,6 +6,21 @@ Ochrana osobných údajov, podmienky používania a popis služby.
 (`src/legal/content.ts`) skriptom `scripts/build-legal-page.mjs`
 v súkromnom repozitári `MatchballApp/matchball`.
 
+## Kde je zdroj vzhľadu
+
+Hlavná stránka (`index.html`) sa píše v repe appky, v `web/index.html`, a sem
+sa kopíruje hotová — aj s `logo.webp`, `logo.png`, `og.jpg`, `favicon.ico`,
+`icon-*.png` a `img/*.webp`. **Tá kópia je zdroj pravdy o dizajne**: paleta
+(zelená `#1E9E52` / `#15803D`, limetka `#51E041`, tmavozelená `#071A13`, modrá
+`#1378ED`), písmo Outfit, plávajúca tmavá sklenená hlavička, guľaté tlačidlá
+a tmavá pätička. Podstránky (generátor nižšie, `legal/`, `g/`, `i/`, `auth/`)
+majú vlastné inline CSS, ale rovnaké tokeny a rovnakú hlavičku s pätičkou —
+pri zmene vzhľadu hlavnej stránky ich treba prepísať s ňou.
+
+`avatar-zastupny.webp` je zástupná fotka trénera a partie: tmavozelený štvorec
+so srdcom, ktorý `object-fit:cover` oreže na čistý kruh. Samotné `logo.webp` je
+priehľadné srdce — v okrúhlom rámčeku by z neho ostali odseknuté krídla.
+
 Dôvod: ten istý text musí byť v aplikácii aj na webe. Keby sa udržiavali
 zvlášť, po prvej zmene by sa rozišli — a rozpor medzi tým, čo sľubujeme
 na webe a čo v aplikácii, je pri kontrole to najhoršie, čo môže nastať.
@@ -71,8 +86,16 @@ node scripts/generuj-stranky-trenerov.mjs
 Bez databázy, len na skúšku vzhľadu:
 
 ```sh
-node scripts/generuj-stranky-trenerov.mjs --fixture scripts/fixture-treneri.json
+node scripts/generuj-stranky-trenerov.mjs \
+  --fixture scripts/fixture-treneri.json \
+  --fixture-skupiny scripts/fixture-skupiny.json
 ```
+
+`--fixture-skupiny` je nepovinné; bez neho vyjde stránka partií prázdna, lebo
+skupiny majú vlastné RPC. **Po skúške vráť vygenerované súbory späť**
+(`git checkout -- t treneri skupiny sitemap.xml index.html && git clean -fd t treneri skupiny`),
+nech sa do repa nedostanú vymyslení tréneri; nočný beh ich síce prepíše, ale až
+o 03:00 UTC.
 
 Skript je idempotentný — druhý beh nad tými istými dátami nezapíše nič, takže
 z neho nevznikajú prázdne commity.
