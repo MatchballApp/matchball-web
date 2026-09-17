@@ -6,11 +6,11 @@
 <title>Martin Mucha – tenis a stolný tenis, Košice | Matchball</title>
 <meta name="description" content="Martin Mucha — tréning tenisu a stolného tenisu v meste Košice. Kde: Ntc. Cena 15 € za hodinu. Rezervácia a platba kartou v appke Matchball.">
 <link rel="canonical" href="https://matchballapp.com/t/martin-mucha/">
-<link rel="icon" href="/favicon.ico?v=2" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png?v=2">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=2">
-<meta name="theme-color" content="#0B100D">
+<link rel="icon" href="/favicon.ico?v=4" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png?v=4">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=4">
+<meta name="theme-color" content="#071A13">
 <meta property="og:type" content="profile">
 <meta property="og:url" content="https://matchballapp.com/t/martin-mucha/">
 <meta property="og:title" content="Martin Mucha – tenis a stolný tenis, Košice">
@@ -24,97 +24,122 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#0B100D;--ink-soft:#141C17;--paper:#EFF2ED;--card:#FFFFFF;
-  --green:#1A7A4A;--green-dark:#125E38;--green-soft:#E8F3EC;
-  --lime:#C9F24E;--lime-dim:#A7D63B;--fg:#141F1A;--muted:#5E7367;--line:#E0E6DF;
+  /* Tá istá paleta ako hlavná stránka (web/index.html, 17. 9. 2026): zelená
+     z loga, tmavozelená namiesto čiernej, limetka a modrá zo srdca.
+     `--green` je zámerne tmavší odtieň #15803D — je to jediná zelená, ktorou
+     sa na bielej karte píše text (ceny, hodnotenia, odkazy) a svetlejší
+     #1E9E52 by na kontrast nestačil. Výplne tlačidiel ho znesú tiež. */
+  --ink:#071A13;--ink-soft:#0C2419;--ink-3:#123125;
+  --paper:#F5F8F5;--card:#FFFFFF;
+  --green:#15803D;--green-dark:#0F6A36;--green-soft:#E9F5ED;
+  --lime:#51E041;--lime-dim:#B7F2C9;--blue:#1378ED;
+  --fg:#0F1F17;--muted:#47594F;--line:#DFE8E2;
+  --on-dark:#EAF3ED;--on-dark-muted:#A6BEB0;
   --gold:#E8B23A;
-  --radius-xl:32px;--radius-lg:24px;--radius-md:16px;
-  --shadow-soft:0 1px 2px rgba(20,31,26,.04),0 12px 32px -12px rgba(20,31,26,.14);
-  --shadow-lift:0 2px 4px rgba(20,31,26,.06),0 24px 48px -16px rgba(20,31,26,.22);
-  --ease:cubic-bezier(.22,1,.36,1);--max:1180px;
+  --focus:#15803D;
+  --radius-xl:30px;--radius-lg:24px;--radius-md:16px;
+  --shadow-soft:0 1px 2px rgba(7,26,19,.05),0 14px 34px -16px rgba(7,26,19,.18);
+  --shadow-lift:0 2px 6px rgba(7,26,19,.07),0 28px 56px -20px rgba(7,26,19,.28);
+  --ease:cubic-bezier(.22,1,.36,1);--max:1200px;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+/* Hlavička stránku prekrýva, takže kotva (#pridat-sa) musí zastaviť pod ňou. */
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:104px}
 body{margin:0;background:var(--paper);color:var(--fg);
   font-family:"Outfit",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   font-size:17px;line-height:1.65;font-weight:400;-webkit-font-smoothing:antialiased;
-  overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}
+  overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh;
+  padding-top:80px}
 img,svg{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit}
 [hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
 .wrap{max-width:var(--max);margin:0 auto;padding:0 20px;width:100%}
-h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.03em;word-spacing:.06em;line-height:1.04}
-h1{font-size:clamp(2.4rem,8vw,4.45rem);font-weight:800}
-h2{font-size:clamp(1.75rem,4.4vw,2.6rem)}
-h3{font-size:1.16rem;line-height:1.25;letter-spacing:-.02em}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.028em;word-spacing:.05em;line-height:1.06}
+h1{font-size:clamp(2.3rem,7vw,3.9rem);font-weight:800;line-height:1.03}
+h2{font-size:clamp(1.85rem,4vw,2.8rem)}
+h3{font-size:1.16rem;line-height:1.26;letter-spacing:-.018em}
 p{margin:0}
-.lead{font-size:1.02rem;color:var(--muted);line-height:1.6}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:600;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:12px}
-.eyebrow::before{content:"";width:20px;height:2px;border-radius:2px;background:var(--green);opacity:.5}
+.lead{font-size:1.05rem;color:var(--muted);line-height:1.6}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:.78rem;font-weight:600;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:14px}
+.eyebrow::before{content:"";width:22px;height:2px;border-radius:2px;background:currentColor;opacity:.55}
 .skip{position:absolute;left:-9999px;top:0;padding:12px 18px;background:var(--ink);color:#fff;
   border-radius:0 0 12px 0;z-index:200}
 .skip:focus{left:0}
 
+/* ── Tlačidlá ───────────────────────────────────────────────
+   Jedna rodina ako na hlavnej stránke. Text sa vždy zmestí:
+   `white-space:nowrap` a krátke popisy, žiadne tri bodky. */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;
-  padding:15px 28px;border-radius:999px;border:0;cursor:pointer;line-height:1.2;
+  padding:15px 26px;border-radius:999px;border:0;cursor:pointer;line-height:1.2;
   font-weight:600;font-size:1rem;white-space:nowrap;text-decoration:none;
-  transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .25s}
-.btn-dark{background:var(--ink);color:#fff;box-shadow:0 10px 24px -10px rgba(11,16,13,.7)}
-.btn-dark:hover{transform:translateY(-2px);box-shadow:0 18px 34px -12px rgba(11,16,13,.8)}
-.btn-green{background:var(--green);color:#fff;box-shadow:0 10px 24px -10px rgba(26,122,74,.8)}
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .2s}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-dark:hover{transform:translateY(-2px);background:var(--ink-3)}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 10px 24px -12px rgba(21,128,61,.9)}
 .btn-green:hover{transform:translateY(-2px);background:var(--green-dark)}
-.btn-light{background:#fff;color:var(--fg);box-shadow:var(--shadow-soft);border:1px solid var(--line)}
+.btn-light{background:#fff;color:var(--fg);box-shadow:var(--shadow-soft)}
 .btn-light:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
-.btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22)}
-.btn-ghost:hover{background:rgba(255,255,255,.16)}
-.btn-lime{background:var(--lime);color:#0B100D;box-shadow:0 12px 30px -12px rgba(201,242,78,.8)}
-.btn-lime:hover{transform:translateY(-2px);box-shadow:0 20px 40px -14px rgba(201,242,78,.9)}
-.btn-sm{padding:11px 20px;font-size:.94rem}
+.btn-ghost{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.24)}
+.btn-ghost:hover{transform:translateY(-2px);background:rgba(255,255,255,.14)}
+.btn-lime{background:var(--lime);color:#06210F;box-shadow:0 12px 28px -14px rgba(81,224,65,.9)}
+.btn-lime:hover{transform:translateY(-2px);background:#6BEA5C}
+.btn-sm{padding:11px 19px;font-size:.93rem}
 .btn svg{width:19px;height:19px;flex:0 0 19px}
 
-.nav-shell{padding:14px 16px 18px}
-.nav{max-width:940px;margin:0 auto;display:flex;align-items:center;gap:12px;
-  padding:8px 8px 8px 16px;border-radius:999px;background:rgba(255,255,255,.72);
-  backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);
-  border:1px solid rgba(255,255,255,.45);
-  box-shadow:0 2px 4px rgba(20,31,26,.05),0 16px 32px -18px rgba(20,31,26,.18)}
+/* ── Plávajúca hlavička ─────────────────────────────────────
+   Tmavý sklenený panel nad obsahom, rovnaký ako na hlavnej stránke. Tmavý je
+   zámerne: pilulka tak vyzerá rovnako nad svetlým zoznamom aj nad tmavou
+   fotkou trénera a nemusí sa pri rolovaní prezliekať. */
+.nav-shell{position:fixed;top:14px;left:0;right:0;z-index:80;padding:0 16px;pointer-events:none}
+.nav{max-width:min(1060px,100%);margin:0 auto;pointer-events:auto;
+  display:flex;align-items:center;gap:12px;
+  padding:9px 9px 9px 18px;border-radius:999px;
+  background:rgba(7,26,19,.88);
+  -webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 10px 30px -14px rgba(7,26,19,.7);
+  color:#fff;--focus:var(--lime)}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.06rem;letter-spacing:-.02em}
-.brand .mark{width:28px;height:28px;flex:0 0 28px;border-radius:8px}
+.brand .mark{width:30px;height:30px;flex:0 0 30px}
 .nav-links{display:none;gap:4px;margin-left:auto}
-.nav-links a{padding:9px 16px;border-radius:999px;color:#2A3831;font-size:.95rem;font-weight:500;
-  transition:background .25s,color .25s}
-.nav-links a:hover,.nav-links a.on{background:rgba(26,122,74,.09);color:var(--green)}
+.nav-links a{padding:9px 13px;border-radius:999px;color:rgba(255,255,255,.82);font-size:.94rem;
+  font-weight:500;transition:background .2s,color .2s}
+.nav-links a:hover{background:rgba(255,255,255,.1);color:#fff}
 .nav-cta{margin-left:auto}
 
-footer{margin-top:auto;padding:44px 0 30px}
-footer .brand{font-size:1.14rem}
-.foot-grid{display:grid;gap:28px;padding-bottom:28px;border-bottom:1px solid var(--line)}
-.foot-grid h4{margin:0 0 14px;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--muted);font-weight:600}
+/* ── Pätička ────────────────────────────────────────────────
+   Tmavý pás, ten istý materiál ako hlavička — na hlavnej stránke tiež. */
+footer{margin-top:auto;background:var(--ink);color:var(--on-dark);
+  padding:52px 0 32px;--focus:var(--lime)}
+footer .brand{font-size:1.2rem;color:#fff}
+.foot-grid{display:grid;gap:30px}
+.foot-h{margin:0 0 14px;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;
+  color:#fff;opacity:.7;font-weight:600}
 .foot-links{display:grid;gap:9px}
-.foot-links a{font-size:.96rem;transition:color .25s}
-.foot-links a:hover{color:var(--green)}
-.foot-about{color:var(--muted);font-size:.94rem;margin-top:12px;max-width:26rem}
-.foot-bottom{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;padding-top:22px;
-  color:var(--muted);font-size:.88rem}
+.foot-links a{font-size:.96rem;color:var(--on-dark-muted);transition:color .2s}
+.foot-links a:hover{color:#fff}
+.foot-about{color:var(--on-dark-muted);font-size:.95rem;margin-top:14px;max-width:26rem}
+.foot-bottom{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;
+  margin-top:36px;padding-top:22px;border-top:1px solid rgba(255,255,255,.14);
+  color:var(--on-dark-muted);font-size:.88rem}
 
 @media (min-width:900px){
-  .nav-shell{padding:22px 20px 0}
-  .nav{padding:10px 10px 10px 22px;gap:20px}
+  body{padding-top:96px}
+  .nav{padding:10px 10px 10px 22px;gap:18px}
   .brand{gap:11px;font-size:1.12rem}
-  .brand .mark{width:30px;height:30px;flex:0 0 30px}
   .nav-links{display:flex}
   .nav-cta{margin-left:4px}
   .lead{font-size:1.15rem}
   .eyebrow{font-size:.8rem;margin-bottom:18px}
   h3{font-size:1.3rem}
-  footer{padding:72px 0 44px}
-  .foot-grid{grid-template-columns:1.4fr 1fr 1fr;gap:40px;padding-bottom:40px}
-  .foot-about{font-size:.98rem;margin-top:14px}
+  footer{padding:76px 0 44px}
+  .foot-grid{grid-template-columns:1.5fr 1fr 1fr;gap:40px}
+  .foot-about{font-size:.98rem}
   .foot-links a{font-size:.98rem}
-  .foot-bottom{padding-top:26px;font-size:.9rem}
+  .foot-bottom{margin-top:52px;padding-top:26px;font-size:.9rem}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -135,15 +160,15 @@ main{padding-bottom:96px}
 .hero{display:grid;gap:0}
 .hero-photo{position:relative}
 .hero-shot{position:relative;border-radius:24px;overflow:hidden;height:min(360px,86vw);
-  box-shadow:0 3px 6px rgba(20,31,26,.06),0 26px 48px -22px rgba(20,31,26,.34)}
+  box-shadow:0 3px 6px rgba(7,26,19,.06),0 26px 48px -22px rgba(7,26,19,.34)}
 .hero-shot .foto{width:100%;height:100%;object-fit:cover;object-position:center 22%}
-.hero-shot .foto.placeholder{object-fit:contain;padding:22%;background:var(--green-soft)}
+.hero-shot .foto.placeholder{object-fit:cover;background:var(--ink-soft)}
 .hero-veil{position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(6,10,7,0) 34%,rgba(6,10,7,.44) 62%,rgba(6,10,7,.88) 100%)}
+  background:linear-gradient(180deg,rgba(5,18,12,0) 34%,rgba(5,18,12,.44) 62%,rgba(5,18,12,.88) 100%)}
 .hero-cap{position:absolute;left:22px;right:22px;bottom:20px;color:#fff}
 .hero-cap .eyebrow{color:var(--lime)}
 .hero-cap .eyebrow::before{background:var(--lime)}
-.hero-cap h1{color:#fff;text-shadow:0 2px 18px rgba(6,10,7,.5)}
+.hero-cap h1{color:#fff;text-shadow:0 2px 18px rgba(5,18,12,.5)}
 .meta{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin-top:9px;
   color:rgba(255,255,255,.86);font-size:.92rem}
 .meta .rate{display:inline-flex;align-items:center;gap:6px;color:#fff;font-weight:700}
@@ -152,7 +177,7 @@ main{padding-bottom:96px}
 .club-line{display:flex;align-items:center;gap:7px;margin-top:16px;color:var(--muted);font-size:.94rem}
 .club-line svg{width:16px;height:16px;flex:0 0 16px;color:var(--green)}
 .verified{display:inline-flex;align-items:center;gap:8px;padding:8px 15px 8px 11px;border-radius:999px;
-  background:var(--green-soft);border:1px solid rgba(26,122,74,.18);color:var(--green-dark);
+  background:var(--green-soft);border:1px solid rgba(30,158,82,.18);color:var(--green-dark);
   font-size:.86rem;font-weight:600;margin-top:16px}
 .verified svg{width:16px;height:16px;flex:0 0 16px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
@@ -174,22 +199,22 @@ main{padding-bottom:96px}
   margin:26px 0 12px}
 .pills{display:flex;flex-wrap:wrap;gap:8px}
 .pill{padding:8px 15px;border-radius:999px;background:#fff;border:1px solid var(--line);
-  font-size:.9rem;font-weight:500;box-shadow:0 1px 2px rgba(20,31,26,.04)}
-.pill-soft{background:var(--green-soft);border-color:rgba(26,122,74,.16);color:var(--green-dark);font-weight:600}
+  font-size:.9rem;font-weight:500;box-shadow:0 1px 2px rgba(7,26,19,.04)}
+.pill-soft{background:var(--green-soft);border-color:rgba(30,158,82,.16);color:var(--green-dark);font-weight:600}
 .pill-sport{display:inline-flex;align-items:center;gap:6px}
 .pill-sport svg{width:14px;height:14px;flex:0 0 14px}
 .place{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
   overflow:hidden;box-shadow:var(--shadow-soft);display:flex;flex-direction:column}
 .place-map{height:104px;flex:0 0 104px;position:relative;
   background:
-    linear-gradient(90deg,rgba(26,122,74,.12) 1px,transparent 1px) 0 0/26px 26px,
-    linear-gradient(180deg,rgba(26,122,74,.12) 1px,transparent 1px) 0 0/26px 26px,
-    linear-gradient(140deg,#DDEBE0,#EFF4EC 55%,#E4EFE6)}
+    linear-gradient(90deg,rgba(30,158,82,.12) 1px,transparent 1px) 0 0/26px 26px,
+    linear-gradient(180deg,rgba(30,158,82,.12) 1px,transparent 1px) 0 0/26px 26px,
+    linear-gradient(140deg,#DCEBE1,#F1F7F2 55%,#E3EFE7)}
 .place-map::after{content:"";position:absolute;left:0;right:0;top:62%;height:14px;
-  background:rgba(201,242,78,.5);transform:rotate(-6deg)}
+  background:rgba(81,224,65,.5);transform:rotate(-6deg)}
 .place-map .pinwrap{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
   width:36px;height:36px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;
-  box-shadow:0 8px 18px -6px rgba(26,122,74,.7);z-index:1}
+  box-shadow:0 8px 18px -6px rgba(30,158,82,.7);z-index:1}
 .place-map .pinwrap svg{width:18px;height:18px}
 .place-body{padding:18px 20px}
 .place-body .name{font-weight:700;font-size:1.04rem;letter-spacing:-.02em}
@@ -229,7 +254,7 @@ main{padding-bottom:96px}
 .rev:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
 .rev .top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .rev .ava{width:42px;height:42px;flex:0 0 42px;border-radius:50%;object-fit:cover;background:var(--green-soft)}
-.rev .ava.placeholder{object-fit:contain;padding:8px}
+.rev .ava.placeholder{object-fit:cover}
 .rev .who{font-weight:700;letter-spacing:-.02em;font-size:.98rem;line-height:1.3}
 .rev .when{color:var(--muted);font-size:.8rem;line-height:1.35}
 .rev .stars{display:flex;gap:2px;margin-left:auto;color:var(--gold)}
@@ -243,7 +268,7 @@ main{padding-bottom:96px}
 .rev-more svg{width:16px;height:16px}
 
 .cta{background:var(--ink);color:#fff;border-radius:var(--radius-xl);padding:30px 26px 28px;
-  margin-top:38px;text-align:center;box-shadow:0 26px 50px -26px rgba(11,16,13,.6)}
+  margin-top:38px;text-align:center;box-shadow:0 26px 50px -26px rgba(7,26,19,.6)}
 .cta h2{color:#fff}
 .cta .lead{color:rgba(255,255,255,.76);margin-top:12px;font-size:1rem}
 .cta .row{display:grid;gap:10px;margin-top:22px}
@@ -257,7 +282,7 @@ main{padding-bottom:96px}
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:70;
   background:rgba(255,255,255,.92);backdrop-filter:blur(18px) saturate(160%);
   -webkit-backdrop-filter:blur(18px) saturate(160%);
-  border-top:1px solid var(--line);box-shadow:0 -6px 26px -10px rgba(20,31,26,.28);
+  border-top:1px solid var(--line);box-shadow:0 -6px 26px -10px rgba(7,26,19,.28);
   padding:12px 20px calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px}
 .dock .btn-green{flex:1;padding:15px 18px}
 .dock .msg{width:54px;height:54px;flex:0 0 54px;border-radius:50%;border:1px solid var(--line);
@@ -274,7 +299,7 @@ body{padding-bottom:92px}
   .hero{grid-template-columns:440px 1fr;gap:0 56px;padding-bottom:84px;align-items:start}
   .hero-photo{display:contents}
   .hero-shot{grid-column:1;grid-row:1 / span 2;height:440px;border-radius:32px;
-    box-shadow:0 3px 6px rgba(20,31,26,.06),0 34px 60px -26px rgba(20,31,26,.34)}
+    box-shadow:0 3px 6px rgba(7,26,19,.06),0 34px 60px -26px rgba(7,26,19,.34)}
   .hero-shot .foto{object-position:center 18%}
   .hero-veil{display:none}
   .hero-cap{position:static;grid-column:2;grid-row:1;color:inherit;padding-top:6px}
@@ -326,7 +351,7 @@ body{padding-bottom:92px}
   .rev-head .stars svg{width:22px;height:22px}
   .rev-head .lead{max-width:22rem;text-align:right;margin-top:0}
   .cta{margin-top:96px;padding:52px 56px;display:grid;grid-template-columns:1fr auto;
-    gap:56px;align-items:center;text-align:left;box-shadow:0 30px 60px -28px rgba(11,16,13,.6)}
+    gap:56px;align-items:center;text-align:left;box-shadow:0 30px 60px -28px rgba(7,26,19,.6)}
   .cta h2{max-width:16ch}
   .cta .lead{margin-top:16px;max-width:38rem}
   .cta .row{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
@@ -338,11 +363,11 @@ body{padding-bottom:92px}
 }
 
 /* ── Modál (počítač) a panel obchodu (telefón) ─────────────── */
-.ov{position:fixed;inset:0;background:rgba(20,31,26,.5);backdrop-filter:blur(3px);
+.ov{position:fixed;inset:0;background:rgba(7,26,19,.5);backdrop-filter:blur(3px);
   display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
 .ov.on{display:flex}
 .modal{position:relative;width:100%;max-width:520px;background:var(--card);border-radius:var(--radius-lg);
-  padding:36px 24px 30px;text-align:center;box-shadow:0 40px 80px -24px rgba(11,16,13,.5);
+  padding:36px 24px 30px;text-align:center;box-shadow:0 40px 80px -24px rgba(7,26,19,.5);
   max-height:calc(100vh - 40px);overflow:auto}
 .modal h3{font-size:1.4rem;margin-bottom:12px}
 .modal .lead{font-size:1rem;margin-bottom:22px}
@@ -362,7 +387,7 @@ body{padding-bottom:92px}
 }
 .toast{position:fixed;left:50%;bottom:104px;transform:translate(-50%,14px);z-index:120;
   background:var(--ink);color:#fff;padding:13px 22px;border-radius:999px;font-size:.92rem;font-weight:500;
-  display:flex;align-items:center;gap:10px;box-shadow:0 20px 40px -16px rgba(11,16,13,.7);
+  display:flex;align-items:center;gap:10px;box-shadow:0 20px 40px -16px rgba(7,26,19,.7);
   opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .3s var(--ease);
   max-width:calc(100vw - 32px)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
@@ -376,20 +401,20 @@ body{padding-bottom:92px}
 <div class="nav-shell">
   <nav class="nav">
     <a class="brand" href="/">
-      <img class="mark" src="/logo.webp" alt="" width="128" height="128">
+      <img class="mark" src="/logo.webp" alt="" width="192" height="192">
       <span>Matchball</span>
     </a>
     <!-- Presne tie isté odkazy v tom istom poradí ako na domovskej stránke —
-         menu sa pri prechode na Trénerov či Skupiny nesmie meniť (Martin, 11. 9.). -->
-    <!-- Tie isté štyri odkazy ako na domovskej stránke; na zozname trénerov
-         či skupín svieti „Nájdi vo svojom meste" (Martin, 11. 9.). -->
+         menu sa pri prechode na Trénerov či Partie nesmie meniť (Martin, 11. 9.).
+         Od 17. 9. sú to tri položky a tlačidlo; „V tvojom meste" z lišty vypadlo.
+         Žiadna položka sa tu nezvýrazňuje ako aktívna: všetky tri vedú na sekcie
+         domovskej stránky a podstránka trénerov ani partií ňou nie je. -->
     <div class="nav-links">
       <a href="/#trenerom">Pre trénerov</a>
       <a href="/#hracom">Pre hráčov</a>
-      <a href="/#partie">Pre skupiny</a>
-      <a class="on" aria-current="page" href="/#kam">Nájdi vo svojom meste</a>
+      <a href="/#partie">Partie</a>
     </div>
-    <a class="btn btn-dark btn-sm nav-cta" href="/#stiahnut">Stiahnuť</a>
+    <a class="btn btn-lime btn-sm nav-cta" href="/#stiahnut">Stiahnuť</a>
   </nav>
 </div>
 
@@ -423,11 +448,11 @@ body{padding-bottom:92px}
         <div class="stat"><div class="num">15 €</div><div class="lbl">za hodinu tréningu</div></div>
       </div>
       <div class="actions">
-        <button class="btn btn-green" type="button" data-otvor="rezervovat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"></rect><path d="M8 2.8v4M16 2.8v4M3.5 10h17"></path></svg>Rezervovať tréning</button>
-        <button class="btn btn-light" type="button" data-otvor="sprava"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.8a8.3 8.3 0 0 1-11.9 7.5L4 21l1.8-4.9A8.3 8.3 0 1 1 21 11.8z"></path></svg>Napísať správu</button>
+        <button class="btn btn-green" type="button" data-otvor="rezervovat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"></rect><path d="M8 2.8v4M16 2.8v4M3.5 10h17"></path></svg>Rezervuj tréning</button>
+        <button class="btn btn-light" type="button" data-otvor="sprava"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.8a8.3 8.3 0 0 1-11.9 7.5L4 21l1.8-4.9A8.3 8.3 0 1 1 21 11.8z"></path></svg>Napíš správu</button>
         <button class="icon-btn" type="button" id="zdielat" title="Zdieľať profil" aria-label="Zdieľať profil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5V3.5"></path><path d="M8 7.2L12 3.2l4 4"></path><path d="M5 13.5v6a1.6 1.6 0 0 0 1.6 1.6h10.8a1.6 1.6 0 0 0 1.6-1.6v-6"></path></svg></button>
       </div>
-      <p class="note">Rezervácia prebieha v appke Matchball. Platíš až po potvrdení trénerom.</p>
+      <p class="note">Rezervuješ v appke Matchball. Platíš až po tom, čo tréner termín potvrdí.</p>
     </div>
   </div>
 
@@ -468,9 +493,9 @@ body{padding-bottom:92px}
           <div><div class="lab">Skupina 4+</div><div class="sub2">cena za osobu</div></div>
           <div class="val">5,75 €<small>od 23 € spolu</small></div>
         </div>
-        <p class="foot" style="text-align:left">Toto sú ceny trénera — pri platbe kartou v appke sa k nim pripočíta poplatok za platbu kartou (5 % + 0,30 €) so zárukou vrátenia a storno pravidlami.</p>
+        <p class="foot" style="text-align:left">Toto sú ceny trénera. Pri platbe kartou v appke sa k nim pripočíta poplatok brány (5 % + 0,30 €), ktorý kryje záruku vrátenia peňazí aj storno pravidlá.</p>
         
-        <button class="btn btn-green" type="button" data-otvor="rezervovat">Rezervovať tréning</button>
+        <button class="btn btn-green" type="button" data-otvor="rezervovat">Rezervuj tréning</button>
         <p class="foot">Kurt sa platí na mieste</p>
       </div>
     </div>
@@ -480,15 +505,15 @@ body{padding-bottom:92px}
 
   <section class="cta">
     <div>
-      <h2>Rezervuj si tréning</h2>
-      <p class="lead">Stiahni si Matchball, vyber termín a zaplať kartou až po potvrdení.</p>
+      <h2>Rezervuj tréning v appke</h2>
+      <p class="lead">Stiahni si Matchball, vyber termín a zaplať až po tom, čo ho tréner potvrdí.</p>
       <div class="row">
         <a class="btn btn-lime" href="https://apps.apple.com/sk/app/matchball/id6804171137"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.8c0-2.2 1.8-3.3 1.9-3.35-1-1.5-2.6-1.7-3.2-1.72-1.4-.14-2.7.8-3.4.8-.7 0-1.8-.78-2.9-.76-1.5.02-2.9.87-3.7 2.2-1.6 2.7-.4 6.8 1.1 9.02.8 1.1 1.7 2.3 2.8 2.26 1.1-.04 1.5-.7 2.9-.7 1.3 0 1.7.7 2.9.68 1.2-.02 2-1.1 2.7-2.2.85-1.26 1.2-2.5 1.22-2.56-.03-.01-2.34-.9-2.36-3.57z"/><path d="M14.2 6.3c.6-.75 1-1.78.9-2.8-.87.03-1.93.58-2.56 1.32-.56.65-1.05 1.7-.92 2.7.97.07 1.96-.5 2.58-1.22z"/></svg>Stiahnuť pre iPhone</a>
         <a class="btn btn-ghost" href="https://play.google.com/store/apps/details?id=sk.matchball.app"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.6 2.4v19.2c0 .62.68 1 1.2.68l14.5-9.6a.8.8 0 0 0 0-1.36L5.8 1.72a.8.8 0 0 0-1.2.68z"/></svg>Stiahnuť pre Android</a>
       </div>
     </div>
     <div class="qr">
-      <div class="box"><svg viewBox="0 0 29 29" width="164" height="164" shape-rendering="crispEdges" role="img" aria-label="QR kód na profil: Martin Mucha"><rect width="29" height="29" fill="#fff"></rect><path fill="#0B100D" d="M0 0h7v1h-7zM10 0h1v1h-1zM13 0h2v1h-2zM18 0h1v1h-1zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM11 1h3v1h-3zM16 1h2v1h-2zM20 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h1v1h-1zM12 2h1v1h-1zM14 2h3v1h-3zM19 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h2v1h-2zM13 3h1v1h-1zM17 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM12 4h2v1h-2zM16 4h5v1h-5zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM11 5h2v1h-2zM16 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM8 7h1v1h-1zM11 7h2v1h-2zM16 7h1v1h-1zM19 7h2v1h-2zM0 8h1v1h-1zM6 8h1v1h-1zM8 8h2v1h-2zM13 8h2v1h-2zM17 8h3v1h-3zM21 8h2v1h-2zM25 8h3v1h-3zM0 9h1v1h-1zM2 9h4v1h-4zM9 9h1v1h-1zM11 9h1v1h-1zM14 9h2v1h-2zM17 9h4v1h-4zM23 9h2v1h-2zM26 9h2v1h-2zM1 10h1v1h-1zM6 10h3v1h-3zM10 10h1v1h-1zM12 10h1v1h-1zM15 10h3v1h-3zM21 10h3v1h-3zM5 11h1v1h-1zM8 11h1v1h-1zM10 11h3v1h-3zM14 11h1v1h-1zM16 11h1v1h-1zM24 11h2v1h-2zM0 12h1v1h-1zM2 12h1v1h-1zM4 12h7v1h-7zM13 12h2v1h-2zM16 12h1v1h-1zM19 12h1v1h-1zM22 12h2v1h-2zM28 12h1v1h-1zM1 13h1v1h-1zM4 13h1v1h-1zM8 13h6v1h-6zM15 13h1v1h-1zM19 13h2v1h-2zM22 13h3v1h-3zM27 13h2v1h-2zM0 14h2v1h-2zM3 14h1v1h-1zM5 14h2v1h-2zM9 14h1v1h-1zM11 14h5v1h-5zM21 14h1v1h-1zM24 14h3v1h-3zM0 15h2v1h-2zM3 15h2v1h-2zM8 15h1v1h-1zM13 15h3v1h-3zM18 15h1v1h-1zM20 15h1v1h-1zM23 15h2v1h-2zM26 15h1v1h-1zM28 15h1v1h-1zM0 16h1v1h-1zM5 16h3v1h-3zM9 16h2v1h-2zM12 16h1v1h-1zM14 16h1v1h-1zM17 16h2v1h-2zM20 16h1v1h-1zM23 16h1v1h-1zM25 16h2v1h-2zM0 17h1v1h-1zM2 17h2v1h-2zM7 17h2v1h-2zM11 17h2v1h-2zM15 17h6v1h-6zM22 17h3v1h-3zM26 17h3v1h-3zM0 18h5v1h-5zM6 18h1v1h-1zM10 18h1v1h-1zM13 18h3v1h-3zM19 18h1v1h-1zM21 18h2v1h-2zM24 18h2v1h-2zM28 18h1v1h-1zM0 19h1v1h-1zM4 19h1v1h-1zM10 19h2v1h-2zM14 19h1v1h-1zM21 19h1v1h-1zM24 19h1v1h-1zM0 20h1v1h-1zM2 20h1v1h-1zM5 20h3v1h-3zM10 20h3v1h-3zM17 20h1v1h-1zM20 20h5v1h-5zM26 20h3v1h-3zM8 21h1v1h-1zM11 21h1v1h-1zM13 21h1v1h-1zM15 21h1v1h-1zM17 21h2v1h-2zM20 21h1v1h-1zM24 21h2v1h-2zM0 22h7v1h-7zM9 22h1v1h-1zM11 22h1v1h-1zM13 22h3v1h-3zM19 22h2v1h-2zM22 22h1v1h-1zM24 22h3v1h-3zM0 23h1v1h-1zM6 23h1v1h-1zM10 23h2v1h-2zM13 23h1v1h-1zM16 23h1v1h-1zM19 23h2v1h-2zM24 23h1v1h-1zM27 23h2v1h-2zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM9 24h1v1h-1zM12 24h2v1h-2zM15 24h1v1h-1zM19 24h7v1h-7zM28 24h1v1h-1zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM9 25h1v1h-1zM12 25h2v1h-2zM15 25h2v1h-2zM18 25h1v1h-1zM21 25h1v1h-1zM25 25h2v1h-2zM28 25h1v1h-1zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM12 26h2v1h-2zM15 26h1v1h-1zM18 26h10v1h-10zM0 27h1v1h-1zM6 27h1v1h-1zM10 27h3v1h-3zM14 27h3v1h-3zM21 27h1v1h-1zM23 27h4v1h-4zM28 27h1v1h-1zM0 28h7v1h-7zM8 28h1v1h-1zM10 28h1v1h-1zM12 28h1v1h-1zM15 28h3v1h-3zM19 28h1v1h-1zM21 28h1v1h-1zM23 28h1v1h-1zM26 28h1v1h-1z"></path></svg></div>
+      <div class="box"><svg viewBox="0 0 29 29" width="164" height="164" shape-rendering="crispEdges" role="img" aria-label="QR kód na profil: Martin Mucha"><rect width="29" height="29" fill="#fff"></rect><path fill="#071A13" d="M0 0h7v1h-7zM10 0h1v1h-1zM13 0h2v1h-2zM18 0h1v1h-1zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM11 1h3v1h-3zM16 1h2v1h-2zM20 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h1v1h-1zM12 2h1v1h-1zM14 2h3v1h-3zM19 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h2v1h-2zM13 3h1v1h-1zM17 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM12 4h2v1h-2zM16 4h5v1h-5zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM11 5h2v1h-2zM16 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM8 7h1v1h-1zM11 7h2v1h-2zM16 7h1v1h-1zM19 7h2v1h-2zM0 8h1v1h-1zM6 8h1v1h-1zM8 8h2v1h-2zM13 8h2v1h-2zM17 8h3v1h-3zM21 8h2v1h-2zM25 8h3v1h-3zM0 9h1v1h-1zM2 9h4v1h-4zM9 9h1v1h-1zM11 9h1v1h-1zM14 9h2v1h-2zM17 9h4v1h-4zM23 9h2v1h-2zM26 9h2v1h-2zM1 10h1v1h-1zM6 10h3v1h-3zM10 10h1v1h-1zM12 10h1v1h-1zM15 10h3v1h-3zM21 10h3v1h-3zM5 11h1v1h-1zM8 11h1v1h-1zM10 11h3v1h-3zM14 11h1v1h-1zM16 11h1v1h-1zM24 11h2v1h-2zM0 12h1v1h-1zM2 12h1v1h-1zM4 12h7v1h-7zM13 12h2v1h-2zM16 12h1v1h-1zM19 12h1v1h-1zM22 12h2v1h-2zM28 12h1v1h-1zM1 13h1v1h-1zM4 13h1v1h-1zM8 13h6v1h-6zM15 13h1v1h-1zM19 13h2v1h-2zM22 13h3v1h-3zM27 13h2v1h-2zM0 14h2v1h-2zM3 14h1v1h-1zM5 14h2v1h-2zM9 14h1v1h-1zM11 14h5v1h-5zM21 14h1v1h-1zM24 14h3v1h-3zM0 15h2v1h-2zM3 15h2v1h-2zM8 15h1v1h-1zM13 15h3v1h-3zM18 15h1v1h-1zM20 15h1v1h-1zM23 15h2v1h-2zM26 15h1v1h-1zM28 15h1v1h-1zM0 16h1v1h-1zM5 16h3v1h-3zM9 16h2v1h-2zM12 16h1v1h-1zM14 16h1v1h-1zM17 16h2v1h-2zM20 16h1v1h-1zM23 16h1v1h-1zM25 16h2v1h-2zM0 17h1v1h-1zM2 17h2v1h-2zM7 17h2v1h-2zM11 17h2v1h-2zM15 17h6v1h-6zM22 17h3v1h-3zM26 17h3v1h-3zM0 18h5v1h-5zM6 18h1v1h-1zM10 18h1v1h-1zM13 18h3v1h-3zM19 18h1v1h-1zM21 18h2v1h-2zM24 18h2v1h-2zM28 18h1v1h-1zM0 19h1v1h-1zM4 19h1v1h-1zM10 19h2v1h-2zM14 19h1v1h-1zM21 19h1v1h-1zM24 19h1v1h-1zM0 20h1v1h-1zM2 20h1v1h-1zM5 20h3v1h-3zM10 20h3v1h-3zM17 20h1v1h-1zM20 20h5v1h-5zM26 20h3v1h-3zM8 21h1v1h-1zM11 21h1v1h-1zM13 21h1v1h-1zM15 21h1v1h-1zM17 21h2v1h-2zM20 21h1v1h-1zM24 21h2v1h-2zM0 22h7v1h-7zM9 22h1v1h-1zM11 22h1v1h-1zM13 22h3v1h-3zM19 22h2v1h-2zM22 22h1v1h-1zM24 22h3v1h-3zM0 23h1v1h-1zM6 23h1v1h-1zM10 23h2v1h-2zM13 23h1v1h-1zM16 23h1v1h-1zM19 23h2v1h-2zM24 23h1v1h-1zM27 23h2v1h-2zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM9 24h1v1h-1zM12 24h2v1h-2zM15 24h1v1h-1zM19 24h7v1h-7zM28 24h1v1h-1zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM9 25h1v1h-1zM12 25h2v1h-2zM15 25h2v1h-2zM18 25h1v1h-1zM21 25h1v1h-1zM25 25h2v1h-2zM28 25h1v1h-1zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM12 26h2v1h-2zM15 26h1v1h-1zM18 26h10v1h-10zM0 27h1v1h-1zM6 27h1v1h-1zM10 27h3v1h-3zM14 27h3v1h-3zM21 27h1v1h-1zM23 27h4v1h-4zM28 27h1v1h-1zM0 28h7v1h-7zM8 28h1v1h-1zM10 28h1v1h-1zM12 28h1v1h-1zM15 28h3v1h-3zM19 28h1v1h-1zM21 28h1v1h-1zM23 28h1v1h-1zM26 28h1v1h-1z"></path></svg></div>
       <p class="cap">Naskenuj telefónom</p>
     </div>
   </section>
@@ -498,31 +523,31 @@ body{padding-bottom:92px}
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <a class="brand" href="/" style="font-size:1.25rem">
-          <img class="mark" src="/logo.webp" alt="" width="128" height="128">
+        <a class="brand" href="/" style="font-size:1.2rem">
+          <img class="mark" src="/logo.webp" alt="" width="192" height="192" loading="lazy" decoding="async">
           <span>Matchball</span>
         </a>
-        <p class="foot-about">Nájdi si trénera, parťáka na sparing alebo partiu vo svojom meste. 41 športov a služieb, účet zadarmo.</p>
+        <p class="foot-about">Matchball spája hráčov a trénerov. Nájdi trénera alebo partiu na šport v tvojom meste. 41 športov a služieb, zadarmo pre hráčov aj trénerov.</p>
       </div>
       <div>
-        <h4>Stránka</h4>
+        <h4 class="foot-h">Stránka</h4>
         <div class="foot-links">
           <a href="/#trenerom">Pre trénerov</a>
           <a href="/#hracom">Pre hráčov</a>
-          <a href="/#partie">Pre skupiny</a>
+          <a href="/#partie">Partie</a>
           <a href="/#sluzby">Zdravie a služby</a>
-          <a href="/#sporty">41 športov</a>
-          <a href="/treneri/">Tréneri</a>
-          <a href="/skupiny/">Skupiny</a>
           <a href="/#ceny">Platby</a>
+          <a href="/#stiahnut">Stiahnuť</a>
         </div>
       </div>
       <div>
-        <h4>Dokumenty a kontakt</h4>
+        <h4 class="foot-h">Zoznamy a kontakt</h4>
         <div class="foot-links">
+          <a href="/treneri/">Tréneri podľa miest</a>
+          <a href="/skupiny/">Partie podľa miest</a>
           <a href="/legal/privacy.html">Ochrana osobných údajov</a>
           <a href="/legal/terms.html">Podmienky používania</a>
-          <a href="mailto:matchball.app@gmail.com">matchball.app@gmail.com</a>
+          <a href="mailto:support@matchballapp.com">support@matchballapp.com</a>
         </div>
       </div>
     </div>
@@ -534,21 +559,21 @@ body{padding-bottom:92px}
 </footer>
 
 <div class="dock">
-  <button class="btn btn-green" type="button" data-otvor="rezervovat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"></rect><path d="M8 2.8v4M16 2.8v4M3.5 10h17"></path></svg>Rezervovať tréning</button>
-  <button class="msg" type="button" data-otvor="sprava" aria-label="Napísať správu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.8a8.3 8.3 0 0 1-11.9 7.5L4 21l1.8-4.9A8.3 8.3 0 1 1 21 11.8z"></path></svg><span>Napísať</span></button>
+  <button class="btn btn-green" type="button" data-otvor="rezervovat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"></rect><path d="M8 2.8v4M16 2.8v4M3.5 10h17"></path></svg>Rezervuj tréning</button>
+  <button class="msg" type="button" data-otvor="sprava" aria-label="Napíš správu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.8a8.3 8.3 0 0 1-11.9 7.5L4 21l1.8-4.9A8.3 8.3 0 1 1 21 11.8z"></path></svg><span>Napíš</span></button>
 </div>
 
 <div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="ov-nadpis" aria-hidden="true">
   <div class="modal">
     <button class="x" type="button" id="ov-zavriet" aria-label="Zavrieť"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
     <h3 id="ov-nadpis">Otvoriť v appke Matchball</h3>
-    <p class="lead" id="ov-text">Naskenuj QR kód telefónom — otvorí sa profil v appke. Ak appku nemáš, dostaneš sa do obchodu.</p>
+    <p class="lead" id="ov-text">Naskenuj kód telefónom a profil sa otvorí v appke. Ak ju ešte nemáš, pôjdeš do obchodu.</p>
     <div class="row">
       <a class="btn btn-dark" href="https://apps.apple.com/sk/app/matchball/id6804171137"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.8c0-2.2 1.8-3.3 1.9-3.35-1-1.5-2.6-1.7-3.2-1.72-1.4-.14-2.7.8-3.4.8-.7 0-1.8-.78-2.9-.76-1.5.02-2.9.87-3.7 2.2-1.6 2.7-.4 6.8 1.1 9.02.8 1.1 1.7 2.3 2.8 2.26 1.1-.04 1.5-.7 2.9-.7 1.3 0 1.7.7 2.9.68 1.2-.02 2-1.1 2.7-2.2.85-1.26 1.2-2.5 1.22-2.56-.03-.01-2.34-.9-2.36-3.57z"/><path d="M14.2 6.3c.6-.75 1-1.78.9-2.8-.87.03-1.93.58-2.56 1.32-.56.65-1.05 1.7-.92 2.7.97.07 1.96-.5 2.58-1.22z"/></svg>App Store</a>
       <a class="btn btn-light" href="https://play.google.com/store/apps/details?id=sk.matchball.app"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.6 2.4v19.2c0 .62.68 1 1.2.68l14.5-9.6a.8.8 0 0 0 0-1.36L5.8 1.72a.8.8 0 0 0-1.2.68z"/></svg>Google Play</a>
     </div>
     <p class="lead" id="ov-mam" hidden style="margin:18px 0 0"><a class="rev-more" href="#" id="ov-mam-odkaz">Appku už mám — otvoriť<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12h15M13.5 6l6 6-6 6"></path></svg></a></p>
-    <div class="qrs" id="ov-qr"><svg viewBox="0 0 29 29" width="132" height="132" shape-rendering="crispEdges" role="img" aria-label="QR kód na profil: Martin Mucha"><rect width="29" height="29" fill="#fff"></rect><path fill="#0B100D" d="M0 0h7v1h-7zM10 0h1v1h-1zM13 0h2v1h-2zM18 0h1v1h-1zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM11 1h3v1h-3zM16 1h2v1h-2zM20 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h1v1h-1zM12 2h1v1h-1zM14 2h3v1h-3zM19 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h2v1h-2zM13 3h1v1h-1zM17 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM12 4h2v1h-2zM16 4h5v1h-5zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM11 5h2v1h-2zM16 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM8 7h1v1h-1zM11 7h2v1h-2zM16 7h1v1h-1zM19 7h2v1h-2zM0 8h1v1h-1zM6 8h1v1h-1zM8 8h2v1h-2zM13 8h2v1h-2zM17 8h3v1h-3zM21 8h2v1h-2zM25 8h3v1h-3zM0 9h1v1h-1zM2 9h4v1h-4zM9 9h1v1h-1zM11 9h1v1h-1zM14 9h2v1h-2zM17 9h4v1h-4zM23 9h2v1h-2zM26 9h2v1h-2zM1 10h1v1h-1zM6 10h3v1h-3zM10 10h1v1h-1zM12 10h1v1h-1zM15 10h3v1h-3zM21 10h3v1h-3zM5 11h1v1h-1zM8 11h1v1h-1zM10 11h3v1h-3zM14 11h1v1h-1zM16 11h1v1h-1zM24 11h2v1h-2zM0 12h1v1h-1zM2 12h1v1h-1zM4 12h7v1h-7zM13 12h2v1h-2zM16 12h1v1h-1zM19 12h1v1h-1zM22 12h2v1h-2zM28 12h1v1h-1zM1 13h1v1h-1zM4 13h1v1h-1zM8 13h6v1h-6zM15 13h1v1h-1zM19 13h2v1h-2zM22 13h3v1h-3zM27 13h2v1h-2zM0 14h2v1h-2zM3 14h1v1h-1zM5 14h2v1h-2zM9 14h1v1h-1zM11 14h5v1h-5zM21 14h1v1h-1zM24 14h3v1h-3zM0 15h2v1h-2zM3 15h2v1h-2zM8 15h1v1h-1zM13 15h3v1h-3zM18 15h1v1h-1zM20 15h1v1h-1zM23 15h2v1h-2zM26 15h1v1h-1zM28 15h1v1h-1zM0 16h1v1h-1zM5 16h3v1h-3zM9 16h2v1h-2zM12 16h1v1h-1zM14 16h1v1h-1zM17 16h2v1h-2zM20 16h1v1h-1zM23 16h1v1h-1zM25 16h2v1h-2zM0 17h1v1h-1zM2 17h2v1h-2zM7 17h2v1h-2zM11 17h2v1h-2zM15 17h6v1h-6zM22 17h3v1h-3zM26 17h3v1h-3zM0 18h5v1h-5zM6 18h1v1h-1zM10 18h1v1h-1zM13 18h3v1h-3zM19 18h1v1h-1zM21 18h2v1h-2zM24 18h2v1h-2zM28 18h1v1h-1zM0 19h1v1h-1zM4 19h1v1h-1zM10 19h2v1h-2zM14 19h1v1h-1zM21 19h1v1h-1zM24 19h1v1h-1zM0 20h1v1h-1zM2 20h1v1h-1zM5 20h3v1h-3zM10 20h3v1h-3zM17 20h1v1h-1zM20 20h5v1h-5zM26 20h3v1h-3zM8 21h1v1h-1zM11 21h1v1h-1zM13 21h1v1h-1zM15 21h1v1h-1zM17 21h2v1h-2zM20 21h1v1h-1zM24 21h2v1h-2zM0 22h7v1h-7zM9 22h1v1h-1zM11 22h1v1h-1zM13 22h3v1h-3zM19 22h2v1h-2zM22 22h1v1h-1zM24 22h3v1h-3zM0 23h1v1h-1zM6 23h1v1h-1zM10 23h2v1h-2zM13 23h1v1h-1zM16 23h1v1h-1zM19 23h2v1h-2zM24 23h1v1h-1zM27 23h2v1h-2zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM9 24h1v1h-1zM12 24h2v1h-2zM15 24h1v1h-1zM19 24h7v1h-7zM28 24h1v1h-1zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM9 25h1v1h-1zM12 25h2v1h-2zM15 25h2v1h-2zM18 25h1v1h-1zM21 25h1v1h-1zM25 25h2v1h-2zM28 25h1v1h-1zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM12 26h2v1h-2zM15 26h1v1h-1zM18 26h10v1h-10zM0 27h1v1h-1zM6 27h1v1h-1zM10 27h3v1h-3zM14 27h3v1h-3zM21 27h1v1h-1zM23 27h4v1h-4zM28 27h1v1h-1zM0 28h7v1h-7zM8 28h1v1h-1zM10 28h1v1h-1zM12 28h1v1h-1zM15 28h3v1h-3zM19 28h1v1h-1zM21 28h1v1h-1zM23 28h1v1h-1zM26 28h1v1h-1z"></path></svg></div>
+    <div class="qrs" id="ov-qr"><svg viewBox="0 0 29 29" width="132" height="132" shape-rendering="crispEdges" role="img" aria-label="QR kód na profil: Martin Mucha"><rect width="29" height="29" fill="#fff"></rect><path fill="#071A13" d="M0 0h7v1h-7zM10 0h1v1h-1zM13 0h2v1h-2zM18 0h1v1h-1zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM11 1h3v1h-3zM16 1h2v1h-2zM20 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h1v1h-1zM12 2h1v1h-1zM14 2h3v1h-3zM19 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h2v1h-2zM13 3h1v1h-1zM17 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM12 4h2v1h-2zM16 4h5v1h-5zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM11 5h2v1h-2zM16 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM8 7h1v1h-1zM11 7h2v1h-2zM16 7h1v1h-1zM19 7h2v1h-2zM0 8h1v1h-1zM6 8h1v1h-1zM8 8h2v1h-2zM13 8h2v1h-2zM17 8h3v1h-3zM21 8h2v1h-2zM25 8h3v1h-3zM0 9h1v1h-1zM2 9h4v1h-4zM9 9h1v1h-1zM11 9h1v1h-1zM14 9h2v1h-2zM17 9h4v1h-4zM23 9h2v1h-2zM26 9h2v1h-2zM1 10h1v1h-1zM6 10h3v1h-3zM10 10h1v1h-1zM12 10h1v1h-1zM15 10h3v1h-3zM21 10h3v1h-3zM5 11h1v1h-1zM8 11h1v1h-1zM10 11h3v1h-3zM14 11h1v1h-1zM16 11h1v1h-1zM24 11h2v1h-2zM0 12h1v1h-1zM2 12h1v1h-1zM4 12h7v1h-7zM13 12h2v1h-2zM16 12h1v1h-1zM19 12h1v1h-1zM22 12h2v1h-2zM28 12h1v1h-1zM1 13h1v1h-1zM4 13h1v1h-1zM8 13h6v1h-6zM15 13h1v1h-1zM19 13h2v1h-2zM22 13h3v1h-3zM27 13h2v1h-2zM0 14h2v1h-2zM3 14h1v1h-1zM5 14h2v1h-2zM9 14h1v1h-1zM11 14h5v1h-5zM21 14h1v1h-1zM24 14h3v1h-3zM0 15h2v1h-2zM3 15h2v1h-2zM8 15h1v1h-1zM13 15h3v1h-3zM18 15h1v1h-1zM20 15h1v1h-1zM23 15h2v1h-2zM26 15h1v1h-1zM28 15h1v1h-1zM0 16h1v1h-1zM5 16h3v1h-3zM9 16h2v1h-2zM12 16h1v1h-1zM14 16h1v1h-1zM17 16h2v1h-2zM20 16h1v1h-1zM23 16h1v1h-1zM25 16h2v1h-2zM0 17h1v1h-1zM2 17h2v1h-2zM7 17h2v1h-2zM11 17h2v1h-2zM15 17h6v1h-6zM22 17h3v1h-3zM26 17h3v1h-3zM0 18h5v1h-5zM6 18h1v1h-1zM10 18h1v1h-1zM13 18h3v1h-3zM19 18h1v1h-1zM21 18h2v1h-2zM24 18h2v1h-2zM28 18h1v1h-1zM0 19h1v1h-1zM4 19h1v1h-1zM10 19h2v1h-2zM14 19h1v1h-1zM21 19h1v1h-1zM24 19h1v1h-1zM0 20h1v1h-1zM2 20h1v1h-1zM5 20h3v1h-3zM10 20h3v1h-3zM17 20h1v1h-1zM20 20h5v1h-5zM26 20h3v1h-3zM8 21h1v1h-1zM11 21h1v1h-1zM13 21h1v1h-1zM15 21h1v1h-1zM17 21h2v1h-2zM20 21h1v1h-1zM24 21h2v1h-2zM0 22h7v1h-7zM9 22h1v1h-1zM11 22h1v1h-1zM13 22h3v1h-3zM19 22h2v1h-2zM22 22h1v1h-1zM24 22h3v1h-3zM0 23h1v1h-1zM6 23h1v1h-1zM10 23h2v1h-2zM13 23h1v1h-1zM16 23h1v1h-1zM19 23h2v1h-2zM24 23h1v1h-1zM27 23h2v1h-2zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM9 24h1v1h-1zM12 24h2v1h-2zM15 24h1v1h-1zM19 24h7v1h-7zM28 24h1v1h-1zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM9 25h1v1h-1zM12 25h2v1h-2zM15 25h2v1h-2zM18 25h1v1h-1zM21 25h1v1h-1zM25 25h2v1h-2zM28 25h1v1h-1zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM12 26h2v1h-2zM15 26h1v1h-1zM18 26h10v1h-10zM0 27h1v1h-1zM6 27h1v1h-1zM10 27h3v1h-3zM14 27h3v1h-3zM21 27h1v1h-1zM23 27h4v1h-4zM28 27h1v1h-1zM0 28h7v1h-7zM8 28h1v1h-1zM10 28h1v1h-1zM12 28h1v1h-1zM15 28h3v1h-3zM19 28h1v1h-1zM21 28h1v1h-1zM23 28h1v1h-1zM26 28h1v1h-1z"></path></svg></div>
     <p class="qcap" id="ov-qcap">matchballapp.com/t/martin-mucha</p>
   </div>
 </div>
@@ -625,7 +650,7 @@ body{padding-bottom:92px}
     var ciel = schema(co);
     poslednyCiel = ciel;
     if (!jeTelefon) {
-      ovText.textContent = 'Naskenuj QR kód telefónom — otvorí sa profil v appke. Ak appku nemáš, dostaneš sa do obchodu.';
+      ovText.textContent = 'Naskenuj kód telefónom a profil sa otvorí v appke. Ak ju ešte nemáš, pôjdeš do obchodu.';
       ukazModal(true);
       return;
     }
@@ -635,7 +660,7 @@ body{padding-bottom:92px}
     window.setTimeout(function(){
       document.removeEventListener('visibilitychange', odchod);
       if (odisiel || document.visibilityState === 'hidden') return;
-      ovText.textContent = 'Vyzerá to, že appku ešte nemáš. Stiahni si ju — profil sa v nej otvorí hneď po inštalácii.';
+      ovText.textContent = 'Appku zatiaľ nemáš. Stiahni si ju a profil sa v nej otvorí hneď po inštalácii.';
       ukazModal(false);
     }, 1500);
     window.location.href = ciel;

@@ -6,16 +6,16 @@
 <title>Tréneri stolného tenisu na Slovensku a v Česku | Matchball</title>
 <meta name="description" content="Tréneri stolného tenisu, ktorých si vieš rezervovať cez appku Matchball. Vyber si podľa mesta, hodnotenia a ceny — platíš kartou až po potvrdení termínu.">
 <link rel="canonical" href="https://matchballapp.com/treneri/stolny-tenis/">
-<link rel="icon" href="/favicon.ico?v=2" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png?v=2">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=2">
-<meta name="theme-color" content="#0B100D">
+<link rel="icon" href="/favicon.ico?v=4" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png?v=4">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=4">
+<meta name="theme-color" content="#071A13">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://matchballapp.com/treneri/stolny-tenis/">
 <meta property="og:title" content="Tréneri stolného tenisu | Matchball">
 <meta property="og:description" content="Tréneri stolného tenisu, ktorých si vieš rezervovať cez appku Matchball. Vyber si podľa mesta, hodnotenia a ceny — platíš kartou až po potvrdení termínu.">
-<meta property="og:image" content="https://matchballapp.com/hero.webp">
+<meta property="og:image" content="https://matchballapp.com/og.jpg">
 <meta property="og:locale" content="sk_SK">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,97 +23,122 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#0B100D;--ink-soft:#141C17;--paper:#EFF2ED;--card:#FFFFFF;
-  --green:#1A7A4A;--green-dark:#125E38;--green-soft:#E8F3EC;
-  --lime:#C9F24E;--lime-dim:#A7D63B;--fg:#141F1A;--muted:#5E7367;--line:#E0E6DF;
+  /* Tá istá paleta ako hlavná stránka (web/index.html, 17. 9. 2026): zelená
+     z loga, tmavozelená namiesto čiernej, limetka a modrá zo srdca.
+     `--green` je zámerne tmavší odtieň #15803D — je to jediná zelená, ktorou
+     sa na bielej karte píše text (ceny, hodnotenia, odkazy) a svetlejší
+     #1E9E52 by na kontrast nestačil. Výplne tlačidiel ho znesú tiež. */
+  --ink:#071A13;--ink-soft:#0C2419;--ink-3:#123125;
+  --paper:#F5F8F5;--card:#FFFFFF;
+  --green:#15803D;--green-dark:#0F6A36;--green-soft:#E9F5ED;
+  --lime:#51E041;--lime-dim:#B7F2C9;--blue:#1378ED;
+  --fg:#0F1F17;--muted:#47594F;--line:#DFE8E2;
+  --on-dark:#EAF3ED;--on-dark-muted:#A6BEB0;
   --gold:#E8B23A;
-  --radius-xl:32px;--radius-lg:24px;--radius-md:16px;
-  --shadow-soft:0 1px 2px rgba(20,31,26,.04),0 12px 32px -12px rgba(20,31,26,.14);
-  --shadow-lift:0 2px 4px rgba(20,31,26,.06),0 24px 48px -16px rgba(20,31,26,.22);
-  --ease:cubic-bezier(.22,1,.36,1);--max:1180px;
+  --focus:#15803D;
+  --radius-xl:30px;--radius-lg:24px;--radius-md:16px;
+  --shadow-soft:0 1px 2px rgba(7,26,19,.05),0 14px 34px -16px rgba(7,26,19,.18);
+  --shadow-lift:0 2px 6px rgba(7,26,19,.07),0 28px 56px -20px rgba(7,26,19,.28);
+  --ease:cubic-bezier(.22,1,.36,1);--max:1200px;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+/* Hlavička stránku prekrýva, takže kotva (#pridat-sa) musí zastaviť pod ňou. */
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:104px}
 body{margin:0;background:var(--paper);color:var(--fg);
   font-family:"Outfit",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   font-size:17px;line-height:1.65;font-weight:400;-webkit-font-smoothing:antialiased;
-  overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}
+  overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh;
+  padding-top:80px}
 img,svg{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit}
 [hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
 .wrap{max-width:var(--max);margin:0 auto;padding:0 20px;width:100%}
-h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.03em;word-spacing:.06em;line-height:1.04}
-h1{font-size:clamp(2.4rem,8vw,4.45rem);font-weight:800}
-h2{font-size:clamp(1.75rem,4.4vw,2.6rem)}
-h3{font-size:1.16rem;line-height:1.25;letter-spacing:-.02em}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.028em;word-spacing:.05em;line-height:1.06}
+h1{font-size:clamp(2.3rem,7vw,3.9rem);font-weight:800;line-height:1.03}
+h2{font-size:clamp(1.85rem,4vw,2.8rem)}
+h3{font-size:1.16rem;line-height:1.26;letter-spacing:-.018em}
 p{margin:0}
-.lead{font-size:1.02rem;color:var(--muted);line-height:1.6}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:600;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:12px}
-.eyebrow::before{content:"";width:20px;height:2px;border-radius:2px;background:var(--green);opacity:.5}
+.lead{font-size:1.05rem;color:var(--muted);line-height:1.6}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:.78rem;font-weight:600;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:14px}
+.eyebrow::before{content:"";width:22px;height:2px;border-radius:2px;background:currentColor;opacity:.55}
 .skip{position:absolute;left:-9999px;top:0;padding:12px 18px;background:var(--ink);color:#fff;
   border-radius:0 0 12px 0;z-index:200}
 .skip:focus{left:0}
 
+/* ── Tlačidlá ───────────────────────────────────────────────
+   Jedna rodina ako na hlavnej stránke. Text sa vždy zmestí:
+   `white-space:nowrap` a krátke popisy, žiadne tri bodky. */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;
-  padding:15px 28px;border-radius:999px;border:0;cursor:pointer;line-height:1.2;
+  padding:15px 26px;border-radius:999px;border:0;cursor:pointer;line-height:1.2;
   font-weight:600;font-size:1rem;white-space:nowrap;text-decoration:none;
-  transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .25s}
-.btn-dark{background:var(--ink);color:#fff;box-shadow:0 10px 24px -10px rgba(11,16,13,.7)}
-.btn-dark:hover{transform:translateY(-2px);box-shadow:0 18px 34px -12px rgba(11,16,13,.8)}
-.btn-green{background:var(--green);color:#fff;box-shadow:0 10px 24px -10px rgba(26,122,74,.8)}
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .2s}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-dark:hover{transform:translateY(-2px);background:var(--ink-3)}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 10px 24px -12px rgba(21,128,61,.9)}
 .btn-green:hover{transform:translateY(-2px);background:var(--green-dark)}
-.btn-light{background:#fff;color:var(--fg);box-shadow:var(--shadow-soft);border:1px solid var(--line)}
+.btn-light{background:#fff;color:var(--fg);box-shadow:var(--shadow-soft)}
 .btn-light:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
-.btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22)}
-.btn-ghost:hover{background:rgba(255,255,255,.16)}
-.btn-lime{background:var(--lime);color:#0B100D;box-shadow:0 12px 30px -12px rgba(201,242,78,.8)}
-.btn-lime:hover{transform:translateY(-2px);box-shadow:0 20px 40px -14px rgba(201,242,78,.9)}
-.btn-sm{padding:11px 20px;font-size:.94rem}
+.btn-ghost{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.24)}
+.btn-ghost:hover{transform:translateY(-2px);background:rgba(255,255,255,.14)}
+.btn-lime{background:var(--lime);color:#06210F;box-shadow:0 12px 28px -14px rgba(81,224,65,.9)}
+.btn-lime:hover{transform:translateY(-2px);background:#6BEA5C}
+.btn-sm{padding:11px 19px;font-size:.93rem}
 .btn svg{width:19px;height:19px;flex:0 0 19px}
 
-.nav-shell{padding:14px 16px 18px}
-.nav{max-width:940px;margin:0 auto;display:flex;align-items:center;gap:12px;
-  padding:8px 8px 8px 16px;border-radius:999px;background:rgba(255,255,255,.72);
-  backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);
-  border:1px solid rgba(255,255,255,.45);
-  box-shadow:0 2px 4px rgba(20,31,26,.05),0 16px 32px -18px rgba(20,31,26,.18)}
+/* ── Plávajúca hlavička ─────────────────────────────────────
+   Tmavý sklenený panel nad obsahom, rovnaký ako na hlavnej stránke. Tmavý je
+   zámerne: pilulka tak vyzerá rovnako nad svetlým zoznamom aj nad tmavou
+   fotkou trénera a nemusí sa pri rolovaní prezliekať. */
+.nav-shell{position:fixed;top:14px;left:0;right:0;z-index:80;padding:0 16px;pointer-events:none}
+.nav{max-width:min(1060px,100%);margin:0 auto;pointer-events:auto;
+  display:flex;align-items:center;gap:12px;
+  padding:9px 9px 9px 18px;border-radius:999px;
+  background:rgba(7,26,19,.88);
+  -webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 10px 30px -14px rgba(7,26,19,.7);
+  color:#fff;--focus:var(--lime)}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.06rem;letter-spacing:-.02em}
-.brand .mark{width:28px;height:28px;flex:0 0 28px;border-radius:8px}
+.brand .mark{width:30px;height:30px;flex:0 0 30px}
 .nav-links{display:none;gap:4px;margin-left:auto}
-.nav-links a{padding:9px 16px;border-radius:999px;color:#2A3831;font-size:.95rem;font-weight:500;
-  transition:background .25s,color .25s}
-.nav-links a:hover,.nav-links a.on{background:rgba(26,122,74,.09);color:var(--green)}
+.nav-links a{padding:9px 13px;border-radius:999px;color:rgba(255,255,255,.82);font-size:.94rem;
+  font-weight:500;transition:background .2s,color .2s}
+.nav-links a:hover{background:rgba(255,255,255,.1);color:#fff}
 .nav-cta{margin-left:auto}
 
-footer{margin-top:auto;padding:44px 0 30px}
-footer .brand{font-size:1.14rem}
-.foot-grid{display:grid;gap:28px;padding-bottom:28px;border-bottom:1px solid var(--line)}
-.foot-grid h4{margin:0 0 14px;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--muted);font-weight:600}
+/* ── Pätička ────────────────────────────────────────────────
+   Tmavý pás, ten istý materiál ako hlavička — na hlavnej stránke tiež. */
+footer{margin-top:auto;background:var(--ink);color:var(--on-dark);
+  padding:52px 0 32px;--focus:var(--lime)}
+footer .brand{font-size:1.2rem;color:#fff}
+.foot-grid{display:grid;gap:30px}
+.foot-h{margin:0 0 14px;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;
+  color:#fff;opacity:.7;font-weight:600}
 .foot-links{display:grid;gap:9px}
-.foot-links a{font-size:.96rem;transition:color .25s}
-.foot-links a:hover{color:var(--green)}
-.foot-about{color:var(--muted);font-size:.94rem;margin-top:12px;max-width:26rem}
-.foot-bottom{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;padding-top:22px;
-  color:var(--muted);font-size:.88rem}
+.foot-links a{font-size:.96rem;color:var(--on-dark-muted);transition:color .2s}
+.foot-links a:hover{color:#fff}
+.foot-about{color:var(--on-dark-muted);font-size:.95rem;margin-top:14px;max-width:26rem}
+.foot-bottom{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;
+  margin-top:36px;padding-top:22px;border-top:1px solid rgba(255,255,255,.14);
+  color:var(--on-dark-muted);font-size:.88rem}
 
 @media (min-width:900px){
-  .nav-shell{padding:22px 20px 0}
-  .nav{padding:10px 10px 10px 22px;gap:20px}
+  body{padding-top:96px}
+  .nav{padding:10px 10px 10px 22px;gap:18px}
   .brand{gap:11px;font-size:1.12rem}
-  .brand .mark{width:30px;height:30px;flex:0 0 30px}
   .nav-links{display:flex}
   .nav-cta{margin-left:4px}
   .lead{font-size:1.15rem}
   .eyebrow{font-size:.8rem;margin-bottom:18px}
   h3{font-size:1.3rem}
-  footer{padding:72px 0 44px}
-  .foot-grid{grid-template-columns:1.4fr 1fr 1fr;gap:40px;padding-bottom:40px}
-  .foot-about{font-size:.98rem;margin-top:14px}
+  footer{padding:76px 0 44px}
+  .foot-grid{grid-template-columns:1.5fr 1fr 1fr;gap:40px}
+  .foot-about{font-size:.98rem}
   .foot-links a{font-size:.98rem}
-  .foot-bottom{padding-top:26px;font-size:.9rem}
+  .foot-bottom{margin-top:52px;padding-top:26px;font-size:.9rem}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -127,7 +152,7 @@ footer .brand{font-size:1.14rem}
 .fpill{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;
   background:#fff;border:1px solid var(--line);font-size:.92rem;font-weight:500;color:var(--fg);
   white-space:nowrap;cursor:pointer;transition:background .25s,border-color .25s,color .25s}
-.fpill:hover{border-color:rgba(26,122,74,.35)}
+.fpill:hover{border-color:rgba(30,158,82,.35)}
 .fpill svg{width:15px;height:15px;flex:0 0 15px}
 .fpill[aria-pressed="true"]{background:var(--green-soft);border-color:transparent;color:var(--green-dark);font-weight:600}
 .switch{width:30px;height:17px;border-radius:999px;background:var(--line);position:relative;flex:0 0 30px;
@@ -151,15 +176,15 @@ footer .brand{font-size:1.14rem}
   transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
 .coach-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
 .coach-photo{position:relative;aspect-ratio:4/3;overflow:hidden;
-  background:linear-gradient(150deg,var(--green-soft),#DCEFE3);
+  background:linear-gradient(150deg,var(--green-soft),#DBEEE3);
   display:flex;align-items:center;justify-content:center}
 .coach-photo .portret{width:100%;height:100%;object-fit:cover}
-.coach-photo .znak{position:relative;width:96px;height:96px;border-radius:50%;object-fit:contain;
-  padding:18px;background:#fff;border:4px solid rgba(255,255,255,.9);
-  box-shadow:0 10px 26px -8px rgba(11,16,13,.35)}
+.coach-photo .znak{position:relative;width:104px;height:104px;border-radius:50%;object-fit:cover;
+  border:4px solid rgba(255,255,255,.92);
+  box-shadow:0 10px 26px -8px rgba(7,26,19,.35)}
 .badge-verified{position:absolute;top:14px;left:14px;display:inline-flex;align-items:center;gap:6px;
   padding:6px 12px 6px 9px;border-radius:999px;background:var(--green);color:#fff;
-  font-size:.78rem;font-weight:600;box-shadow:0 6px 16px -6px rgba(26,122,74,.6)}
+  font-size:.78rem;font-weight:600;box-shadow:0 6px 16px -6px rgba(30,158,82,.6)}
 .badge-verified svg{width:13px;height:13px;flex:0 0 13px}
 .coach-body{padding:20px 22px 22px;display:flex;flex-direction:column;flex:1}
 .coach-meta{margin-top:6px;color:var(--muted);font-size:.92rem}
@@ -183,7 +208,7 @@ footer .brand{font-size:1.14rem}
 .city-pill{display:inline-flex;align-items:center;gap:7px;padding:11px 18px;border-radius:999px;
   background:var(--card);border:1px solid var(--line);font-size:.95rem;font-weight:500;
   transition:border-color .25s,color .25s}
-.city-pill:hover{border-color:rgba(26,122,74,.35);color:var(--green-dark)}
+.city-pill:hover{border-color:rgba(30,158,82,.35);color:var(--green-dark)}
 .city-pill span{color:var(--muted);font-weight:400}
 
 /* Krížový odkaz medzi trénermi a skupinami. Nie je to reklama na inú stránku,
@@ -200,15 +225,33 @@ footer .brand{font-size:1.14rem}
   align-items:center;justify-content:center;background:var(--green-soft);color:var(--green-dark)}
 .krizom .sip svg{width:18px;height:18px}
 
+/* Ako to funguje — tri kroky pod zoznamom. Kto sem príde z vyhľadávača, appku
+   nemá a nevie, čo sa stane po kliknutí na „Pozri si profil". Tri vety to
+   povedia skôr, než sa spýta. Číslo je súčasťou karty, nie ozdoba pred ňou. */
+.kroky{margin-bottom:64px}
+.kroky h2{font-size:1.45rem;margin-bottom:18px}
+.kroky ol{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:krok}
+.kroky li{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);padding:22px 24px 24px}
+.kroky li::before{counter-increment:krok;content:counter(krok);
+  display:flex;align-items:center;justify-content:center;width:34px;height:34px;
+  border-radius:50%;background:var(--green-soft);color:var(--green);
+  font-weight:700;font-size:.95rem;margin-bottom:14px}
+.kroky b{display:block;font-size:1.06rem;font-weight:600;letter-spacing:-.02em}
+.kroky p{color:var(--muted);font-size:.94rem;margin-top:6px}
+
 .cta-dark{background:var(--ink);color:#fff;border-radius:var(--radius-xl);
   padding:34px 26px;display:flex;flex-direction:column;gap:22px;
   margin-bottom:64px;position:relative;overflow:hidden}
 .cta-dark::after{content:"";position:absolute;width:460px;height:460px;right:-190px;top:-200px;
-  border-radius:50%;background:radial-gradient(circle,rgba(201,242,78,.2),transparent 65%);pointer-events:none}
+  border-radius:50%;background:radial-gradient(circle,rgba(81,224,65,.2),transparent 65%);pointer-events:none}
 .cta-dark-text{max-width:34rem;position:relative}
 .cta-dark-text h2{color:#fff;font-size:1.7rem}
 .cta-dark-text .lead{color:rgba(255,255,255,.72);margin-top:12px}
 .cta-dark-actions{display:grid;gap:10px;flex:0 0 auto;position:relative}
+/* Druhá, tichšia veta pod výzvou — pre toho, kto na stránku prišiel s inou
+   otázkou (tréner na zozname trénerov, peniaze na zozname partií). */
+.cta-dark-note{color:rgba(255,255,255,.72);font-size:.92rem;margin-top:14px;position:relative}
 
 @media (min-width:900px){
   .sec-head{padding:44px 0 40px}
@@ -217,6 +260,9 @@ footer .brand{font-size:1.14rem}
   .filters .spacer{display:block}
   .fpill{padding:11px 18px;font-size:.94rem}
   .grid-coaches{grid-template-columns:repeat(3,1fr);gap:24px}
+  .kroky{margin-bottom:80px}
+  .kroky h2{font-size:1.7rem;margin-bottom:22px}
+  .kroky ol{grid-template-columns:repeat(3,1fr);gap:20px}
   .cta-dark{flex-direction:row;align-items:center;justify-content:space-between;gap:40px;
     padding:64px 72px;margin-bottom:80px}
   .cta-dark-text h2{font-size:2.2rem}
@@ -231,20 +277,20 @@ footer .brand{font-size:1.14rem}
 <div class="nav-shell">
   <nav class="nav">
     <a class="brand" href="/">
-      <img class="mark" src="/logo.webp" alt="" width="128" height="128">
+      <img class="mark" src="/logo.webp" alt="" width="192" height="192">
       <span>Matchball</span>
     </a>
     <!-- Presne tie isté odkazy v tom istom poradí ako na domovskej stránke —
-         menu sa pri prechode na Trénerov či Skupiny nesmie meniť (Martin, 11. 9.). -->
-    <!-- Tie isté štyri odkazy ako na domovskej stránke; na zozname trénerov
-         či skupín svieti „Nájdi vo svojom meste" (Martin, 11. 9.). -->
+         menu sa pri prechode na Trénerov či Partie nesmie meniť (Martin, 11. 9.).
+         Od 17. 9. sú to tri položky a tlačidlo; „V tvojom meste" z lišty vypadlo.
+         Žiadna položka sa tu nezvýrazňuje ako aktívna: všetky tri vedú na sekcie
+         domovskej stránky a podstránka trénerov ani partií ňou nie je. -->
     <div class="nav-links">
       <a href="/#trenerom">Pre trénerov</a>
       <a href="/#hracom">Pre hráčov</a>
-      <a href="/#partie">Pre skupiny</a>
-      <a class="on" aria-current="page" href="/#kam">Nájdi vo svojom meste</a>
+      <a href="/#partie">Partie</a>
     </div>
-    <a class="btn btn-dark btn-sm nav-cta" href="/#stiahnut">Stiahnuť</a>
+    <a class="btn btn-lime btn-sm nav-cta" href="/#stiahnut">Stiahnuť</a>
   </nav>
 </div>
 
@@ -257,7 +303,7 @@ footer .brand{font-size:1.14rem}
   <header class="sec-head">
     <p class="eyebrow">Tréneri</p>
     <h1>Tréneri stolného tenisu</h1>
-    <p class="lead">Tréneri stolného tenisu, ktorých si vieš rezervovať cez appku Matchball. Vyber si podľa mesta, hodnotenia a ceny — platíš kartou až po potvrdení termínu.</p>
+    <p class="lead">Hľadáš trénera stolného tenisu? Vyber si mesto a pozri si cenník aj hodnotenia skôr, než niekomu napíšeš.</p>
   </header>
 
   <div class="filters">
@@ -292,12 +338,21 @@ footer .brand{font-size:1.14rem}
           
           <div class="coach-foot">
             <div class="coach-price"><b>15 €</b><span>za hodinu</span></div>
-            <a class="btn btn-green btn-sm" href="/t/martin-mucha/">Zobraziť profil</a>
+            <a class="btn btn-green btn-sm" href="/t/martin-mucha/">Pozri si profil</a>
           </div>
         </div>
       </article>
   </div>
   <p class="prazdno" id="ziadne" hidden>V tomto výbere nikto nie je. Skús vypnúť „Len overení“.</p>
+
+  <section class="kroky">
+    <h2>Ako to funguje</h2>
+    <ol>
+      <li><b>Vyber si trénera</b><p>Filtruj podľa športu a zoraď podľa ceny alebo hodnotenia. Cenník vidíš hneď tu.</p></li>
+      <li><b>Pošli žiadosť o termín</b><p>V appke vyberieš deň, čas a počet hráčov. Trvá to minútu.</p></li>
+      <li><b>Tréner potvrdí</b><p>Dozvieš sa to hneď. Platíš kartou, QR kódom alebo v hotovosti.</p></li>
+    </ol>
+  </section>
 
   <section class="cities-block">
     <h2>Ďalšie mestá</h2>
@@ -307,14 +362,15 @@ footer .brand{font-size:1.14rem}
   </section>
 
   <a class="krizom" href="/skupiny/">
-    <span class="txt"><b>Hľadáš partiu, nie trénera?</b><span>Sparingové skupiny hrávajú pravidelne a berú nových hráčov.</span></span>
+    <span class="txt"><b>Hľadáš partiu, nie trénera?</b><span>Partie hrávajú pravidelne a berú nových hráčov.</span></span>
     <span class="sip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12h15M13.5 6l6 6-6 6"></path></svg></span>
   </a>
 
   <section class="cta-dark">
     <div class="cta-dark-text">
-      <h2>Trénuješ? Buď medzi nimi.</h2>
-      <p class="lead">Založ si profil v appke Matchball, nastav si cenník a termíny. Verejná stránka ti vznikne sama.</p>
+      <h2>Rezervuj si tréning.</h2>
+      <p class="lead">Stiahni si Matchball, vyber termín a zaplať až po tom, čo ho tréner potvrdí.</p>
+      <p class="cta-dark-note">Trénuješ sám? Založ si profil v appke — verejná stránka ti vznikne sama.</p>
     </div>
     <div class="cta-dark-actions">
       <a class="btn btn-lime" href="https://apps.apple.com/sk/app/matchball/id6804171137"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.8c0-2.2 1.8-3.3 1.9-3.35-1-1.5-2.6-1.7-3.2-1.72-1.4-.14-2.7.8-3.4.8-.7 0-1.8-.78-2.9-.76-1.5.02-2.9.87-3.7 2.2-1.6 2.7-.4 6.8 1.1 9.02.8 1.1 1.7 2.3 2.8 2.26 1.1-.04 1.5-.7 2.9-.7 1.3 0 1.7.7 2.9.68 1.2-.02 2-1.1 2.7-2.2.85-1.26 1.2-2.5 1.22-2.56-.03-.01-2.34-.9-2.36-3.57z"/><path d="M14.2 6.3c.6-.75 1-1.78.9-2.8-.87.03-1.93.58-2.56 1.32-.56.65-1.05 1.7-.92 2.7.97.07 1.96-.5 2.58-1.22z"/></svg>Stiahnuť pre iPhone</a>
@@ -327,31 +383,31 @@ footer .brand{font-size:1.14rem}
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <a class="brand" href="/" style="font-size:1.25rem">
-          <img class="mark" src="/logo.webp" alt="" width="128" height="128">
+        <a class="brand" href="/" style="font-size:1.2rem">
+          <img class="mark" src="/logo.webp" alt="" width="192" height="192" loading="lazy" decoding="async">
           <span>Matchball</span>
         </a>
-        <p class="foot-about">Nájdi si trénera, parťáka na sparing alebo partiu vo svojom meste. 41 športov a služieb, účet zadarmo.</p>
+        <p class="foot-about">Matchball spája hráčov a trénerov. Nájdi trénera alebo partiu na šport v tvojom meste. 41 športov a služieb, zadarmo pre hráčov aj trénerov.</p>
       </div>
       <div>
-        <h4>Stránka</h4>
+        <h4 class="foot-h">Stránka</h4>
         <div class="foot-links">
           <a href="/#trenerom">Pre trénerov</a>
           <a href="/#hracom">Pre hráčov</a>
-          <a href="/#partie">Pre skupiny</a>
+          <a href="/#partie">Partie</a>
           <a href="/#sluzby">Zdravie a služby</a>
-          <a href="/#sporty">41 športov</a>
-          <a href="/treneri/">Tréneri</a>
-          <a href="/skupiny/">Skupiny</a>
           <a href="/#ceny">Platby</a>
+          <a href="/#stiahnut">Stiahnuť</a>
         </div>
       </div>
       <div>
-        <h4>Dokumenty a kontakt</h4>
+        <h4 class="foot-h">Zoznamy a kontakt</h4>
         <div class="foot-links">
+          <a href="/treneri/">Tréneri podľa miest</a>
+          <a href="/skupiny/">Partie podľa miest</a>
           <a href="/legal/privacy.html">Ochrana osobných údajov</a>
           <a href="/legal/terms.html">Podmienky používania</a>
-          <a href="mailto:matchball.app@gmail.com">matchball.app@gmail.com</a>
+          <a href="mailto:support@matchballapp.com">support@matchballapp.com</a>
         </div>
       </div>
     </div>
