@@ -2060,6 +2060,9 @@ const CSS_SKUPINY = `.city-groups{margin-bottom:44px}
 }`;
 
 function kartaSkupiny(g) {
+  // Fotka partie má prednosť pred maskotom (346, na web 407); bez nej maskot
+  // partie, bez maskota postavička organizátora — presne ako v appke.
+  const foto = g.fotoSubor ? `/skupiny/foto/${g.fotoSubor}` : null;
   const maskot = avatarSubor(g.avatar_id) || avatarSubor(g.organizer_avatar);
   const organizator = avatarSubor(g.organizer_avatar);
   const kedy = kedyText(g.recurrence);
@@ -2073,9 +2076,11 @@ function kartaSkupiny(g) {
 
   return `<article class="group-card">
         <div class="group-head">
-          ${maskot
-    ? `<img class="group-avatar" src="${maskot}" alt="" width="224" height="224" loading="lazy">`
-    : `<img class="group-avatar znak" src="${ZASTUPNA_FOTKA}" alt="" width="512" height="512" loading="lazy">`}
+          ${foto
+    ? `<img class="group-avatar" src="${foto}" alt="" width="224" height="224" loading="lazy">`
+    : maskot
+      ? `<img class="group-avatar" src="${maskot}" alt="" width="224" height="224" loading="lazy">`
+      : `<img class="group-avatar znak" src="${ZASTUPNA_FOTKA}" alt="" width="512" height="512" loading="lazy">`}
           <div>
             <h3>${esc(g.name)}</h3>
             ${miesto ? `<p class="group-when">${miesto}</p>` : ''}
@@ -2571,6 +2576,23 @@ async function main() {
   // patriť. Sport, ktorý generátor nepozná, sa berie ako tenis — rovnaká
   // úvaha ako pri trénerovi bez `sports`.
   const skupiny = skupinySurove.filter((g) => g && g.name && g.city && slugify(g.city_key || g.city));
+
+  // ── Fotky partií ───────────────────────────────────────────────────────
+  // Rovnaký sťahovač ako pri trénerovi: privátne vedierko, len keď je súbor
+  // na disku starší než záznam. Ukladá sa pod id partie, nie pod názov — názov
+  // sa mení, id nie, a starý súbor by inak zostal ležať.
+  for (const g of skupiny) {
+    g.fotoSubor = null;
+    if (!g.photo_path) continue;
+    const subor = `${g.id}.jpg`;
+    const ciel = path.join(ROOT, 'skupiny', 'foto', subor);
+    if (fixture) {
+      if (fs.existsSync(ciel)) g.fotoSubor = subor;
+      continue;
+    }
+    const ok = await stiahniFotku({ url, key, photoPath: g.photo_path, cielovySubor: ciel, updatedAt: g.updated_at });
+    if (ok) g.fotoSubor = subor;
+  }
   const preskoceneSkupiny = skupinySurove.length - skupiny.length;
   if (preskoceneSkupiny > 0) console.warn(`Preskočených ${preskoceneSkupiny} skupín bez mena alebo mesta.`);
   for (const g of skupiny) {
