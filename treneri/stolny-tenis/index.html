@@ -6,16 +6,16 @@
 <title>Tréneri stolného tenisu na Slovensku a v Česku | Matchball</title>
 <meta name="description" content="Tréneri stolného tenisu, ktorých si vieš rezervovať cez appku Matchball. Vyber si podľa mesta, hodnotenia a ceny — platíš kartou až po potvrdení termínu.">
 <link rel="canonical" href="https://matchballapp.com/treneri/stolny-tenis/">
-<link rel="icon" href="/favicon-srdce.ico" sizes="48x48">
-<link rel="icon" type="image/png" sizes="32x32" href="/icon-srdce-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-srdce-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/icon-srdce-180.png">
+<link rel="icon" href="/favicon-m.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-m-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-m-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-m-180.png">
 <meta name="theme-color" content="#071A13">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://matchballapp.com/treneri/stolny-tenis/">
 <meta property="og:title" content="Tréneri stolného tenisu | Matchball">
 <meta property="og:description" content="Tréneri stolného tenisu, ktorých si vieš rezervovať cez appku Matchball. Vyber si podľa mesta, hodnotenia a ceny — platíš kartou až po potvrdení termínu.">
-<meta property="og:image" content="https://matchballapp.com/og.jpg">
+<meta property="og:image" content="https://matchballapp.com/og-m.jpg">
 <meta property="og:locale" content="sk_SK">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -107,6 +107,9 @@ p{margin:0}
 .nav-links a{padding:9px 13px;border-radius:999px;color:rgba(255,255,255,.82);font-size:.94rem;
   font-weight:500;transition:background .2s,color .2s}
 .nav-links a:hover{background:rgba(255,255,255,.1);color:#fff}
+/* Kde práve som. Nie ďalšia farba — len plná biela a pevnejší podklad, teda
+   to isté, čo robí prejdenie myšou, natrvalo. */
+.nav-links a.aktivna{background:rgba(255,255,255,.14);color:#fff;font-weight:600}
 .nav-cta{margin-left:auto}
 
 /* ── Pätička ────────────────────────────────────────────────
@@ -277,20 +280,15 @@ footer .brand{font-size:1.2rem;color:#fff}
 <div class="nav-shell">
   <nav class="nav">
     <a class="brand" href="/">
-      <img class="mark" src="/logo.webp" alt="" width="192" height="192">
+      <img class="mark" src="/logo-m.webp" alt="" width="192" height="192">
       <span>Matchball</span>
     </a>
-    <!-- Presne tie isté odkazy v tom istom poradí ako na domovskej stránke —
-         menu sa pri prechode na Trénerov či Partie nesmie meniť (Martin, 11. 9.).
-         Od 17. 9. sú to tri položky a tlačidlo; „V tvojom meste" z lišty vypadlo.
-         Žiadna položka sa tu nezvýrazňuje ako aktívna: všetky tri vedú na sekcie
-         domovskej stránky a podstránka trénerov ani partií ňou nie je. -->
     <div class="nav-links">
+      <a href="/treneri/" class="aktivna" aria-current="page">Tréneri</a>
+      <a href="/skupiny/">Partie</a>
       <a href="/#trenerom">Pre trénerov</a>
-      <a href="/#hracom">Pre hráčov</a>
-      <a href="/#partie">Partie</a>
     </div>
-    <a class="btn btn-lime btn-sm nav-cta" href="/#stiahnut">Stiahnuť</a>
+    <a class="btn btn-lime btn-sm nav-cta" href="/stiahnut/">Stiahnuť</a>
   </nav>
 </div>
 
@@ -384,20 +382,20 @@ footer .brand{font-size:1.2rem;color:#fff}
     <div class="foot-grid">
       <div>
         <a class="brand" href="/" style="font-size:1.2rem">
-          <img class="mark" src="/logo.webp" alt="" width="192" height="192" loading="lazy" decoding="async">
+          <img class="mark" src="/logo-m.webp" alt="" width="192" height="192" loading="lazy" decoding="async">
           <span>Matchball</span>
         </a>
-        <p class="foot-about">Matchball spája hráčov a trénerov. Nájdi trénera alebo partiu na šport v tvojom meste. 41 športov a služieb, zadarmo pre hráčov aj trénerov.</p>
+        <p class="foot-about">Matchball spája hráčov, trénerov a partie. Nájdi spoluhráča, partiu alebo trénera na svoj šport v tvojom meste. 41 športov a služieb, zadarmo pre hráčov aj trénerov.</p>
       </div>
       <div>
         <h4 class="foot-h">Stránka</h4>
         <div class="foot-links">
-          <a href="/#trenerom">Pre trénerov</a>
           <a href="/#hracom">Pre hráčov</a>
+          <a href="/#spoluhraci">Spoluhráči</a>
           <a href="/#partie">Partie</a>
+          <a href="/#trenerom">Pre trénerov</a>
           <a href="/#sluzby">Zdravie a služby</a>
           <a href="/#ceny">Platby</a>
-          <a href="/#stiahnut">Stiahnuť</a>
         </div>
       </div>
       <div>
@@ -405,6 +403,7 @@ footer .brand{font-size:1.2rem;color:#fff}
         <div class="foot-links">
           <a href="/treneri/">Tréneri podľa miest</a>
           <a href="/skupiny/">Partie podľa miest</a>
+          <a href="/stiahnut/">Stiahnuť appku</a>
           <a href="/legal/privacy.html">Ochrana osobných údajov</a>
           <a href="/legal/terms.html">Podmienky používania</a>
           <a href="mailto:support@matchballapp.com">support@matchballapp.com</a>
