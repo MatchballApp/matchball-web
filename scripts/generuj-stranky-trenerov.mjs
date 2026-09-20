@@ -2769,7 +2769,19 @@ ${[
     zmazaneMesta.push(...zmazane.map((m) => `${s.slug}/${m}`));
   }
 
-  const zmazaneMestaSkupin = zmazNezive(path.join(ROOT, 'skupiny'), mestaSoSkupinami);
+  // `foto/` nie je mesto: sú v ňom fotky partií (pod id). Upratovanie by ho
+  // zmazalo hneď po stiahnutí — stalo sa 20. 9. 2026, karta odkazovala na
+  // súbor, ktorý na webe nebol.
+  const zmazaneMestaSkupin = zmazNezive(path.join(ROOT, 'skupiny'), new Set([...mestaSoSkupinami, 'foto']));
+  // Fotky partií, ktoré už nie sú verejné, nech neležia na webe donekonečna.
+  const fotoDir = path.join(ROOT, 'skupiny', 'foto');
+  if (fs.existsSync(fotoDir)) {
+    const zive = new Set(skupiny.filter((g) => g.fotoSubor).map((g) => g.fotoSubor));
+    for (const f of fs.readdirSync(fotoDir)) {
+      if (!zive.has(f)) fs.rmSync(path.join(fotoDir, f), { force: true });
+    }
+    if (fs.readdirSync(fotoDir).length === 0) fs.rmdirSync(fotoDir);
+  }
 
   // ── Dlaždice miest na hlavnej stránke ────────────────────────────────────
   if (dopisMestaDoIndexu({
