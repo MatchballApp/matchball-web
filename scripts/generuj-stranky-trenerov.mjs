@@ -2064,7 +2064,10 @@ function kartaSkupiny(g) {
   // partie, bez maskota postavička organizátora — presne ako v appke.
   const foto = g.fotoSubor ? `/skupiny/foto/${g.fotoSubor}` : null;
   const maskot = avatarSubor(g.avatar_id) || avatarSubor(g.organizer_avatar);
-  const organizator = avatarSubor(g.organizer_avatar);
+  // Organizátor: jeho fotka, keď ju v appke preferuje (299, na web 408),
+  // inak jeho maskot — to isté pravidlo, akým sa kreslí v appke.
+  const organizator = (g.orgFotoSubor ? `/skupiny/foto/${g.orgFotoSubor}` : null)
+    || avatarSubor(g.organizer_avatar);
   const kedy = kedyText(g.recurrence);
   const miesto = [g.venue, kedy].filter(Boolean).map((s) => esc(s)).join(' · ');
   // Počet ČLENOV, nie „1 z 8 miest": do skupiny sa pridá, kto chce, kapacita
@@ -2593,6 +2596,20 @@ async function main() {
     const ok = await stiahniFotku({ url, key, photoPath: g.photo_path, cielovySubor: ciel, updatedAt: g.updated_at });
     if (ok) g.fotoSubor = subor;
   }
+  // Fotka organizátora — pod jeho id s predponou, nech sa nepletie s fotkou
+  // partie a nech ju viac partií jedného človeka stiahne len raz.
+  for (const g of skupiny) {
+    g.orgFotoSubor = null;
+    if (!g.organizer_photo_path || !g.organizer_id) continue;
+    const subor = `org-${g.organizer_id}.jpg`;
+    const ciel = path.join(ROOT, 'skupiny', 'foto', subor);
+    if (fixture) {
+      if (fs.existsSync(ciel)) g.orgFotoSubor = subor;
+      continue;
+    }
+    const ok = await stiahniFotku({ url, key, photoPath: g.organizer_photo_path, cielovySubor: ciel, updatedAt: g.organizer_photo_updated_at });
+    if (ok) g.orgFotoSubor = subor;
+  }
   const preskoceneSkupiny = skupinySurove.length - skupiny.length;
   if (preskoceneSkupiny > 0) console.warn(`Preskočených ${preskoceneSkupiny} skupín bez mena alebo mesta.`);
   for (const g of skupiny) {
@@ -2776,7 +2793,10 @@ ${[
   // Fotky partií, ktoré už nie sú verejné, nech neležia na webe donekonečna.
   const fotoDir = path.join(ROOT, 'skupiny', 'foto');
   if (fs.existsSync(fotoDir)) {
-    const zive = new Set(skupiny.filter((g) => g.fotoSubor).map((g) => g.fotoSubor));
+    const zive = new Set([
+      ...skupiny.filter((g) => g.fotoSubor).map((g) => g.fotoSubor),
+      ...skupiny.filter((g) => g.orgFotoSubor).map((g) => g.orgFotoSubor),
+    ]);
     for (const f of fs.readdirSync(fotoDir)) {
       if (!zive.has(f)) fs.rmSync(path.join(fotoDir, f), { force: true });
     }
