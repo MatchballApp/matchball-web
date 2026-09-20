@@ -5,7 +5,9 @@
       {
         "appID": "GMG42P2BPM.sk.matchball.app",
         "paths": [
-          "/t/*"
+          "/t/*",
+          "/i/*",
+          "/g/*"
         ]
       }
     ]

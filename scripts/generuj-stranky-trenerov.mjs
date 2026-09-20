@@ -592,44 +592,53 @@ function hviezdy(rating, triedaOff = 'off') {
 
 // Ikony sú tie isté ako v `index.html`, len absolútnou cestou — stránky trénerov
 // sedia o dva priečinky hlbšie a relatívne cesty by hľadali `t/katka/favicon.ico`.
-const FAVICONY = `<link rel="icon" href="/favicon-srdce.ico" sizes="48x48">
-<link rel="icon" type="image/png" sizes="32x32" href="/icon-srdce-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-srdce-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/icon-srdce-180.png">
+const FAVICONY = `<link rel="icon" href="/favicon-m.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-m-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-m-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-m-180.png">
 <meta name="theme-color" content="#071A13">`;
 
 // Náhľad odkazu. Jeden obrázok pre celý web — ten istý, aký má hlavná stránka.
 // (Stránka trénera si ho prepíše jeho fotkou; kto fotku nemá, dostane tento.)
-const OG_OBRAZOK = `${WEB_ORIGIN}/og.jpg`;
+const OG_OBRAZOK = `${WEB_ORIGIN}/og-m.jpg`;
 
-// Zástupná fotka trénera či partie: tmavozelený kruh so srdcom, nie holé logo.
-// Logo je priehľadné srdce — v okrúhlom rámčeku by z neho ostali odseknuté
-// krídla na bielom. Tento obrázok je štvorec, takže ho `object-fit:cover`
-// oreže na čistý kruh a v tmavej ploche srdce svieti.
-const ZASTUPNA_FOTKA = '/avatar-zastupny.webp';
+// Zástupná fotka trénera či partie: tmavozelený kruh s logom, nie holé logo.
+// Logo je priehľadné M — v okrúhlom rámčeku by z neho ostali odseknuté rohy
+// na bielom. Tento obrázok je štvorec, takže ho `object-fit:cover` oreže na
+// čistý kruh a v tmavej ploche logo svieti.
+const ZASTUPNA_FOTKA = '/avatar-zastupny-m.webp';
 
 const PISMO = `<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">`;
 
-function hlavicka() {
+/**
+ * Lišta. Presne tie isté odkazy v tom istom poradí ako na domovskej stránke —
+ * menu sa pri prechode na Trénerov či Partie nesmie meniť (Martin, 11. 9.).
+ * Od 20. 9. vedú prvé dve položky na ZOZNAMY, nie na sekcie domovskej stránky:
+ * `/treneri/` a `/skupiny/` sú to, po čom človek prišiel, a doteraz sa k nim
+ * dostal len zrolovaním k sekcii „Kam ďalej". „Pre hráčov" v lište nestojí —
+ * hráč je ten, kto stránku otvoril.
+ *
+ * Preto sa tu odteraz aktívna položka aj ZVÝRAZŇUJE: dve z troch vedú na tieto
+ * stránky, takže je čo zvýrazniť. `kde` je 'treneri' | 'skupiny' | null.
+ * Stránka trénera (`/t/<slug>/`) patrí pod Trénerov — drobčeková navigácia nad
+ * ňou začína tou istou položkou.
+ */
+function hlavicka(kde = null) {
+  const akt = (co) => (co === kde ? ' class="aktivna" aria-current="page"' : '');
   return `<div class="nav-shell">
   <nav class="nav">
     <a class="brand" href="/">
-      <img class="mark" src="/logo.webp" alt="" width="192" height="192">
+      <img class="mark" src="/logo-m.webp" alt="" width="192" height="192">
       <span>Matchball</span>
     </a>
-    <!-- Presne tie isté odkazy v tom istom poradí ako na domovskej stránke —
-         menu sa pri prechode na Trénerov či Partie nesmie meniť (Martin, 11. 9.).
-         Od 17. 9. sú to tri položky a tlačidlo; „V tvojom meste" z lišty vypadlo.
-         Žiadna položka sa tu nezvýrazňuje ako aktívna: všetky tri vedú na sekcie
-         domovskej stránky a podstránka trénerov ani partií ňou nie je. -->
     <div class="nav-links">
+      <a href="/treneri/"${akt('treneri')}>Tréneri</a>
+      <a href="/skupiny/"${akt('skupiny')}>Partie</a>
       <a href="/#trenerom">Pre trénerov</a>
-      <a href="/#hracom">Pre hráčov</a>
-      <a href="/#partie">Partie</a>
     </div>
-    <a class="btn btn-lime btn-sm nav-cta" href="/#stiahnut">Stiahnuť</a>
+    <a class="btn btn-lime btn-sm nav-cta" href="/stiahnut/">Stiahnuť</a>
   </nav>
 </div>`;
 }
@@ -639,20 +648,20 @@ const PATICKA = `<footer>
     <div class="foot-grid">
       <div>
         <a class="brand" href="/" style="font-size:1.2rem">
-          <img class="mark" src="/logo.webp" alt="" width="192" height="192" loading="lazy" decoding="async">
+          <img class="mark" src="/logo-m.webp" alt="" width="192" height="192" loading="lazy" decoding="async">
           <span>Matchball</span>
         </a>
-        <p class="foot-about">Matchball spája hráčov a trénerov. Nájdi trénera alebo partiu na šport v tvojom meste. 41 športov a služieb, zadarmo pre hráčov aj trénerov.</p>
+        <p class="foot-about">Matchball spája hráčov, trénerov a partie. Nájdi spoluhráča, partiu alebo trénera na svoj šport v tvojom meste. 41 športov a služieb, zadarmo pre hráčov aj trénerov.</p>
       </div>
       <div>
         <h4 class="foot-h">Stránka</h4>
         <div class="foot-links">
-          <a href="/#trenerom">Pre trénerov</a>
           <a href="/#hracom">Pre hráčov</a>
+          <a href="/#spoluhraci">Spoluhráči</a>
           <a href="/#partie">Partie</a>
+          <a href="/#trenerom">Pre trénerov</a>
           <a href="/#sluzby">Zdravie a služby</a>
           <a href="/#ceny">Platby</a>
-          <a href="/#stiahnut">Stiahnuť</a>
         </div>
       </div>
       <div>
@@ -660,6 +669,7 @@ const PATICKA = `<footer>
         <div class="foot-links">
           <a href="/treneri/">Tréneri podľa miest</a>
           <a href="/skupiny/">Partie podľa miest</a>
+          <a href="/stiahnut/">Stiahnuť appku</a>
           <a href="/legal/privacy.html">Ochrana osobných údajov</a>
           <a href="/legal/terms.html">Podmienky používania</a>
           <a href="mailto:support@matchballapp.com">support@matchballapp.com</a>
@@ -764,6 +774,9 @@ p{margin:0}
 .nav-links a{padding:9px 13px;border-radius:999px;color:rgba(255,255,255,.82);font-size:.94rem;
   font-weight:500;transition:background .2s,color .2s}
 .nav-links a:hover{background:rgba(255,255,255,.1);color:#fff}
+/* Kde práve som. Nie ďalšia farba — len plná biela a pevnejší podklad, teda
+   to isté, čo robí prejdenie myšou, natrvalo. */
+.nav-links a.aktivna{background:rgba(255,255,255,.14);color:#fff;font-weight:600}
 .nav-cta{margin-left:auto}
 
 /* ── Pätička ────────────────────────────────────────────────
@@ -1280,7 +1293,7 @@ ${CSS_TRENER}
 </head>
 <body>
 <a class="skip" href="#obsah">Preskočiť na obsah</a>
-${hlavicka()}
+${hlavicka('treneri')}
 
 <main id="obsah" class="wrap">
   <nav class="crumbs" aria-label="Drobčeková navigácia">
@@ -1865,7 +1878,7 @@ ${CSS_ZOZNAM}
 </head>
 <body>
 <a class="skip" href="#obsah">Preskočiť na obsah</a>
-${hlavicka()}
+${hlavicka('treneri')}
 
 <main id="obsah" class="wrap">
   ${jeMesto || sport ? `<nav class="crumbs" aria-label="Drobčeková navigácia" style="display:flex;gap:8px;color:var(--muted);font-size:.86rem;margin-top:8px">
@@ -2198,7 +2211,7 @@ ${CSS_SKUPINY}
 </head>
 <body>
 <a class="skip" href="#obsah">Preskočiť na obsah</a>
-${hlavicka()}
+${hlavicka('skupiny')}
 
 <main id="obsah" class="wrap">
   ${jeMesto ? `<nav class="crumbs" aria-label="Drobčeková navigácia" style="display:flex;gap:8px;color:var(--muted);font-size:.86rem;margin-top:8px">
@@ -2679,6 +2692,9 @@ async function main() {
 ${[
     polozka(`${WEB_ORIGIN}/`, najnovsi, '1.0'),
     polozka(`${WEB_ORIGIN}/treneri/`, najnovsi, '0.9'),
+    // Univerzálna stránka na stiahnutie. Statická, takže `lastmod` má taký istý
+    // ako domovská — iný dátum by generátor nemal odkiaľ vziať.
+    polozka(`${WEB_ORIGIN}/stiahnut/`, najnovsi, '0.8'),
     ...mesta.map((m) => polozka(`${WEB_ORIGIN}/treneri/${m.slug}/`, najnovsi, '0.8')),
     ...sportyStranky.map((s) => polozka(`${WEB_ORIGIN}/treneri/${s.slug}/`, najnovsi, '0.75')),
     ...sportyStranky.flatMap((s) => s.mesta.map((m) =>
@@ -2696,8 +2712,11 @@ ${[
   // `.well-known/` by na webe vôbec nebolo — hlboké odkazy by tíško nefungovali.
   if (zapis('.nojekyll', '')) zmenene++;
 
+  // Hlboké odkazy, ktoré má otvárať APPKA. `/stiahnut/` a `/` tu zámerne nie sú:
+  // tie majú zostať na webe — kto ich otvorí, appku ešte len hľadá.
+  // Cesty: profil trénera, pozvánka (`/i/`), pozvánka do partie (`/g/`).
   const aasa = {
-    applinks: { apps: [], details: [{ appID: APPLE_APP_ID, paths: ['/t/*'] }] },
+    applinks: { apps: [], details: [{ appID: APPLE_APP_ID, paths: ['/t/*', '/i/*', '/g/*'] }] },
   };
   if (zapis(path.join('.well-known', 'apple-app-site-association'), `${JSON.stringify(aasa, null, 2)}\n`)) zmenene++;
 
