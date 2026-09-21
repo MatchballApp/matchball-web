@@ -2059,6 +2059,19 @@ const CSS_SKUPINY = `.city-groups{margin-bottom:44px}
   .grid-groups.solo{margin-bottom:64px}
 }`;
 
+// Kde sa hrá (migrácia 416). Partia, ktorej sa miesto mení (`place_varies`),
+// nemá na svojej úrovni ani halu, ani špendlík — hovorí za ňu najbližší termín.
+// Presne to isté pravidlo má appka (`utils/groupPlace.ts`), aby karta na webe a
+// karta v Hľadať nemohli povedať dve rôzne veci.
+//
+// Mapu web nekreslí a súradnice zámerne nedostáva (371), takže tu je len riadok
+// karty — jedna veta o mieste, nič viac.
+function miestoText(g) {
+  if (!g.place_varies) return g.venue || null;
+  const kde = (g.next_venue || '').trim();
+  return kde ? `Mení sa · najbližšie ${kde}` : 'Miesto sa dohodne';
+}
+
 function kartaSkupiny(g) {
   // Fotka partie má prednosť pred maskotom (346, na web 407); bez nej maskot
   // partie, bez maskota postavička organizátora — presne ako v appke.
@@ -2069,7 +2082,7 @@ function kartaSkupiny(g) {
   const organizator = (g.orgFotoSubor ? `/skupiny/foto/${g.orgFotoSubor}` : null)
     || avatarSubor(g.organizer_avatar);
   const kedy = kedyText(g.recurrence);
-  const miesto = [g.venue, kedy].filter(Boolean).map((s) => esc(s)).join(' · ');
+  const miesto = [miestoText(g), kedy].filter(Boolean).map((s) => esc(s)).join(' · ');
   // Počet ČLENOV, nie „1 z 8 miest": do skupiny sa pridá, kto chce, kapacita
   // platí až na jednotlivý termín (Martin, 9. 9.). Kapacita termínu je
   // v podtitulku, aby bolo jasné, koľkí sa na jedno stretnutie zmestia.
@@ -2162,7 +2175,10 @@ function strankaSkupin({ mesto, mestaPodla, maTrenerov }) {
         eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
         location: {
           '@type': 'Place',
-          name: g.venue || g.city,
+          // Meno miesta najbližšieho termínu, keď ho partia má vlastné (416):
+          // `SportsEvent` je JEDEN termín, nie partia, takže mu patrí miesto
+          // toho termínu. Bez neho ostáva hala partie a nakoniec mesto.
+          name: g.next_venue || g.venue || g.city,
           address: { '@type': 'PostalAddress', addressLocality: g.city },
         },
       };
