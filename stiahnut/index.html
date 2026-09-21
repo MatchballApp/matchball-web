@@ -114,7 +114,32 @@ html.ios #other,html.android #other{display:none}
       if (kod) menoKodu = m[1];
     }
   } catch (e) { /* pokazená adresa nie je dôvod nezobraziť stránku */ }
-  if (menoKodu) PLAY += '&referrer=' + encodeURIComponent(menoKodu + '=' + kod);
+
+  // `?z=` je MIESTO v appke, z ktorého pozvánka odišla (migrácia 423). Musí
+  // prežiť cestu do obchodu: appka si ho po inštalácii prečíta z toho istého
+  // reťazca `referrer`, aký nesie kód (`parseRef` v services/referral.ts hľadá
+  // `ref=` aj `z=`), a pošle ho pri registrácii serveru. Bez toho by sa o pol
+  // roka nedalo povedať, ktoré miesto v appke niekoho naozaj privedie.
+  //
+  // Uzavretý číselník, nie čokoľvek z adresy: hodnota má na serveri check
+  // constraint a vymyslený štítok z preposlaného odkazu by v štatistike urobil
+  // kategóriu, ktorú appka nikam nedá.
+  //
+  // Iba ku KÓDU POZVÁNKY. Ku kódu partie (`kod=`) nie — tam žiadny zdroj
+  // nevzniká a v Play Console by len šumel.
+  var zdroj = '';
+  try {
+    var mz = location.search.match(/[?&]z=([^&#]+)/);
+    if (mz && menoKodu === 'ref') {
+      var z = decodeURIComponent(mz[1]).toLowerCase();
+      if (['hladat', 'trening', 'partia', 'ziadost', 'profil', 'web'].indexOf(z) >= 0) zdroj = z;
+    }
+  } catch (e) { /* to isté: pokazený parameter stránku nezhodí */ }
+
+  if (menoKodu) {
+    PLAY += '&referrer=' + encodeURIComponent(
+      menoKodu + '=' + kod + (zdroj ? '&z=' + zdroj : ''));
+  }
 
   var ua = navigator.userAgent || '';
   var isAndroid = /Android/i.test(ua);

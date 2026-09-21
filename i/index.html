@@ -151,6 +151,24 @@ footer :focus-visible{outline-color:var(--lime)}
     if (m) ref = decodeURIComponent(m[1]).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32);
   } catch (e) { /* pokazená adresa nie je dôvod nezobraziť stránku */ }
 
+  // `?z=` je MIESTO v appke, z ktorého pozvánka odišla (migrácia 423). Odovzdá
+  // sa appke spolu s kódom cez `mecbal://invite?ref=…&z=…` a tá ho pri
+  // registrácii pošle serveru — bez toho by sa nedalo zmerať, ktoré z miest,
+  // kde appka pozvánku ponúka, niekoho naozaj privedie.
+  //
+  // Uzavretý číselník, nie čokoľvek z adresy: hodnota má na serveri check
+  // constraint a vymyslený štítok z preposlaného odkazu by v štatistike urobil
+  // kategóriu, ktorú appka nikam nedá. Bez `z=` (staré odkazy, QR, obrázok
+  // pozvánky) je odkaz do appky presne ten, čo býval.
+  var zdroj = '';
+  try {
+    var mz = location.search.match(/[?&]z=([^&#]+)/);
+    if (mz) {
+      var z = decodeURIComponent(mz[1]).toLowerCase();
+      if (['hladat', 'trening', 'partia', 'ziadost', 'profil', 'web'].indexOf(z) >= 0) zdroj = z;
+    }
+  } catch (e) { /* to isté: pokazený parameter stránku nezhodí */ }
+
   function otvorAppku(href) {
     [].forEach.call(document.querySelectorAll('.open-app'), function (a) { a.href = href; });
   }
@@ -164,7 +182,8 @@ footer :focus-visible{outline-color:var(--lime)}
     // nie je, Safari na to odpovie chybovým oknom a to je horšie než nič.
     // Cez triedu, nie cez id: tú istú dvojicu má odteraz iOS aj Android a
     // `getElementById` by obslúžil vždy len ten prvý.
-    otvorAppku('mecbal://invite?ref=' + encodeURIComponent(ref));
+    otvorAppku('mecbal://invite?ref=' + encodeURIComponent(ref)
+      + (zdroj ? '&z=' + zdroj : ''));
     // Bez kódu by tá veta klamala — vracať sa netreba, keď nie je čo doplniť.
     [].forEach.call(document.querySelectorAll('.back-hint'), function (el) { el.hidden = false; });
   } else {
