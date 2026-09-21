@@ -405,7 +405,13 @@ function urovenText(min, max) {
 }
 
 /**
- * Kedy sa hráva: „Nedeľa 18:00–20:00".
+ * Kedy sa hráva: „Nedeľa 18:00–20:00", od 417 aj „Utorok a štvrtok 19:00–21:00".
+ *
+ * Partia smie hrávať VIACKRÁT DO TÝŽDŇA (417, Martin 21. 9. 2026) — dni sú
+ * v `weekdays`. `weekday` v tom istom objekte drží prvý z nich a je tu ako
+ * záloha: partia zapísaná pred 417 pole nemá vôbec. Čas stojí RAZ, lebo rozvrh
+ * pozná jednu hodinu pre všetky dni; iná hodina v iný deň je výnimka na
+ * jednotlivom termíne a tá na túto stránku nepatrí.
  *
  * Minúty v `recurrence` sú nástenný čas na kurte (Europe/Bratislava), preto sa
  * tu nič neprepočítava cez `Date` — rovnaká úvaha ako v appke
@@ -417,11 +423,23 @@ function urovenText(min, max) {
 function kedyText(recurrence) {
   const r = recurrence && typeof recurrence === 'object' ? recurrence : null;
   if (!r || r.type !== 'weekly') return '';
-  const den = DNI[Number(r.weekday)] || '';
+  // Platné ISO dni, zoradené a bez duplikátov. Jeden nezmysel v poli nemá
+  // zmazať celý riadok — a keď v ňom neostane nič, hovorí `weekday` sám.
+  const zPola = Array.isArray(r.weekdays)
+    ? [...new Set(r.weekdays.map(Number).filter((d) => Number.isInteger(d) && d >= 1 && d <= 7))]
+      .sort((a, b) => a - b)
+    : [];
+  const dni = (zPola.length ? zPola : [Number(r.weekday)])
+    .map((d) => DNI[d] || '')
+    .filter(Boolean);
   const od = Number(r.start_min);
   const doo = Number(r.end_min);
-  if (!den || !Number.isFinite(od) || !Number.isFinite(doo)) return '';
-  return `${den} ${cas(od)}–${cas(doo)}`;
+  if (!dni.length || !Number.isFinite(od) || !Number.isFinite(doo)) return '';
+  // Veľké písmeno má len prvý deň: „Utorok a Štvrtok" nie je veta.
+  const veta = dni
+    .map((d, i) => (i === 0 ? d : d.toLowerCase()))
+    .reduce((acc, d, i) => (i === 0 ? d : i === dni.length - 1 ? `${acc} a ${d}` : `${acc}, ${d}`), '');
+  return `${veta} ${cas(od)}–${cas(doo)}`;
 }
 
 /** Slovenské skloňovanie počtu skupín. */
@@ -2059,17 +2077,22 @@ const CSS_SKUPINY = `.city-groups{margin-bottom:44px}
   .grid-groups.solo{margin-bottom:64px}
 }`;
 
-// Kde sa hrá (migrácia 416). Partia, ktorej sa miesto mení (`place_varies`),
-// nemá na svojej úrovni ani halu, ani špendlík — hovorí za ňu najbližší termín.
-// Presne to isté pravidlo má appka (`utils/groupPlace.ts`), aby karta na webe a
-// karta v Hľadať nemohli povedať dve rôzne veci.
+// Kde sa hrá (416, pravidlo prepísané 417). Miesto partie, ak ho má; inak miesto
+// najbližšieho termínu; inak nič. Presne to isté pravidlo má appka
+// (`utils/groupPlace.ts`), aby karta na webe a karta v Hľadať nemohli povedať dve
+// rôzne veci.
+//
+// Prepínač „Miesto sa mení" (416) zanikol 21. 9. 2026 a s ním aj text „Mení sa ·
+// najbližšie…": kto stojí pred rozhodnutím „pridám sa?", potrebuje vedieť KDE, nie
+// akým pravidlom to vyšlo. Výnimka na jednom termíne partiu nepresťahuje — miesto
+// termínu hovorí len za partiu, ktorá svoje nemá.
 //
 // Mapu web nekreslí a súradnice zámerne nedostáva (371), takže tu je len riadok
 // karty — jedna veta o mieste, nič viac.
 function miestoText(g) {
-  if (!g.place_varies) return g.venue || null;
-  const kde = (g.next_venue || '').trim();
-  return kde ? `Mení sa · najbližšie ${kde}` : 'Miesto sa dohodne';
+  const hala = (g.venue || '').trim();
+  if (hala) return hala;
+  return (g.next_venue || '').trim() || null;
 }
 
 function kartaSkupiny(g) {
