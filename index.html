@@ -39,7 +39,7 @@
    Identita je z appky, nie zo šablóny: zelená z loga (src/theme/colors.ts,
    `primary` #1E9E52 / `primaryLight` #51E041), tmavozelená namiesto čiernej
    a modrá zo srdca ako drobný akcent. Stránka je SVETLÁ s tmavozelenými
-   pásmi (hero, truhlice, tréneri, výzva, pätička) — jedna identita, žiadne
+   pásmi (hero, mystery boxy, tréneri, výzva, pätička) — jedna identita, žiadne
    dvojité kreslenie pre `prefers-color-scheme`.
    ───────────────────────────────────────────────────────────── */
 :root{
@@ -112,7 +112,7 @@ p{margin:0}
 .inline-link:hover{color:var(--green-dark)}
 
 /* ── Tmavé pásy ─────────────────────────────────────────────
-   Jeden odtieň pre všetky: hero, truhlice, tréneri, výzva aj pätička sú
+   Jeden odtieň pre všetky: hero, mystery boxy, tréneri, výzva aj pätička sú
    ten istý materiál, len iná dĺžka. */
 .band{background:var(--ink);color:var(--on-dark);--focus:var(--lime)}
 .band h1,.band h2,.band h3{color:#fff}
@@ -716,7 +716,7 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
   </div>
 </section>
 
-<!-- ── Truhlice ─────────────────────────────────────────────
+<!-- ── Mystery boxy ─────────────────────────────────────────────
      Tmavý pás: snímky zo zbierky sú v tmavom vzhľade appky a na svetlom
      podklade by pôsobili ako cudzí prvok. -->
 <section class="section band" id="odmeny">
@@ -725,7 +725,7 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
       <div class="showcase-media reveal">
         <div class="duo">
           <div class="phone">
-            <img src="img/app-odmena.webp" alt="Zlatá truhlica s novým legendárnym avatarom" width="520" height="1131" loading="lazy" decoding="async">
+            <img src="img/app-odmena.webp" alt="Zlatý box, z ktorého vyskočil nový legendárny avatar" width="520" height="1131" loading="lazy" decoding="async">
           </div>
           <div class="phone">
             <img src="img/app-zbierka.webp" alt="Zbierka avatarov: 17 z 34 postavičiek" width="520" height="1131" loading="lazy" decoding="async">
@@ -737,21 +737,21 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
         <div class="section-head reveal" style="max-width:34rem">
           <span class="eyebrow">Odmeny</span>
           <h2>Zbieraj avatarov</h2>
-          <p class="lead">Za každý odohraný tréning ti padne drevená truhlica, za platbu kartou zlatá. V každej je avatar, od bežných po legendárne.</p>
+          <p class="lead">Za každú odohranú hru ti padne mystery box, za platbu kartou zlatý. Vyskočí z neho avatar, od bežných po legendárne.</p>
         </div>
         <div class="feature-list" style="margin-top:28px">
           <article class="feature reveal">
             <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2.4"/><path d="M3 12h18M12 8v12"/><path d="M5 8c0-2.2 1.8-4 4-4 1.6 0 2.4 1 3 2 .6-1 1.4-2 3-2 2.2 0 4 1.8 4 4"/></svg></div>
             <div>
-              <h3>Drevená za tréning, zlatá za kartu</h3>
-              <p>Truhlica padne hneď po odohranom tréningu. Kúpiť sa nedá a čakať na ňu nemusíš.</p>
+              <h3>Mystery box za hru, zlatý za kartu</h3>
+              <p>Box padne hneď po odohranom tréningu, termíne partie aj zápase s kamarátom. Kúpiť sa nedá a čakať naň nemusíš.</p>
             </div>
           </article>
           <article class="feature reveal">
             <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h14v5.2a7 7 0 0 1-14 0z"/><path d="M5 6H3.2v1.4A3.4 3.4 0 0 0 6.6 10.8M19 6h1.8v1.4a3.4 3.4 0 0 1-3.4 3.4"/><path d="M9.6 16.8h4.8L15.4 20H8.6z"/></svg></div>
             <div>
               <h3>Žiadny avatar dvakrát</h3>
-              <p>Kým nemáš celú zbierku, každá truhlica ti donesie postavičku, ktorú ešte nemáš.</p>
+              <p>Kým nemáš celú zbierku, z každého boxu ti vyskočí postavička, ktorú ešte nemáš.</p>
             </div>
           </article>
         </div>

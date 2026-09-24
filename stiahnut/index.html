@@ -132,7 +132,7 @@ html.ios #other,html.android #other{display:none}
     var mz = location.search.match(/[?&]z=([^&#]+)/);
     if (mz && menoKodu === 'ref') {
       var z = decodeURIComponent(mz[1]).toLowerCase();
-      if (['hladat', 'trening', 'partia', 'ziadost', 'profil', 'web'].indexOf(z) >= 0) zdroj = z;
+      if (['hladat', 'trening', 'partia', 'ziadost', 'profil', 'web', 'uvod'].indexOf(z) >= 0) zdroj = z;
     }
   } catch (e) { /* to isté: pokazený parameter stránku nezhodí */ }
 
