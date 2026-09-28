@@ -102,15 +102,15 @@ footer :focus-visible{outline-color:var(--lime)}
 <h2>Poloha</h2>
 <p>Pokud to povolíš, použijeme přibližnou polohu telefonu k zobrazení trenérů a počasí ve tvém okolí. Polohu neukládáme a nesledujeme tě na pozadí. Povolení můžeš kdykoli odebrat v nastavení telefonu.</p>
 <h2>Oznámení</h2>
-<p>Pokud povolíš oznámení, uložíme si identifikátor zařízení, abychom ti mohli poslat připomínku tréninku nebo zprávu. Posílá je služba Expo přes Apple Push Notification service.</p>
+<p>Pokud povolíš oznámení, uložíme si identifikátor zařízení, abychom ti mohli poslat připomínku tréninku nebo zprávu. Posílá je služba Expo přes Apple Push Notification service (iPhone) a Firebase Cloud Messaging od Google (Android).</p>
 <h2>Platby</h2>
 <p>Platby zpracovává Stripe Payments Europe. Údaje o kartě se k nám nikdy nedostanou — ukládá je Stripe. Trenéři procházejí ověřením totožnosti (KYC) přímo u Stripe. Pokud si trenér zvolí přímou platbu, ukládáme i IBAN jeho bankovního účtu a zobrazíme ho hráči při rezervaci, aby mohl platbu převést.</p>
 <h2>Daňové hlášení (DAC7)</h2>
 <p>Jako platforma jsme podle směrnice DAC7 povinni jednou ročně nahlásit finanční správě identifikační a daňové údaje trenérů a jejich příjmy z Matchball. Tyto údaje uchováváme odděleně od veřejného profilu a týkají se jen trenérů.</p>
 <h2>Komu údaje zpřístupňujeme</h2>
-<p>Supabase (databáze a soubory, EU), Stripe (platby), Expo (oznámení), Sentry (hlášení pádů aplikace — posíláme jen identifikátor účtu, nikdy jméno ani e-mail), PostHog (anonymní statistiky používání, servery v EU — které obrazovky a funkce používáš, s identifikátorem účtu, nikdy jméno, e-mail, zprávy ani platební údaje; vypneš je v Nastavení), Google (přihlášení, pokud ho použiješ, a automatická kontrola profilové fotky na nevhodný obsah), Apple (přihlášení, pokud ho použiješ, a předpověď počasí — posílají se jen souřadnice místa tréninku), Registr fyzických osob ve sportu (při ověřování trenérské licence se posílá IDFO, které trenér sám zadá) a finanční správa v rozsahu podle DAC7. Údaje neprodáváme a nepoužíváme k reklamě.</p>
+<p>Supabase (databáze a soubory, EU), Stripe (platby), Expo (oznámení), Sentry (hlášení pádů aplikace — posíláme jen identifikátor účtu, nikdy jméno ani e-mail), PostHog (anonymní statistiky používání, servery v EU — které obrazovky a funkce používáš, s identifikátorem účtu, nikdy jméno, e-mail, zprávy ani platební údaje; vypneš je v Nastavení), Google (přihlášení, pokud ho použiješ, mapa na Androidu a automatická kontrola profilové fotky na nevhodný obsah), Apple (přihlášení, pokud ho použiješ, a předpověď počasí — posílají se jen souřadnice místa tréninku), Registr fyzických osob ve sportu (při ověřování trenérské licence se posílá IDFO, které trenér sám zadá) a finanční správa v rozsahu podle DAC7. Údaje neprodáváme a nepoužíváme k reklamě.</p>
 <h2>Jak dlouho je uchováváme</h2>
-<p>Údaje účtu do jeho smazání. Doklady o platbách a daňové údaje 10 let, jak vyžaduje zákon o účetnictví. Zprávy a hodnocení se smažou spolu s účtem.</p>
+<p>Údaje účtu do jeho smazání. Doklady o platbách a daňové údaje 10 let, jak vyžaduje zákon o účetnictví. Po smazání účtu zmizí tvé osobní údaje, fotky a doklady. Zprávy, které jsi poslal, a hodnocení, která jsi napsal, zůstanou druhé straně pod jménem „Smazaný uživatel“.</p>
 <h2>Věk</h2>
 <p>Matchball je určen pro osoby od 16 let. Trénink pro dítě rezervuje rodič ze svého účtu.</p>
 <h2>Tvá práva</h2>
