@@ -1308,6 +1308,7 @@ ${CSS_ZAKLAD}
 ${CSS_TRENER}
 </style>
 <script type="application/ld+json">${json(ld)}</script>
+<script src="/m.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#obsah">Preskočiť na obsah</a>
@@ -1893,6 +1894,7 @@ ${CSS_ZAKLAD}
 ${CSS_ZOZNAM}
 </style>
 <script type="application/ld+json">${json(ld)}</script>
+<script src="/m.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#obsah">Preskočiť na obsah</a>
@@ -2255,6 +2257,7 @@ ${CSS_ZOZNAM}
 ${CSS_SKUPINY}
 </style>
 <script type="application/ld+json">${json(ld)}</script>
+<script src="/m.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#obsah">Preskočiť na obsah</a>

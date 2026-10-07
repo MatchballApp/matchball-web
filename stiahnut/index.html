@@ -93,6 +93,7 @@ footer :focus-visible{outline-color:var(--lime)}
 html.ios #ios,html.android #android{display:block}
 html.ios #other,html.android #other{display:none}
 </style>
+<script src="/m.js"></script>
 <script>
 (function () {
   'use strict';
@@ -139,6 +140,10 @@ html.ios #other,html.android #other{display:none}
   if (menoKodu) {
     PLAY += '&referrer=' + encodeURIComponent(
       menoKodu + '=' + kod + (zdroj ? '&z=' + zdroj : ''));
+  } else if (window.mbZdroj) {
+    // Bez kódu pozvánky nesie odkaz aspoň zdroj návštevy (`?s=` z príspevku),
+    // aby ho ukázal prehľad akvizícií v Play Console. Appka z neho nič nečíta.
+    PLAY += '&referrer=' + encodeURIComponent('utm_source=' + window.mbZdroj + '&utm_medium=web');
   }
 
   var ua = navigator.userAgent || '';
@@ -166,7 +171,11 @@ html.ios #other,html.android #other{display:none}
   if (isAndroid || isIOS) {
     var zvnutra = false;
     try { zvnutra = (document.referrer || '').indexOf(location.origin + '/') === 0; } catch (e) { /* prísnejšie prostredie referrer zamlčí */ }
-    if (!zvnutra) { location.replace(isAndroid ? PLAY : APP_STORE); return; }
+    if (!zvnutra) {
+      if (window.mb) window.mb('store_redirect', { obchod: isAndroid ? 'google_play' : 'app_store' });
+      location.replace(isAndroid ? PLAY : APP_STORE);
+      return;
+    }
   }
 
   // Odkazy na Play dostanú `&referrer=` až tu — v hlave ešte neexistujú.
