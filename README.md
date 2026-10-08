@@ -60,7 +60,7 @@ logiky v appke treba prepísať aj hlavičku toho skriptu.**
 
 `scripts/sport-katalog.json` je kópia `docs/sport-katalog.json` z repa appky —
 jediný zdroj mien, poradia, slova pre miesto (`venue_sk`) a toho, či ide
-o šport alebo o službu bez levelu (`kind`), pre všetkých 41 športov a služieb.
+o šport alebo o službu bez levelu (`kind`), pre všetkých 42 športov a služieb.
 **Needituj ho tu ručne** — pri zmene katalógu v appke skopíruj súbor znova.
 Generátor z neho stavia `SPORT_ORDER`/`SPORT_NAZOV`/`SPORT_GENITIV`/`SPORT_SLUG`
 aj zoznam služieb (`SPORT_DRUH`); cenník služby (fyzioterapia a pod.) číta

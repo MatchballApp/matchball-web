@@ -270,7 +270,7 @@ const KURT = {
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Športy a služby — jediný zdroj pravdy je `scripts/sport-katalog.json`,
-//  kópia `docs/sport-katalog.json` z repa appky (41 športov/služieb v 5
+//  kópia `docs/sport-katalog.json` z repa appky (42 športov/služieb v 5
 //  kategóriách, rozšírenie 10. 9. 2026). Pri zmene katalógu v appke treba
 //  kópiu tu prepísať a tento súbor si z nej sám dovytiahne mená, slovo pre
 //  miesto (`venue_sk`) aj to, či ide o šport (level, sparing) alebo o
@@ -669,7 +669,7 @@ const PATICKA = `<footer>
           <img class="mark" src="/logo-m.webp" alt="" width="192" height="192" loading="lazy" decoding="async">
           <span>Matchball</span>
         </a>
-        <p class="foot-about">Matchball spája hráčov, trénerov a partie. Nájdi spoluhráča, partiu alebo trénera na svoj šport v tvojom meste. 41 športov a služieb, zadarmo pre hráčov aj trénerov.</p>
+        <p class="foot-about">Matchball spája hráčov, trénerov a partie. Nájdi spoluhráča, partiu alebo trénera na svoj šport v tvojom meste. 42 športov a služieb, zadarmo pre hráčov aj trénerov.</p>
       </div>
       <div>
         <h4 class="foot-h">Stránka</h4>
