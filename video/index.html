@@ -11,11 +11,11 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Matchball — hráči, tréneri a partie">
-<meta property="og:video" content="https://matchballapp.com/video/matchball.mp4">
-<meta property="og:video:secure_url" content="https://matchballapp.com/video/matchball.mp4">
+<meta property="og:video" content="https://matchballapp.com/video/matchball-9x14.mp4">
+<meta property="og:video:secure_url" content="https://matchballapp.com/video/matchball-9x14.mp4">
 <meta property="og:video:type" content="video/mp4">
-<meta property="og:video:width" content="720">
-<meta property="og:video:height" content="1280">
+<meta property="og:video:width" content="1080">
+<meta property="og:video:height" content="1680">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="sk_SK">
 <meta property="og:url" content="https://matchballapp.com/video/">
@@ -58,20 +58,21 @@ h1{font-size:clamp(1.7rem,6vw,2.1rem);font-weight:800;letter-spacing:-.028em;
 p{margin:0 0 1rem;color:var(--muted)}
 p.lead{color:var(--fg)}
 
-/* Zvislé video. Šírku okrem 380 px stráži aj VÝŠKA okna: na telefóne by
+/* Zvislé video, orezané z 9:16 na 9:14 (bez prázdneho horného pásu, ktorý
+   potrebuje len Instagram). Šírku okrem 420 px stráži aj VÝŠKA okna: na telefóne by
    video na celú šírku vytlačilo tlačidlo na stiahnutie pod okraj obrazovky,
    a kvôli tomu tlačidlu táto stránka existuje. `aspect-ratio` drží miesto
    ešte pred načítaním, takže stránka pod videom neposkočí. */
-.ram{position:relative;width:min(100%,380px,calc(60vh * 9 / 16));margin:1.2rem auto 0;
+.ram{position:relative;width:min(100%,420px,calc(62vh * 9 / 14));margin:1.2rem auto 0;
   border-radius:26px;overflow:hidden;background:var(--ink);
   box-shadow:0 2px 6px rgba(7,26,19,.07),0 28px 56px -20px rgba(7,26,19,.34)}
-@supports (height:1svh){.ram{width:min(100%,380px,calc(60svh * 9 / 16))}}
-.ram video{display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;background:var(--ink)}
+@supports (height:1svh){.ram{width:min(100%,420px,calc(62svh * 9 / 14))}}
+.ram video{display:block;width:100%;height:auto;aspect-ratio:9/14;object-fit:cover;background:var(--ink)}
 
-/* Video sa samo pustí len stlmené. Tlačidlo hore na videu (dole je natívne
-   ovládanie) zvuk zapne a pustí video od začiatku; kým zvuk hrá, je skryté —
+/* Video sa samo pustí len stlmené. Tlačidlo dole na videu, tesne nad natívnym
+   ovládaním (hore je po orezaní text videa), zvuk zapne a pustí video od začiatku; kým zvuk hrá, je skryté —
    hlasitosť potom drží ovládanie videa. */
-.zvuk{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:1;
+.zvuk{position:absolute;bottom:64px;left:50%;transform:translateX(-50%);z-index:1;
   display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 20px 0 16px;
   border:0;border-radius:999px;background:var(--lime);color:#06210F;cursor:pointer;
   font-family:inherit;font-size:1rem;font-weight:700;line-height:1;white-space:nowrap;
@@ -132,8 +133,8 @@ html.ios #other,html.android #other{display:none}
   "@type": "VideoObject",
   "name": "Matchball za 36 sekúnd",
   "description": "Spoluhráč, partia aj tréner na 42 športov v tvojom meste. Šport nás spája. My spájame vás.",
-  "thumbnailUrl": "https://matchballapp.com/video/poster.jpg",
-  "contentUrl": "https://matchballapp.com/video/matchball.mp4",
+  "thumbnailUrl": "https://matchballapp.com/video/poster-9x14.jpg",
+  "contentUrl": "https://matchballapp.com/video/matchball-9x14.mp4",
   "uploadDate": "2026-10-09",
   "duration": "PT37S",
   "inLanguage": "sk"
@@ -169,8 +170,8 @@ html.ios #other,html.android #other{display:none}
        tlačidlo na videu (odkrýva ho skript), bez JavaScriptu natívne
        ovládanie. -->
   <div class="ram">
-    <video id="video" src="/video/matchball.mp4" poster="/video/poster.jpg"
-      width="720" height="1280" muted playsinline controls preload="metadata"
+    <video id="video" src="/video/matchball-9x14.mp4" poster="/video/poster-9x14.jpg"
+      width="1080" height="1680" muted playsinline controls preload="metadata"
       aria-label="Video: Matchball za 36 sekúnd. Prepis je pod tlačidlami."></video>
     <button class="zvuk" id="zvuk" type="button" aria-pressed="false" hidden>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>
@@ -264,28 +265,59 @@ html.ios #other,html.android #other{display:none}
   // začiatku, nech hudba sedí so strihom. Potom už stránka zvuk sama
   // nestlmí — vypnúť ho môže len človek ovládaním videa. `video_sound_on`
   // odíde raz, aj keď si zvuk zapol natívnym ovládaním.
+  //
+  // Zapnutý zvuk platí na celú návštevu (`sessionStorage`, ten istý kľúč ako
+  // video na hlavnej stránke): kto si ho zapol tam, má ho mať aj tu a naopak.
+  // Po načítaní sa video aj tak musí rozbehnúť stlmené — prehliadač zvuk bez
+  // ťuknutia nedovolí — a zvuk sa vráti pri prvom ťuknutí alebo klávese
+  // kdekoľvek na stránke.
   var zvuk = document.getElementById('zvuk');
   var zvukPoslany = false;
+  var chceZvuk = false;
+  try { chceZvuk = window.sessionStorage.getItem('mbZvuk') === '1'; } catch (e) { /* súkromný režim */ }
+  var pamataj = function (zapnuty) {
+    try {
+      if (zapnuty) window.sessionStorage.setItem('mbZvuk', '1');
+      else window.sessionStorage.removeItem('mbZvuk');
+    } catch (e) { /* to isté */ }
+  };
   var zvukStav = function () {
     var hra = !v.muted && v.volume > 0;
     if (zvuk) zvuk.hidden = hra;
     if (hra && !zvukPoslany) { zvukPoslany = true; poslat('video_sound_on', { miesto: 'video' }); }
+    // Stránka sama zvuk nikdy nestlmí, takže každá zmena je rozhodnutie
+    // človeka — aj tá cez natívne ovládanie videa.
+    chceZvuk = hra; pamataj(hra);
   };
   v.addEventListener('volumechange', zvukStav);
+  var zapniZvuk = function (odZaciatku) {
+    chceZvuk = true;
+    pamataj(true);
+    v.muted = false;
+    if (!v.volume) v.volume = 1;
+    if (odZaciatku) { try { v.currentTime = 0; } catch (e) { /* ešte bez metadát */ } }
+    zvukStav();
+  };
   if (zvuk) {
     zvuk.hidden = false;
     zvuk.addEventListener('click', function () {
-      v.muted = false;
-      if (!v.volume) v.volume = 1;
-      try { v.currentTime = 0; } catch (e) { /* ešte bez metadát */ }
+      zapniZvuk(true);
       try {
         var p = v.play();
         if (p && p.catch) p.catch(function () { /* ostane ovládanie videa */ });
       } catch (e) { /* to isté */ }
-      zvukStav();
       v.focus();
     });
   }
+  var obnovZvuk = function (e) {
+    if (!chceZvuk || !v.muted) return;
+    var t = e && e.target;
+    // Video má natívne ovládanie a tlačidlo zvuku vlastnú obsluhu.
+    if (t && t.closest && (t === v || t.closest('#zvuk'))) return;
+    zapniZvuk(false);
+  };
+  document.addEventListener('click', obnovZvuk, true);
+  document.addEventListener('keydown', obnovZvuk, true);
 
   var menejPohybu = false;
   try { menejPohybu = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* starý prehliadač */ }

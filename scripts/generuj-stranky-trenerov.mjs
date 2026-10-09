@@ -1598,28 +1598,45 @@ function skriptTrenera(coach, zdielanyUrl) {
 
 const CSS_ZOZNAM = `.sec-head{padding:26px 0 26px;max-width:44rem}
 .sec-head .lead{margin-top:14px}
-.filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  padding:12px;background:var(--card);border:1px solid var(--line);
-  border-radius:26px;box-shadow:var(--shadow-soft);margin-bottom:28px}
-.fpill{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;
-  background:#fff;border:1px solid var(--line);font-size:.92rem;font-weight:500;color:var(--fg);
-  white-space:nowrap;cursor:pointer;transition:background .25s,border-color .25s,color .25s}
-.fpill:hover{border-color:rgba(30,158,82,.35)}
+/* ── Filter ─────────────────────────────────────────────────
+   Dva riadky výberu (šport, mesto) a riadok nástrojov. Každý riadok má
+   popis, aby bolo jasné, že je to VÝBER: predtým tu stál šedý štítok
+   „Stolný tenis", ktorý vyzeral ako filter, ale nedal sa prepnúť (Martin,
+   9. 10.: „filter nefunguje, stále tam mám len stolný tenis"). Riadok sa
+   ukáže len vtedy, keď je z čoho vyberať — jediná možnosť nie je filter.
+   Čipy sú odkazy na hotové podstránky, takže fungujú aj bez JavaScriptu. */
+.filters{display:grid;gap:14px;padding:18px 18px 16px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius-lg);box-shadow:var(--shadow-soft);margin-bottom:24px}
+.frow{display:grid;gap:8px;min-width:0}
+.flabel{font-size:.74rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+/* Na telefóne sa čipy nelámu do troch riadkov, ale posúvajú do strany. */
+.fchips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  margin:0 -18px;padding:2px 18px}
+.fchips::-webkit-scrollbar{display:none}
+.fpill{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;
+  background:#fff;border:1px solid var(--line);font-size:.94rem;font-weight:500;color:var(--fg);
+  white-space:nowrap;cursor:pointer;flex:0 0 auto;
+  transition:background .25s,border-color .25s,color .25s}
+.fpill:hover{border-color:var(--green)}
 .fpill svg{width:15px;height:15px;flex:0 0 15px}
-.fpill[aria-pressed="true"]{background:var(--green-soft);border-color:transparent;color:var(--green-dark);font-weight:600}
+.fpill .n{font-size:.82rem;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.fpill[aria-current="true"],.fpill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+.fpill[aria-current="true"] .n{color:rgba(255,255,255,.7)}
+.fpill[aria-pressed="true"]{background:var(--green-soft);border-color:transparent;color:var(--green-dark)}
 .switch{width:30px;height:17px;border-radius:999px;background:var(--line);position:relative;flex:0 0 30px;
   transition:background .25s}
 .switch::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;
   background:#fff;transition:transform .25s var(--ease);box-shadow:0 1px 2px rgba(0,0,0,.2)}
 .fpill[aria-pressed="true"] .switch{background:var(--green)}
 .fpill[aria-pressed="true"] .switch::after{transform:translateX(13px)}
-.fpill.static{cursor:default}
-.fpill.static:hover{border-color:var(--line)}
-.filters .spacer{flex:1 1 auto;display:none}
-.sort-wrap{display:inline-flex;align-items:center;gap:8px;padding:6px 8px 6px 16px;border-radius:999px;
-  background:#fff;border:1px solid var(--line);font-size:.92rem;font-weight:500}
-.sort-wrap select{font:inherit;border:0;background:transparent;padding:5px 6px;border-radius:999px;
+.ftools{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.frow+.ftools{padding-top:14px;border-top:1px solid var(--line)}
+.sort-wrap{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 8px 0 16px;border-radius:999px;
+  background:#fff;border:1px solid var(--line);font-size:.94rem;font-weight:500;margin-left:auto}
+.sort-wrap select{font:inherit;border:0;background:transparent;padding:8px 4px;border-radius:999px;
   cursor:pointer;color:var(--green-dark);font-weight:600}
+/* Na telefóne sa prepínač a zoradenie musia zmestiť do jedného riadka. */
+@media (max-width:520px){.sort-wrap .sl{display:none}.sort-wrap{padding-left:10px}}
 .pocet-vysledkov{color:var(--muted);font-size:.94rem;margin-bottom:18px}
 
 .grid-coaches{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:20px;margin-bottom:36px}
@@ -1708,9 +1725,9 @@ const CSS_ZOZNAM = `.sec-head{padding:26px 0 26px;max-width:44rem}
 @media (min-width:900px){
   .sec-head{padding:44px 0 40px}
   .sec-head .lead{margin-top:18px}
-  .filters{padding:14px;border-radius:999px;margin-bottom:36px}
-  .filters .spacer{display:block}
-  .fpill{padding:11px 18px;font-size:.94rem}
+  .filters{padding:20px 24px;margin-bottom:32px;gap:16px}
+  .frow{grid-template-columns:5.5rem 1fr;align-items:center;gap:12px}
+  .fchips{flex-wrap:wrap;overflow:visible;margin:0;padding:0}
   .grid-coaches{grid-template-columns:repeat(3,1fr);gap:24px}
   .kroky{margin-bottom:80px}
   .kroky h2{font-size:1.7rem;margin-bottom:22px}
@@ -1749,7 +1766,9 @@ function kartaTrenera(coach) {
   const url = `/t/${coach.slug}/`;
   const maFotku = !!coach.fotoSubor;
   const tagy = (coach.specializations || []).map((s) => ZAMERANIE[s]).filter(Boolean).slice(0, 3);
-  const ukazSporty = sportyKodmi.length > 1 || sportyKodmi[0] !== 'tennis';
+  // Šport stojí na karte VŽDY: appka má 42 športov a „tréner" bez športu
+  // nič nehovorí (kedysi sa tenis ako jediný šport nevypisoval).
+  const ukazSporty = true;
 
   const metaCasti = [];
   if (pocetH > 0 && rating > 0) metaCasti.push(`★ <b>${hodnotenie(rating)}</b> (${pocetH})`);
@@ -1792,7 +1811,7 @@ function kartaTrenera(coach) {
  * `ostatneMesta` sú všetky mestá aj s počtami; na stránke mesta sa z nich to
  * aktuálne vynechá, aby odkaz neviedol sám na seba.
  */
-function strankaZoznamu({ mesto, sport, coaches, ostatneMesta, sportyVScope, skupinyMesta }) {
+function strankaZoznamu({ mesto, sport, coaches, ostatneMesta, sportyVScope, sportPocty, skupinyMesta }) {
   const jeMesto = !!mesto;
   const n = coaches.length;
   const sportSlug = sport ? SPORT_SLUG[sport] : null;
@@ -1847,18 +1866,68 @@ function strankaZoznamu({ mesto, sport, coaches, ostatneMesta, sportyVScope, sku
     .map((m) => `<a class="city-pill" href="${predpona}/${m.slug}/">${esc(m.name)} <span>${m.count}</span></a>`)
     .join('\n        ');
 
-  // Chipy športov vo filtri — len tie, čo majú v tomto rozsahu (meste alebo
-  // celkovo) aspoň jedného trénera. Keď je v rozsahu len jeden šport, nemá
-  // zmysel z neho robiť filter — zostane statický štítok ako predtým.
-  const sportChipy = sportyVScope.length <= 1
-    ? `<span class="fpill static">${esc(SPORT_NAZOV[sportyVScope[0] || 'tennis'])}</span>`
-    : [
-      `<a class="fpill" href="${jeMesto ? `/treneri/${mesto.slug}/` : '/treneri/'}" aria-pressed="${sport ? 'false' : 'true'}">Všetky športy</a>`,
-      ...sportyVScope.map((k) => {
-        const href = jeMesto ? `/treneri/${SPORT_SLUG[k]}/${mesto.slug}/` : `/treneri/${SPORT_SLUG[k]}/`;
-        return `<a class="fpill" href="${href}" aria-pressed="${sport === k ? 'true' : 'false'}">${ikonaPreSport(k)}${esc(SPORT_NAZOV[k])}</a>`;
-      }),
-    ].join('\n    ');
+  // ── Filter ──────────────────────────────────────────────────────────────
+  // Čipy športov: len tie, čo majú v tomto rozsahu (meste alebo celkovo)
+  // aspoň jedného trénera, každý s počtom. Riadok sa kreslí, keď je z čoho
+  // vyberať (aspoň dva športy), alebo keď už na stránke športu stojíme —
+  // vtedy musí byť cesta späť na „Všetky". Jediný šport bez výberu NIE JE
+  // filter a nekreslí sa: šport je napísaný na karte trénera.
+  const pocetSportu = (k) => (sportPocty && sportPocty.get(k)) || 0;
+  const vsetciVRozsahu = (sportPocty && sportPocty.get('*')) || n;
+  const cip = (href, text, pocetN, aktivny, ikona = '') =>
+    `<a class="fpill" href="${href}"${aktivny ? ' aria-current="true"' : ''}>${ikona}${esc(text)}${pocetN ? ` <span class="n">${pocetN}</span>` : ''}</a>`;
+  const riadokSportov = (sportyVScope.length >= 2 || sport)
+    ? `<div class="frow">
+      <span class="flabel" id="f-sport">Šport</span>
+      <div class="fchips" role="group" aria-labelledby="f-sport">
+        ${[
+      cip(jeMesto ? `/treneri/${mesto.slug}/` : '/treneri/', 'Všetky', vsetciVRozsahu, !sport),
+      ...sportyVScope.map((k) => cip(
+        jeMesto ? `/treneri/${SPORT_SLUG[k]}/${mesto.slug}/` : `/treneri/${SPORT_SLUG[k]}/`,
+        SPORT_NAZOV[k], pocetSportu(k), sport === k, ikonaPreSport(k))),
+    ].join('\n        ')}
+      </div>
+    </div>`
+    : '';
+  // Čipy miest: mestá, kde v tomto rozsahu (šport alebo všetko) niekto je.
+  // Rovnaké pravidlo — aspoň dve mestá, alebo už v meste stojíme.
+  const vsetciVoVsetkychMestach = ostatneMesta.reduce((acc, m) => acc + m.count, 0);
+  const riadokMiest = (ostatneMesta.length >= 2 || jeMesto)
+    ? `<div class="frow">
+      <span class="flabel" id="f-mesto">Mesto</span>
+      <div class="fchips" role="group" aria-labelledby="f-mesto">
+        ${[
+      cip(`${predpona}/`, 'Všetky', vsetciVoVsetkychMestach, !jeMesto),
+      ...ostatneMesta.map((m) => cip(`${predpona}/${m.slug}/`, m.name, m.count, jeMesto && m.slug === mesto.slug)),
+    ].join('\n        ')}
+      </div>
+    </div>`
+    : '';
+  // Nástroje: prepínač „Len overení" má zmysel, len keď niečo skryje a niečo
+  // nechá; zoradenie až od dvoch kariet.
+  const overenych = coaches.filter((c) => c.verified).length;
+  const maPrepinac = overenych > 0 && overenych < n;
+  const maZoradenie = n >= 2;
+  const riadokNastrojov = (maPrepinac || maZoradenie)
+    ? `<div class="ftools">
+      ${maPrepinac ? '<button class="fpill" type="button" id="len-overeni" aria-pressed="false"><span class="switch" aria-hidden="true"></span>Len overení</button>' : ''}
+      ${maZoradenie ? `<label class="sort-wrap"><span class="sl">Zoradiť</span>
+        <select id="zoradenie" aria-label="Zoradiť">
+          <option value="odporucane">Odporúčané</option>
+          <option value="hodnotenie">Podľa hodnotenia</option>
+          <option value="cena">Od najlacnejších</option>
+          <option value="meno">Podľa mena</option>
+        </select>
+      </label>` : ''}
+    </div>`
+    : '';
+  const filter = (riadokSportov || riadokMiest || riadokNastrojov)
+    ? `<div class="filters">
+    ${[riadokSportov, riadokMiest, riadokNastrojov].filter(Boolean).join('\n    ')}
+  </div>`
+    : '';
+  // Čo je práve vybrané, slovom — pod filtrom pri počte výsledkov.
+  const vyber = [sportNazov, jeMesto ? mesto.name : null].filter(Boolean).join(' · ');
 
   const crumbCasti = ['<a href="/treneri/">Tréneri</a>'];
   if (sport) {
@@ -1910,24 +1979,9 @@ ${hlavicka('treneri')}
     <p class="lead">${esc(uvod)}</p>
   </header>
 
-  ${n > 0 ? `<div class="filters">
-    ${jeMesto
-    ? `<a class="fpill" href="${predpona}/">${IKONA.pin}${esc(mesto.name)}</a>`
-    : `<span class="fpill static">${IKONA.pin}Všetky mestá</span>`}
-    ${sportChipy}
-    <button class="fpill" type="button" id="len-overeni" aria-pressed="false"><span class="switch" aria-hidden="true"></span>Len overení</button>
-    <span class="spacer"></span>
-    <label class="sort-wrap">Zoradiť
-      <select id="zoradenie">
-        <option value="odporucane">Odporúčané</option>
-        <option value="hodnotenie">Podľa hodnotenia</option>
-        <option value="cena">Od najlacnejších</option>
-        <option value="meno">Podľa mena</option>
-      </select>
-    </label>
-  </div>
+  ${n > 0 ? `${filter}
 
-  <p class="pocet-vysledkov" id="pocet-vysledkov">${n} ${pocet(n, 'tréner', 'tréneri', 'trénerov')}</p>
+  <p class="pocet-vysledkov"><span id="pocet-vysledkov">${n} ${pocet(n, 'tréner', 'tréneri', 'trénerov')}</span>${vyber ? ` · ${esc(vyber)}` : ''}</p>
 
   <div class="grid-coaches" id="mriezka">
       ${coaches.map(kartaTrenera).join('\n      ')}
@@ -1936,13 +1990,13 @@ ${hlavicka('treneri')}
     : ''}
 
   ${n > 0 ? akoToFunguje([
-    ['Vyber si trénera', 'Filtruj podľa športu a zoraď podľa ceny alebo hodnotenia. Cenník vidíš hneď tu.'],
+    ['Vyber si trénera', 'Pozri si šport, mesto, cenník aj hodnotenia. Všetko vidíš hneď tu, bez appky.'],
     ['Pošli žiadosť o termín', 'V appke vyberieš deň, čas a počet hráčov. Trvá to minútu.'],
     ['Tréner potvrdí', 'Dozvieš sa to hneď. Platíš kartou, QR kódom alebo v hotovosti.'],
   ]) : ''}
 
-  ${mestaPills ? `<section class="cities-block">
-    <h2>Ďalšie mestá</h2>
+  ${mestaPills && !riadokMiest ? `<section class="cities-block">
+    <h2>Mestá</h2>
     <div class="cities-pills">
         ${mestaPills}
     </div>
@@ -1958,7 +2012,7 @@ ${hlavicka('treneri')}
     <div class="cta-dark-text">
       <h2>Rezervuj si tréning.</h2>
       <p class="lead">Stiahni si Matchball, vyber termín a zaplať až po tom, čo ho tréner potvrdí.</p>
-      <p class="cta-dark-note">Trénuješ sám? Založ si profil v appke — verejná stránka ti vznikne sama.</p>
+      <p class="cta-dark-note">Trénuješ? Založ si v appke profil a pridaj fotku alebo pár viet o sebe. Po schválení ti verejná stránka vznikne sama.</p>
     </div>
     <div class="cta-dark-actions">
       <a class="btn btn-lime" href="${APP_STORE}">${IKONA.apple}Stiahnuť pre iPhone</a>
@@ -2016,24 +2070,25 @@ const SKRIPT_ZOZNAMU = `(function(){
   }
 
   function prekresli(){
-    var lenOvereni = prepinac.getAttribute('aria-pressed') === 'true';
+    var lenOvereni = !!prepinac && prepinac.getAttribute('aria-pressed') === 'true';
     var vidno = 0;
     karty.forEach(function(k){
       var ok = !lenOvereni || k.dataset.overeny === '1';
       k.hidden = !ok;
       if (ok) vidno++;
     });
-    var zoradene = karty.slice().sort(poradia[vyber.value] || poradia.odporucane);
+    var zoradene = karty.slice().sort((vyber && poradia[vyber.value]) || poradia.odporucane);
     zoradene.forEach(function(k){ mriezka.appendChild(k); });
     pocetEl.textContent = sklonuj(vidno);
     ziadneEl.hidden = vidno > 0;
   }
 
-  prepinac.addEventListener('click', function(){
+  // Prepínač aj zoradenie sú na stránke len vtedy, keď majú čo robiť.
+  if (prepinac) prepinac.addEventListener('click', function(){
     prepinac.setAttribute('aria-pressed', prepinac.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
     prekresli();
   });
-  vyber.addEventListener('change', prekresli);
+  if (vyber) vyber.addEventListener('change', prekresli);
 })();`;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2603,6 +2658,14 @@ async function main() {
     for (const s of coach.sports) sportyPoMeste.get(coach.mestoSlug).add(s);
   }
   const sportyGlobalne = SPORT_ORDER.filter((s) => platni.some((c) => c.sports.includes(s)));
+  // Počty pri čipoch športov: koľko trénerov má šport v danom rozsahu
+  // (všetci, alebo jedno mesto). Kľúč '*' je počet všetkých v rozsahu.
+  const pocetPodlaSportu = (zoznam) => {
+    const m = new Map([['*', zoznam.length]]);
+    for (const c of zoznam) for (const sp of c.sports) m.set(sp, (m.get(sp) || 0) + 1);
+    return m;
+  };
+  const poctyGlobalne = pocetPodlaSportu(platni);
 
   // Tréneri a mestá pre každý šport — `treneri/<sport>/` a `treneri/<sport>/<mesto>/`.
   const sportMestaMap = new Map(); // sport -> Map(citySlug -> {slug, name, coaches})
@@ -2695,7 +2758,7 @@ async function main() {
   if (zapis(path.join('treneri', 'index.html'),
     strankaZoznamu({
       mesto: null, sport: null, coaches: platni, ostatneMesta: vsetkyMesta,
-      sportyVScope: sportyGlobalne, skupinyMesta: mestaSoSkupinami,
+      sportyVScope: sportyGlobalne, sportPocty: poctyGlobalne, skupinyMesta: mestaSoSkupinami,
     }))) zmenene++;
 
   for (const m of mesta) {
@@ -2703,7 +2766,7 @@ async function main() {
     if (zapis(path.join('treneri', m.slug, 'index.html'),
       strankaZoznamu({
         mesto: m, sport: null, coaches: m.coaches, ostatneMesta: vsetkyMesta,
-        sportyVScope: sportyMesta, skupinyMesta: mestaSoSkupinami,
+        sportyVScope: sportyMesta, sportPocty: pocetPodlaSportu(m.coaches), skupinyMesta: mestaSoSkupinami,
       }))) zmenene++;
   }
 
@@ -2722,7 +2785,7 @@ async function main() {
       strankaZoznamu({
         mesto: null, sport, coaches: sportCoaches,
         ostatneMesta: sportMesta.map(({ slug, name, count }) => ({ slug, name, count })),
-        sportyVScope: sportyGlobalne, skupinyMesta: mestaSoSkupinami,
+        sportyVScope: sportyGlobalne, sportPocty: poctyGlobalne, skupinyMesta: mestaSoSkupinami,
       }))) zmenene++;
 
     for (const m of sportMesta) {
@@ -2731,7 +2794,9 @@ async function main() {
         strankaZoznamu({
           mesto: m, sport, coaches: m.coaches,
           ostatneMesta: sportMesta.map(({ slug, name, count }) => ({ slug, name, count })),
-          sportyVScope: sportyVMesteScope, skupinyMesta: mestaSoSkupinami,
+          sportyVScope: sportyVMesteScope,
+          sportPocty: pocetPodlaSportu(mestaMap.get(m.slug)?.coaches ?? m.coaches),
+          skupinyMesta: mestaSoSkupinami,
         }))) zmenene++;
     }
   }
