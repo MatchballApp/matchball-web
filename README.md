@@ -25,6 +25,57 @@ Dôvod: ten istý text musí byť v aplikácii aj na webe. Keby sa udržiavali
 zvlášť, po prvej zmene by sa rozišli — a rozpor medzi tým, čo sľubujeme
 na webe a čo v aplikácii, je pri kontrole to najhoršie, čo môže nastať.
 
+## Systém vzhľadu (revízia 9. 10. 2026)
+
+Jedna myšlienka: **spájanie**. Nesie ju prechod z loga (modrá `#1378ED` →
+tyrkysová → zelená), v CSS ako `--grad` (na svetlom) a `--grad-on-dark` (na
+tmavom). Je to **akcent, nie farba akcie**: druhá veta sloganu, čiarka pred
+nadpisom sekcie, čísla pilierov, „ball" v mene značky a žiara tmavých panelov.
+Akcie ostávajú zelené ako v appke (`#15803D`, na tmavom limetka `#51E041`).
+
+- **Hlavná stránka**: úvod (slogan + video) → tri piliere (spoluhráč, partia,
+  tréner; mestá dopĺňa generátor) → odmeny → 42 športov → pre trénerov →
+  zdravie a služby → férové podmienky (štyri fakty + platby) → výzva.
+  Tmavé plochy sú zaoblené panely (`.panel.on-dark`), úvod je zaoblený dole.
+- **Podstránky z generátora** majú tie isté tokeny v `CSS_ZAKLAD`, tú istú
+  hlavičku (aj s menu na telefóne) a pätičku. Pri zmene tokenov na hlavnej
+  stránke ich treba prepísať aj tam.
+- **Malé stránky** (`stiahnut/`, `video/`, `i/`, `g/`) majú na konci `<style>`
+  rovnaký blok „Spoločná koža malých stránok" — pri zmene ho prepíš vo
+  všetkých štyroch. Logiku týchto stránok (rozpoznanie zariadenia, kódy
+  pozvánok, presmerovanie) revízia nemenila.
+- **Právne stránky** (`legal/`) generuje skript v repe appky a tento systém
+  zatiaľ nemajú („ball" v prechode, menu na telefóne) — treba ich doplniť tam.
+
+### Video
+
+`video/matchball-hero-9x14.mp4` (720×1120, úvod) a `video/matchball-9x14.mp4`
+(1080×1680, `/video/`) sú orezané zo zvislého 9:16: preč je horných 240 px
+z 1920, prázdny pás pre Instagram. Spodok sa orezať nedá — telefóny vo videu
+siahajú po okraj. Staré 9:16 súbory (`matchball.mp4`, `matchball-hero.mp4`,
+`poster.jpg`) ostávajú pre staré odkazy. Výroba z hotového mp4:
+
+```sh
+ffmpeg -i matchball-1080.mp4 -vf "crop=1080:1680:0:240,scale=720:1120" \
+  -c:v libx264 -b:v 610k -c:a aac -b:a 96k -movflags +faststart matchball-hero-9x14.mp4
+```
+
+Zapnutý zvuk si stránka pamätá v `sessionStorage` (`mbZvuk`) do zavretia karty
+— platí na hlavnej stránke aj na `/video/`. Nie je to meranie a nikam sa
+neposiela.
+
+### Filter na zoznamoch
+
+Tréneri: riadky **Šport** a **Mesto** sú odkazy na hotové podstránky
+(`/treneri/<šport>/`, `/treneri/<mesto>/`, `/treneri/<šport>/<mesto>/`) a
+ukážu sa, len keď je z čoho vyberať; šport je napísaný na každej karte.
+Ponúkajú sa len športy a mestá, kde je aspoň jeden zverejnený tréner.
+Partie: filter športu beží v prehliadači (partia podstránku športu nemá).
+
+Kto je „zverejnený tréner", určuje RPC `public_coach_pages`: schválený
+(`approved_at`), aktívny, so zapnutou verejnou stránkou, s cenou a **s fotkou
+alebo textom o sebe**. Schválený tréner bez fotky aj bez textu na webe nie je.
+
 ## Stránky trénerov a skupín (`t/`, `treneri/`, `skupiny/`)
 
 Verejná stránka trénera na `matchballapp.com/t/<slug>`, adresár na

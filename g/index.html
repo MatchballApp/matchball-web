@@ -89,10 +89,39 @@ footer a{color:var(--on-dark-muted)}
 footer a:hover{color:#fff}
 footer :focus-visible{outline-color:var(--lime)}
 [hidden]{display:none!important}
+
+/* ── Spoločná koža malých stránok (revízia 9. 10. 2026) ──────
+   `/stiahnut/`, `/video/`, `/i/` a `/g/` sú jedna obrazovka s jednou akciou
+   a vyzerajú rovnako: značka s „ball" v prechode z loga, jemné modro-zelené
+   vlny v rohoch (ako na plagáte appky) a tie isté tlačidlá. Tento blok je
+   vo všetkých štyroch súboroch ROVNAKÝ — pri zmene ho prepíš všade. */
+:root{--grad:linear-gradient(92deg,#1378ED 0%,#0FA9C4 52%,#1FAE55 100%)}
+body{background:
+  radial-gradient(46rem 26rem at 108% -8%,rgba(19,120,237,.11),transparent 62%),
+  radial-gradient(40rem 24rem at -10% 108%,rgba(31,174,85,.13),transparent 62%),
+  var(--paper)}
+.znacka{min-height:44px;padding-top:26px;font-size:1.12rem}
+.znacka b{font-weight:inherit;color:var(--green)}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .znacka b{background:var(--grad);-webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent}
+}
+h1{text-wrap:balance}
+p{text-wrap:pretty}
+.btn{min-height:54px;padding-top:0;padding-bottom:0}
+.btn:active{transform:scale(.98)}
+footer a{display:inline-block;padding:11px 4px}
+@media (min-width:700px){
+  main{padding-top:38px}
+  h1{font-size:2.5rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.001ms!important}
+}
 </style>
 <a class="znacka" href="/">
   <img src="/logo-m.webp" alt="" width="192" height="192">
-  <span>Matchball</span>
+  <span>Match<b>ball</b></span>
 </a>
 <main>
   <div class="mark" id="mark">🏅</div>

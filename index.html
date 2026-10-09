@@ -35,13 +35,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ─────────────────────────────────────────────────────────────
-   Matchball — verejná stránka (17. 9. 2026)
+   Matchball — verejná stránka (revízia 9. 10. 2026)
 
-   Identita je z appky, nie zo šablóny: zelená z loga (src/theme/colors.ts,
-   `primary` #1E9E52 / `primaryLight` #51E041), tmavozelená namiesto čiernej
-   a modrá zo srdca ako drobný akcent. Stránka je SVETLÁ s tmavozelenými
-   pásmi (hero, mystery boxy, tréneri, výzva, pätička) — jedna identita, žiadne
-   dvojité kreslenie pre `prefers-color-scheme`.
+   Jedna myšlienka: SPÁJANIE. Nesie ju prechod z loga (modrá → tyrkysová →
+   zelená) — je to akcent, nie farba akcie: druhá veta sloganu, čiarka pred
+   nadpisom sekcie, čísla troch pilierov, „ball" v mene a žiara tmavých
+   panelov. Akcie ostávajú zelené ako v appke (`--green-strong`, na tmavom
+   limetka). Stránka je SVETLÁ; tmavozelené sú úvod, zaoblené panely
+   (odmeny, tréneri, výzva) a pätička — jedna identita, žiadne dvojité
+   kreslenie pre `prefers-color-scheme`. Tie isté tokeny má generátor
+   podstránok (`scripts/generuj-stranky-trenerov.mjs`, `CSS_ZAKLAD`).
    ───────────────────────────────────────────────────────────── */
 :root{
   --ink:#071A13;
@@ -56,6 +59,7 @@
   --lime:#51E041;
   --lime-soft:#B7F2C9;
   --blue:#1378ED;
+  --blue-soft:#E8F1FE;
   --fg:#0F1F17;
   --muted:#47594F;
   --muted-soft:#5C6F64;
@@ -64,13 +68,16 @@
   --line:#DFE8E2;
   --line-dark:rgba(255,255,255,.14);
   --focus:#15803D;
-  --r-xl:30px;
+  --grad:linear-gradient(92deg,#1378ED 0%,#0FA9C4 52%,#1FAE55 100%);
+  --grad-on-dark:linear-gradient(92deg,#5CB2FF 0%,#35D6C4 48%,#7CEB6A 100%);
+  --r-xl:clamp(28px,3vw,40px);
   --r-lg:24px;
   --r-md:16px;
   --shadow-soft:0 1px 2px rgba(7,26,19,.05),0 14px 34px -16px rgba(7,26,19,.18);
   --shadow-lift:0 2px 6px rgba(7,26,19,.07),0 28px 56px -20px rgba(7,26,19,.28);
   --ease:cubic-bezier(.22,1,.36,1);
   --max:1200px;
+  --gutter:clamp(8px,1.2vw,16px);   /* okraj okolo tmavých panelov */
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -88,75 +95,90 @@ button{font:inherit;color:inherit}
 
 /* ── Typografia ─────────────────────────────────────────────
    Záporné `letter-spacing` stiahne aj MEDZERU MEDZI SLOVAMI — pri veľkom
-   nadpise sa slová zlepia. `word-spacing` to vracia späť. */
-h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.028em;word-spacing:.05em;line-height:1.06}
+   nadpise sa slová zlepia. `word-spacing` to vracia späť. `balance` rozloží
+   nadpis na rovnako dlhé riadky, `pretty` v odseku nenechá osamotené slovo. */
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.028em;word-spacing:.05em;line-height:1.06;text-wrap:balance}
 h1{font-size:clamp(2.3rem,5.2vw,3.9rem);font-weight:800;line-height:1.03}
-.h1-soft{color:var(--lime-soft)}
-/* Druhá veta sloganu v prechode značky (modrá → tyrkysová → zelená z loga),
-   zosvetlenom tak, aby na tmavom páse držal kontrast. Kto `background-clip`
-   nevie, dostane plnú svetlú zelenú. */
-.h1-grad{color:#7BE495}
-@supports ((-webkit-background-clip:text) or (background-clip:text)){
-  .h1-grad{
-    background:linear-gradient(92deg,#5CB2FF 0%,#35D6C4 48%,#7CEB6A 100%);
-    -webkit-background-clip:text;background-clip:text;
-    -webkit-text-fill-color:transparent;color:transparent;
-    /* Orezanie na text odreže spodok „j" a „p" — riadok dostane miesto. */
-    padding-bottom:.12em;
-  }
-}
-h2{font-size:clamp(1.85rem,4vw,3rem)}
+h2{font-size:clamp(1.85rem,3.8vw,2.85rem)}
 h3{font-size:clamp(1.1rem,1.6vw,1.3rem);line-height:1.28;letter-spacing:-.018em}
-p{margin:0}
-.lead{font-size:clamp(1.05rem,1.5vw,1.2rem);color:var(--muted);line-height:1.6}
+p{margin:0;text-wrap:pretty}
+.lead{font-size:clamp(1.05rem,1.5vw,1.2rem);color:var(--muted);line-height:1.6;max-width:38rem}
+
+/* Text v prechode značky. Kto `background-clip` nevie, dostane plnú farbu. */
+.grad{color:var(--green-strong)}
+.on-dark .grad,.h1-grad{color:#7BE495}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .grad,.h1-grad{
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+  }
+  .on-dark .grad,.h1-grad{background-image:var(--grad-on-dark)}
+  /* Orezanie na text odreže spodok „j" a „p" — riadok dostane miesto. */
+  .h1-grad{padding-bottom:.12em}
+}
 
 .wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
-.section{padding:clamp(64px,8.5vw,120px) 0}
-.section-head{max-width:46rem}
+.section{padding:clamp(64px,8vw,112px) 0}
+.section.tight{padding-top:0}
+.section-head{max-width:44rem}
 .section-head .lead{margin-top:16px}
 .section-head+*{margin-top:clamp(32px,4.5vw,56px)}
 .eyebrow{
-  display:inline-flex;align-items:center;gap:9px;
+  display:inline-flex;align-items:center;gap:10px;
   font-size:.78rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
   color:var(--green-strong);margin-bottom:16px;
 }
-.eyebrow::before{content:"";width:22px;height:2px;border-radius:2px;background:currentColor;opacity:.55}
-.band .eyebrow{color:var(--lime-soft)}
-.inline-link{color:var(--green-strong);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px}
+.eyebrow::before{content:"";width:26px;height:3px;border-radius:3px;background:var(--grad)}
+.on-dark .eyebrow{color:var(--lime-soft)}
+.on-dark .eyebrow::before{background:var(--grad-on-dark)}
+.inline-link{display:inline-block;padding:8px 0;margin:-8px 0;color:var(--green-strong);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px}
 .inline-link:hover{color:var(--green-dark)}
 
-/* ── Tmavé pásy ─────────────────────────────────────────────
-   Jeden odtieň pre všetky: hero, mystery boxy, tréneri, výzva aj pätička sú
-   ten istý materiál, len iná dĺžka. */
-.band{background:var(--ink);color:var(--on-dark);--focus:var(--lime)}
-.band h1,.band h2,.band h3{color:#fff}
-.band .lead{color:var(--on-dark-muted)}
+/* ── Tmavé plochy ───────────────────────────────────────────
+   Jeden materiál: úvod (cez celú šírku, zaoblený dole), panely vnútri
+   stránky (zaoblené, s okrajom) a pätička. Žiara značky je v rohoch. */
+.on-dark{background:var(--ink);color:var(--on-dark);--focus:var(--lime)}
+.on-dark h1,.on-dark h2,.on-dark h3{color:#fff}
+.on-dark .lead{color:var(--on-dark-muted)}
+.panel{position:relative;overflow:hidden;margin:0 var(--gutter);border-radius:var(--r-xl);
+  padding:clamp(56px,7vw,96px) 0}
+.panel::before,.panel::after{content:"";position:absolute;aspect-ratio:1;border-radius:50%;pointer-events:none}
+.panel::before{width:min(640px,110%);right:-14%;top:-36%;
+  background:radial-gradient(circle,rgba(53,214,196,.2),rgba(81,224,65,.09) 40%,transparent 66%)}
+.panel::after{width:min(520px,100%);left:-16%;bottom:-46%;
+  background:radial-gradient(circle,rgba(19,120,237,.26),transparent 66%)}
+.panel>.wrap{position:relative;z-index:1}
 
 /* ── Tlačidlá ───────────────────────────────────────────────
    Jedna rodina, tri váhy. Text sa vždy zmestí: `white-space:nowrap`
-   a krátke popisy, žiadne tri bodky. */
+   a krátke popisy, žiadne tri bodky. Najmenšie má stále 44 px na výšku. */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:10px;
-  padding:15px 26px;border-radius:999px;border:0;cursor:pointer;
-  font-weight:600;font-size:1rem;text-decoration:none;white-space:nowrap;
+  min-height:52px;padding:0 26px;border-radius:999px;border:0;cursor:pointer;
+  font-weight:600;font-size:1rem;line-height:1.2;text-decoration:none;white-space:nowrap;
   transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .2s;
 }
+.btn:active{transform:translateY(0) scale(.98)}
 .btn-green{background:var(--green-strong);color:#fff;box-shadow:0 10px 24px -12px rgba(21,128,61,.9)}
 .btn-green:hover{transform:translateY(-2px);background:var(--green-dark)}
 .btn-lime{background:var(--lime);color:#06210F;box-shadow:0 12px 28px -14px rgba(81,224,65,.9)}
 .btn-lime:hover{transform:translateY(-2px);background:#6BEA5C}
-.btn-dark{background:var(--ink);color:#fff}
-.btn-dark:hover{transform:translateY(-2px);background:var(--ink-3)}
-.btn-light{background:#fff;color:var(--fg);box-shadow:var(--shadow-soft)}
-.btn-light:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
 .btn-ghost{background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.24)}
 .btn-ghost:hover{transform:translateY(-2px);background:rgba(255,255,255,.14)}
-.btn-sm{padding:11px 19px;font-size:.93rem}
+.btn-sm{min-height:44px;padding:0 19px;font-size:.93rem}
 .btn-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+/* Textový odkaz so šípkou — druhá, tichšia akcia vedľa tlačidla. */
+.go{
+  display:inline-flex;align-items:center;gap:8px;min-height:44px;
+  font-weight:600;color:var(--green-strong);font-size:.98rem;text-decoration:none;
+}
+.go:hover{color:var(--green-dark)}
+.go svg{transition:transform .3s var(--ease)}
+.go:hover svg{transform:translateX(4px)}
 
 /* ── Plávajúca hlavička ─────────────────────────────────────
    Tmavý sklenený panel nad obsahom. Tmavý je zámerne v oboch smeroch:
-   plávajúca pilulka tak vyzerá rovnako nad tmavým hero aj nad svetlým
+   plávajúca pilulka tak vyzerá rovnako nad tmavým úvodom aj nad svetlým
    telom stránky a nemusí sa pri rolovaní prezliekať. */
 .nav-shell{position:fixed;top:14px;left:0;right:0;z-index:80;padding:0 16px;pointer-events:none}
 .nav{
@@ -172,24 +194,31 @@ p{margin:0}
   transition:box-shadow .3s var(--ease),background .3s;
 }
 .nav.scrolled{background:rgba(7,26,19,.92);box-shadow:0 14px 36px -16px rgba(7,26,19,.85)}
-.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;letter-spacing:-.02em;font-size:1.06rem}
+.brand{display:inline-flex;align-items:center;gap:10px;min-height:44px;text-decoration:none;font-weight:700;letter-spacing:-.02em;font-size:1.06rem;color:#fff}
 .brand .mark{width:30px;height:30px;flex:none}
+/* „ball" v prechode značky, ako v logu. */
+.brand b{font-weight:inherit;color:#7BE495}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .brand b{background:var(--grad-on-dark);-webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent}
+}
 .nav-links{display:flex;gap:4px;margin-left:auto}
 .nav-links a{
+  display:inline-flex;align-items:center;min-height:44px;
   text-decoration:none;font-size:.94rem;font-weight:500;color:rgba(255,255,255,.82);
-  padding:9px 13px;border-radius:999px;transition:background .2s,color .2s;
+  padding:0 14px;border-radius:999px;transition:background .2s,color .2s;
 }
 .nav-links a:hover{background:rgba(255,255,255,.1);color:#fff}
 .nav-burger{
-  display:none;width:42px;height:42px;border-radius:999px;border:1px solid rgba(255,255,255,.2);
-  background:rgba(255,255,255,.06);cursor:pointer;position:relative;
+  display:none;width:44px;height:44px;border-radius:999px;border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.06);cursor:pointer;position:relative;padding:0;
 }
 .nav-burger span,.nav-burger::before,.nav-burger::after{
-  content:"";position:absolute;left:11px;width:20px;height:2px;border-radius:2px;background:#fff;transition:transform .3s var(--ease),opacity .2s;
+  content:"";position:absolute;left:12px;width:20px;height:2px;border-radius:2px;background:#fff;transition:transform .3s var(--ease),opacity .2s;
 }
-.nav-burger span{top:20px}
-.nav-burger::before{top:14px}
-.nav-burger::after{top:26px}
+.nav-burger span{top:21px}
+.nav-burger::before{top:15px}
+.nav-burger::after{top:27px}
 .nav-burger[aria-expanded="true"] span{opacity:0}
 .nav-burger[aria-expanded="true"]::before{transform:translateY(6px) rotate(45deg)}
 .nav-burger[aria-expanded="true"]::after{transform:translateY(-6px) rotate(-45deg)}
@@ -202,22 +231,23 @@ p{margin:0}
   --focus:var(--lime);
 }
 .mobile-menu.open{opacity:1;visibility:visible;transform:none}
-.mobile-menu a{text-decoration:none;font-size:1.5rem;font-weight:600;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.1)}
-.mobile-menu .btn{margin-top:26px;border-bottom:0;font-size:1rem}
+.mobile-menu a:not(.btn){text-decoration:none;font-size:1.5rem;font-weight:600;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.mobile-menu .btn{margin-top:26px}
 
 @media (max-width:900px){
   .nav-links{display:none}
-  .nav-cta{display:none}
-  .nav-burger{display:block;margin-left:auto}
+  .nav-cta{margin-left:auto}
+  .nav-burger{display:block}
 }
 
-/* ── Hero ───────────────────────────────────────────────────
+/* ── Úvod ───────────────────────────────────────────────────
    Slogan značky, jedna veta pod ním, dve tlačidlá (Martin, 9. 10.: v úvode
    nič iné). Vpravo beží video — zaoblený obdĺžnik BEZ bezelu telefónu:
    telefóny sú už vo videu samotnom a rám v ráme by sa bil. Video je orezané
    z 9:16 na 9:14 (preč je prázdny horný pás pre Reels), takže je na webe
    nižšie a pri tej istej výške širšie. */
-.hero{position:relative;overflow:hidden;padding:clamp(112px,13vw,152px) 0 clamp(56px,7vw,88px)}
+.hero{position:relative;overflow:hidden;padding:clamp(112px,13vw,152px) 0 clamp(56px,7vw,88px);
+  border-radius:0 0 var(--r-xl) var(--r-xl)}
 .hero::before{
   content:"";position:absolute;width:min(820px,130%);aspect-ratio:1;right:-16%;top:-26%;
   background:radial-gradient(circle,rgba(53,214,196,.2),rgba(81,224,65,.1) 38%,rgba(81,224,65,0) 64%);pointer-events:none;
@@ -227,7 +257,7 @@ p{margin:0}
   background:radial-gradient(circle,rgba(19,120,237,.26),rgba(19,120,237,0) 64%);pointer-events:none;
 }
 .hero-grid{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(24px,4vw,56px);align-items:center}
-.hero h1{font-size:clamp(2.2rem,5.6vw,4.3rem);line-height:1.02;text-wrap:balance}
+.hero h1{font-size:clamp(2.2rem,5.6vw,4.3rem);line-height:1.02}
 .hero h1 span{display:block}
 .hero-sub{margin-top:clamp(16px,2vw,24px);font-size:clamp(1.14rem,1.9vw,1.5rem);font-weight:500;color:var(--on-dark);opacity:.86;line-height:1.4;letter-spacing:-.01em}
 .hero .btn-row{margin-top:clamp(26px,3vw,36px)}
@@ -240,9 +270,9 @@ p{margin:0}
 .hero-clip::after{content:"";position:absolute;inset:0;border-radius:32px;border:1px solid rgba(255,255,255,.16);pointer-events:none}
 .hero-clip video{display:block;width:100%;height:auto;aspect-ratio:9/14;object-fit:cover;background:#0B1511}
 .hero-clip.js video{cursor:pointer}
-/* Dve tlačidlá na videu: zvuk (hlavné, pri prvom zobrazení s textom) vľavo
+/* Dve tlačidlá na videu: zvuk (hlavné, kým je stlmené, s textom) vľavo
    dole, pauza (menšie) vpravo dole. Sklo nad videom, nie plná farba —
-   hlavná akcia hero ostáva tlačidlo do obchodu. */
+   hlavná akcia úvodu ostáva tlačidlo do obchodu. */
 .hero-clip-btn{
   position:absolute;bottom:12px;z-index:1;height:44px;min-width:44px;border:0;padding:0;border-radius:999px;cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;gap:8px;color:#fff;background:rgba(7,26,19,.58);
@@ -268,12 +298,6 @@ p{margin:0}
 .hero-clip-toggle.paused .i-play{display:block}
 .hero-clip-toggle.paused .i-pause{display:none}
 
-/* Štyri fakty POD hero, nie v ňom — úvod patrí sloganu (Martin, 9. 10.). */
-.stats-strip{background:var(--card);border-bottom:1px solid var(--line)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:clamp(22px,3vw,34px) 0}
-.stat b{display:block;font-size:clamp(1.35rem,2.2vw,1.8rem);font-weight:700;color:var(--green-strong);letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
-.stat span{display:block;margin-top:4px;font-size:.93rem;color:var(--muted)}
-
 /* ── Rám telefónu ───────────────────────────────────────────
    Tmavý bezel, zaoblenie, jeden tieň a jemný svetelný obrys. */
 .phone{
@@ -283,61 +307,65 @@ p{margin:0}
 }
 .phone::after{content:"";position:absolute;inset:0;border-radius:40px;border:1px solid rgba(255,255,255,.16);pointer-events:none}
 .phone img{width:100%;border-radius:32px;background:#0B1511}
-.band .phone{box-shadow:0 2px 6px rgba(0,0,0,.4),0 34px 70px -26px rgba(0,0,0,.8)}
+.on-dark .phone{box-shadow:0 2px 6px rgba(0,0,0,.4),0 34px 70px -26px rgba(0,0,0,.8)}
 
-/* ── Bento mriežka ──────────────────────────────────────────
-   Dlaždice so snímkou sú vysoké a zaberajú dva riadky; textové sa k nim
-   ukladajú. `dense` zaplní diery, keď sa mriežka na užšom okne preskladá. */
-.bento{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-flow:dense;gap:16px;align-content:start}
-.tile{
-  position:relative;display:flex;flex-direction:column;justify-content:center;
-  background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
-  padding:26px;box-shadow:var(--shadow-soft);
-  transition:transform .4s var(--ease),box-shadow .4s var(--ease);
+/* ── Tri piliere: spoluhráč, partia, tréner ─────────────────
+   Tri rovnaké bloky pod sebou — snímka z appky a k nej to, čo naozaj vie.
+   Strany sa striedajú. Číslo je v prechode značky; je to jediná ozdoba. */
+.pillars{display:grid;gap:clamp(64px,9vw,120px)}
+.pillar{display:grid;grid-template-columns:.92fr 1.08fr;gap:clamp(28px,5vw,72px);align-items:center}
+.pillar.flip .pillar-media{order:2}
+.pillar-media{position:relative;display:flex;justify-content:center;align-items:flex-end;min-width:0}
+.pillar-media::before{
+  content:"";position:absolute;inset:8% 6% 2%;border-radius:48px;
+  background:linear-gradient(140deg,var(--blue-soft),var(--green-soft));
 }
-.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
-.tile h3{margin-bottom:8px}
-.tile p{color:var(--muted);font-size:.99rem}
-.tile .ico{
-  width:42px;height:42px;border-radius:13px;display:grid;place-items:center;margin-bottom:16px;
-  background:var(--green-soft);color:var(--green-strong);
+.pillar-media .phone{max-width:256px}
+/* Dva telefóny: druhý stojí o kus nižšie a za prvým. */
+.pillar-media.two .phone{max-width:228px}
+.pillar-media.two{padding-bottom:36px}
+.pillar-media.two .phone+.phone{margin-left:-56px;margin-bottom:-36px;z-index:1}
+.pillar-no{
+  display:table;font-size:clamp(1rem,1.4vw,1.15rem);font-weight:700;letter-spacing:.06em;
+  font-variant-numeric:tabular-nums;margin-bottom:12px;
 }
-.tile.media{justify-content:flex-start;gap:18px;grid-row:span 2;padding-bottom:0;overflow:hidden}
-.tile.media .phone{max-width:214px;margin-top:auto;margin-bottom:-152px}
-.tile.accent{background:linear-gradient(160deg,var(--ink-2),var(--ink));border-color:transparent;color:var(--on-dark)}
-.tile.accent h3{color:#fff}
-.tile.accent p{color:var(--on-dark-muted)}
-.tile.accent .ico{background:rgba(81,224,65,.16);color:var(--lime)}
-.band .tile{background:var(--ink-2);border-color:var(--line-dark);color:var(--on-dark);box-shadow:none}
-.band .tile p{color:var(--on-dark-muted)}
-.band .tile .ico{background:rgba(81,224,65,.15);color:var(--lime)}
+.pillar h3{font-size:clamp(1.6rem,3vw,2.25rem);font-weight:700;line-height:1.1;letter-spacing:-.028em}
+.pillar .lead{margin-top:14px}
+.ticks{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:16px;max-width:36rem}
+.ticks li{display:grid;grid-template-columns:26px 1fr;gap:14px;align-items:start;color:var(--muted);font-size:.99rem}
+.ticks li::before{
+  content:"";width:26px;height:26px;border-radius:50%;margin-top:1px;
+  background:var(--green-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2315803D' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 12.5l3.6 3.6 7.4-7.6'/%3E%3C/svg%3E") center/14px no-repeat;
+}
+.ticks b{display:block;color:var(--fg);font-weight:600;font-size:1.04rem;letter-spacing:-.012em;line-height:1.35;margin-bottom:2px}
+.on-dark .ticks li{color:var(--on-dark-muted)}
+.on-dark .ticks b{color:#fff}
+.on-dark .ticks li::before{
+  background:rgba(81,224,65,.15) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2351E041' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 12.5l3.6 3.6 7.4-7.6'/%3E%3C/svg%3E") center/14px no-repeat;
+}
+.pillar-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;margin-top:30px}
+/* Mestá (dlaždice dopĺňa nočný generátor). */
+.where{margin-top:26px;padding-top:22px;border-top:1px solid var(--line);max-width:36rem}
+.where-h{font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-soft);margin-bottom:12px}
+.next-cities{display:flex;flex-wrap:wrap;gap:8px}
+.city-chip{
+  display:inline-flex;align-items:center;gap:7px;min-height:44px;text-decoration:none;font-size:.95rem;font-weight:500;
+  background:var(--card);color:var(--fg);border:1px solid var(--line);
+  border-radius:999px;padding:0 16px;transition:border-color .2s,transform .25s var(--ease);
+}
+.city-chip:hover{border-color:var(--green);transform:translateY(-2px)}
+.city-chip span{font-size:.84rem;color:var(--muted-soft);font-variant-numeric:tabular-nums}
+.next-note{color:var(--muted-soft);font-size:.95rem}
 
-/* ── Ukážka: telefón a zoznam výhod ─────────────────────────── */
+/* ── Panel: text a telefóny (odmeny, tréneri) ───────────────── */
 .showcase{display:grid;grid-template-columns:.92fr 1.08fr;gap:clamp(28px,5vw,64px);align-items:center}
 .showcase.flip .showcase-media{order:2}
-.showcase-media{position:relative;display:flex;justify-content:center}
-.showcase-media::before{
-  content:"";position:absolute;inset:6% 4% 4%;border-radius:48px;
-  background:radial-gradient(circle at 50% 40%,rgba(30,158,82,.16),rgba(30,158,82,0) 68%);
-}
+.showcase-media{position:relative;display:flex;justify-content:center;min-width:0}
 .showcase-media .phone{max-width:272px}
-.feature-list{display:grid;gap:18px}
-.feature{display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:start}
-.feature .ico{
-  width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
-  background:var(--green-soft);color:var(--green-strong);
-}
-.band .feature .ico{background:rgba(81,224,65,.15);color:var(--lime)}
-.feature h3{margin-bottom:5px}
-.feature p{color:var(--muted);font-size:.99rem}
-.band .feature p{color:var(--on-dark-muted)}
-
-/* ── Dvojica telefónov v tmavom páse ────────────────────────── */
 .duo{display:flex;justify-content:center;align-items:flex-end;gap:clamp(14px,3vw,34px)}
 .duo .phone{max-width:236px}
 .duo .phone:first-child{transform:rotate(-3deg)}
 .duo .phone:last-child{transform:rotate(3deg)}
-
 
 /* ── Športy ─────────────────────────────────────────────────── */
 .sport-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px}
@@ -366,72 +394,61 @@ p{margin:0}
   border:1px solid var(--line);border-radius:999px;padding:5px 12px;
 }
 
-/* ── Mestá (dlaždice dopĺňa nočný generátor) ─────────────────── */
-.next-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.next-card{
-  display:flex;flex-direction:column;gap:14px;background:var(--card);border:1px solid var(--line);
-  border-radius:var(--r-xl);padding:clamp(26px,3vw,38px);box-shadow:var(--shadow-soft);
+/* ── Tri karty v rade (služby, platby) ──────────────────────── */
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:28px}
+.card h3{margin-bottom:8px}
+.card p{color:var(--muted);font-size:.99rem}
+.card .ico{
+  width:44px;height:44px;border-radius:14px;display:grid;place-items:center;margin-bottom:18px;
+  background:var(--green-soft);color:var(--green-strong);
 }
-.next-card h2{font-size:clamp(1.4rem,2.2vw,1.85rem)}
-.next-card>p{color:var(--muted);font-size:1rem}
-.next-cities{display:flex;flex-wrap:wrap;gap:8px}
-.city-chip{
-  display:inline-flex;align-items:center;gap:7px;text-decoration:none;font-size:.93rem;font-weight:500;
-  background:var(--green-soft);color:var(--green-dark);border:1px solid transparent;
-  border-radius:999px;padding:7px 14px;transition:border-color .2s,transform .25s var(--ease);
-}
-.city-chip:hover{border-color:var(--green);transform:translateY(-2px)}
-.city-chip span{font-size:.8rem;color:var(--green-strong);opacity:.75}
-.next-note{color:var(--muted-soft);font-size:.95rem}
-/* Hlavná akcia karty. Bola to `<span>` — vyzerala ako odkaz, ale kliknúť sa
-   na ňu nedalo (Martin, 17. 9.). Teraz je to `<a>` a je to jediný odkaz na
-   zoznam v karte; nadpis je už len nadpis, aby tá istá akcia nestála v karte
-   dvakrát. `align-self:flex-start` drží klikaciu plochu na šírke textu —
-   roztiahnutý odkaz cez celú kartu by chytal aj kliknutia vedľa. */
-.next-go{
-  display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
-  margin-top:auto;padding-top:6px;
-  font-weight:600;color:var(--green-strong);font-size:.98rem;text-decoration:none;
-}
-.next-go:hover{color:var(--green-dark)}
-.next-card:hover .next-go svg,.next-go:hover svg{transform:translateX(4px)}
-.next-go svg{transition:transform .3s var(--ease)}
-
-/* ── Platby ─────────────────────────────────────────────────── */
-.pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.pay-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:28px;box-shadow:var(--shadow-soft)}
-.pay-card.lead-card{border-color:var(--green);box-shadow:0 0 0 1px var(--green),var(--shadow-soft)}
+.card.lead-card{border-color:var(--green-strong);box-shadow:0 0 0 1px var(--green-strong)}
 .pay-tag{
   display:inline-block;font-size:.76rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
   color:var(--green-dark);background:var(--green-soft);border-radius:999px;padding:5px 11px;margin-bottom:14px;
 }
-.pay-card h3{margin-bottom:8px}
-.pay-card p{color:var(--muted);font-size:.99rem}
-.pay-card .fee{margin-top:12px;font-size:.93rem;color:var(--muted-soft)}
-.pay-card .fee b{color:var(--fg)}
+.card .fee{margin-top:12px;font-size:.93rem;color:var(--muted-soft)}
+.card .fee b{color:var(--fg);font-variant-numeric:tabular-nums}
+
+/* ── Štyri fakty ────────────────────────────────────────────
+   Len to, čo je pravda a dá sa overiť v appke: počet športov, nulová
+   provízia, cena účtu. Žiadne počty používateľov. */
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.fact{padding:clamp(20px,2.6vw,30px) clamp(18px,2.4vw,28px)}
+.fact+.fact{border-left:1px solid var(--line)}
+.fact b{display:table;font-size:clamp(1.5rem,2.6vw,2.1rem);font-weight:700;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.fact span{display:block;margin-top:6px;font-size:.93rem;color:var(--muted);line-height:1.4}
+.facts+*{margin-top:16px}
 
 /* ── Výzva a QR ─────────────────────────────────────────────── */
-.cta{text-align:center;max-width:44rem;margin:0 auto}
-.cta .btn-row{justify-content:center;margin-top:30px}
+.cta{display:grid;grid-template-columns:1fr auto;gap:clamp(28px,5vw,72px);align-items:center}
+.cta h2{font-size:clamp(2rem,4.4vw,3.2rem)}
+/* Vety sa lámu vcelku, nie uprostred. */
+.cta h2 span{display:inline-block}
+.cta .lead{margin-top:16px}
 /* Jeden kód namiesto dvoch, preto väčší a s popisom na dva riadky. */
-.qr-row{display:flex;justify-content:center;margin-top:38px}
 .qr{
-  display:grid;justify-items:center;gap:11px;text-decoration:none;max-width:20rem;
+  display:grid;justify-items:center;gap:11px;text-decoration:none;width:13.5rem;
   background:rgba(255,255,255,.06);border:1px solid var(--line-dark);border-radius:var(--r-lg);
-  padding:18px 20px 15px;transition:transform .3s var(--ease),background .2s;
+  padding:18px 18px 15px;transition:transform .3s var(--ease),background .2s;
 }
 .qr:hover{transform:translateY(-3px);background:rgba(255,255,255,.12)}
-.qr-code{display:block;width:128px;height:128px;background:#fff;border-radius:10px;padding:6px}
+.qr-code{display:block;width:100%;aspect-ratio:1;background:#fff;border-radius:12px;padding:8px}
 .qr-code svg{width:100%;height:100%;fill:#071A13}
 .qr-label{font-size:.9rem;font-weight:500;line-height:1.4;text-align:center;color:var(--on-dark)}
 
 /* ── Pätička ────────────────────────────────────────────────── */
-footer{background:var(--ink);color:var(--on-dark);padding:clamp(56px,7vw,80px) 0 34px;--focus:var(--lime)}
+footer{background:var(--ink);color:var(--on-dark);padding:clamp(56px,7vw,80px) 0 34px;--focus:var(--lime);
+  margin-top:clamp(40px,6vw,72px)}
 .foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:34px}
-.foot-about{margin-top:14px;color:var(--on-dark-muted);font-size:.97rem;max-width:26rem}
-footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spacing:.12em;font-size:.76rem;opacity:.7;font-weight:600;letter-spacing:.12em}
-.foot-links{display:grid;gap:9px}
-.foot-links a{text-decoration:none;color:var(--on-dark-muted);font-size:.97rem}
+footer .brand{font-size:1.2rem}
+.foot-slogan{margin-top:16px;font-size:1.12rem;font-weight:700;letter-spacing:-.02em;line-height:1.3;color:#fff}
+.foot-about{margin-top:8px;color:var(--on-dark-muted);font-size:.97rem;max-width:26rem}
+footer .foot-h{color:#fff;margin:0 0 14px;text-transform:uppercase;letter-spacing:.12em;font-size:.76rem;opacity:.7;font-weight:600}
+.foot-links{display:grid;gap:2px}
+.foot-links a{display:flex;align-items:center;min-height:36px;text-decoration:none;color:var(--on-dark-muted);font-size:.97rem;transition:color .2s}
 .foot-links a:hover{color:#fff}
 .foot-bottom{
   display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;
@@ -440,38 +457,46 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
 }
 
 /* ── Odhalenie pri rolovaní ─────────────────────────────────── */
-.reveal{opacity:0;transform:translateY(20px);transition:opacity .65s var(--ease),transform .65s var(--ease)}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
 .reveal.in{opacity:1;transform:none}
 
 /* ── Zúženie ────────────────────────────────────────────────── */
 @media (max-width:1000px){
-  .bento{grid-template-columns:repeat(2,1fr)}
-  .showcase{grid-template-columns:1fr;gap:34px}
-  .showcase.flip .showcase-media{order:0}
-  .showcase-media .phone{max-width:248px}
-  .next-grid{grid-template-columns:1fr}
-  .pay-grid{grid-template-columns:1fr}
+  .trio{grid-template-columns:1fr}
+  .facts{grid-template-columns:repeat(2,1fr)}
+  .fact:nth-child(3){border-left:0}
+  .fact:nth-child(n+3){border-top:1px solid var(--line)}
   .foot-grid{grid-template-columns:1fr 1fr;gap:28px}
 }
-@media (max-width:820px){
+@media (max-width:860px){
   .hero-grid{grid-template-columns:1fr;gap:38px}
   .hero-video{margin-top:4px}
-  /* Na telefóne video nesmie hero natiahnuť: šírku stráži aj výška okna. */
+  /* Na telefóne video nesmie úvod natiahnuť: šírku stráži aj výška okna. */
   .hero-clip{width:min(320px,76vw,calc(62vh * 9 / 14))}
-  .stats{grid-template-columns:repeat(2,1fr);gap:22px}
+  .pillar,.showcase{grid-template-columns:1fr;gap:36px}
+  .pillar.flip .pillar-media,.showcase.flip .showcase-media{order:0}
+  .pillar-media::before{inset:10% 0 0}
+  .pillar-media .phone{max-width:232px}
+  .pillar-media.two .phone{max-width:min(196px,48vw)}
+  .pillar-media.two{padding-bottom:28px}
+  .pillar-media.two .phone+.phone{margin-left:-48px;margin-bottom:-28px}
+  .showcase-media .phone{max-width:248px}
+  .cta{grid-template-columns:1fr;text-align:center;justify-items:center}
+  .cta .lead{margin-inline:auto}
+  .cta .btn-row{justify-content:center}
 }
 @media (max-width:620px){
   body{font-size:16px}
-  .bento{grid-template-columns:1fr}
-  .tile.media{grid-row:auto}
-  .tile.media .phone{max-width:224px;margin-bottom:-70px}
   .foot-grid{grid-template-columns:1fr}
+  .foot-links a{min-height:44px}
   .duo{gap:12px}
   .duo .phone{max-width:min(160px,42vw)}
-  .qr-code{width:112px;height:112px}
+  .card{padding:24px}
+  /* Na telefóne QR kód nemá kto naskenovať — tlačidlá do obchodov stačia. */
+  .qr{display:none}
 }
 @media (max-width:380px){
-  .btn{padding:14px 20px;font-size:.95rem}
+  .btn{padding:0 20px;font-size:.95rem}
   .duo .phone{max-width:min(140px,40vw)}
 }
 
@@ -524,23 +549,22 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
 <body>
 <!-- ── Hlavička ─────────────────────────────────────────────── -->
 <div class="nav-shell">
-  <nav class="nav" id="nav">
+  <nav class="nav" id="nav" aria-label="Hlavná navigácia">
     <a class="brand" href="#top">
       <img class="mark" src="logo-m.webp" alt="" width="192" height="192">
-      <span>Matchball</span>
+      <span>Match<b>ball</b></span>
     </a>
     <!-- Tri položky, jedno tlačidlo (Martin, 20. 9.). Prvé dve vedú na hotové
          ZOZNAMY, nie na sekcie tejto stránky: kto sem prišiel, hľadá trénera
-         alebo partiu, a doteraz sa k nim dostal až po zrolovaní k „Kam ďalej".
-         „Pre hráčov" v lište nestojí — hráč je ten, kto stránku otvoril; lište
-         patrí to, čo hľadá, nie meno jeho vlastnej roly. -->
+         alebo partiu. „Pre hráčov" v lište nestojí — hráč je ten, kto stránku
+         otvoril; lište patrí to, čo hľadá, nie meno jeho vlastnej roly. -->
     <div class="nav-links">
       <a href="/treneri/">Tréneri</a>
       <a href="/skupiny/">Partie</a>
       <a href="#trenerom">Pre trénerov</a>
     </div>
     <a class="btn btn-lime btn-sm nav-cta" href="/stiahnut/">Stiahnuť</a>
-    <button class="nav-burger" id="burger" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenu"><span></span></button>
+    <button class="nav-burger" id="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenu"><span></span></button>
   </nav>
 </div>
 
@@ -551,12 +575,12 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
   <a class="btn btn-lime" href="/stiahnut/">Stiahnuť appku</a>
 </div>
 
-<!-- ── Hero ─────────────────────────────────────────────────
-     Jedna myšlienka, jeden titulok, dve tlačidlá do obchodov. Vpravo
-     video (Martin, 9. 10.: úplne hore namiesto dvoch snímok a nech beží
-     samo). Na mobile stojí POD textom a tlačidlami, aby nadpis aj tlačidlo
-     na stiahnutie ostali na prvej obrazovke; video spod okraja vykúka. -->
-<header class="hero band" id="top">
+<!-- ── Úvod ─────────────────────────────────────────────────
+     Slogan značky, jedna veta, dve tlačidlá do obchodov. Vpravo video
+     (Martin, 9. 10.: úplne hore a nech beží samo). Na mobile stojí POD
+     textom a tlačidlami, aby nadpis aj tlačidlo na stiahnutie ostali na
+     prvej obrazovke; video spod okraja vykúka. -->
+<header class="hero on-dark" id="top">
   <div class="wrap">
     <div class="hero-grid">
       <div class="hero-text">
@@ -604,224 +628,139 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
   </div>
 </header>
 
-<!-- ── Štyri fakty ──────────────────────────────────────────
-     Stáli v hero; teraz majú vlastný svetlý pás hneď pod ním. -->
-<div class="stats-strip">
-  <div class="wrap">
-    <div class="stats">
-      <div class="stat"><b>42</b><span>športov a služieb</span></div>
-      <div class="stat"><b>0 %</b><span>provízia z ceny trénera</span></div>
-      <div class="stat"><b>1 minúta</b><span>a máš dohodnutý termín</span></div>
-      <div class="stat"><b>Zadarmo</b><span>appka aj účet, iOS a Android</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Pre hráčov ───────────────────────────────────────────
-     Bento: dve dlaždice so snímkou (tréneri, rezervácia) a k nim textové
-     dlaždice s tým, čo appka naozaj vie. -->
-<section class="section" id="hracom">
+<!-- ── Čo tu nájdeš ─────────────────────────────────────────
+     Tri piliere v tom istom poradí ako na uvítaní appky: spoluhráč, partia,
+     tréner. Každý je jeden blok — snímka z appky, jedna veta a to, čo appka
+     naozaj vie. Zoznamy miest pri partiách a tréneroch dopĺňa nočný
+     generátor (`scripts/generuj-stranky-trenerov.mjs`) medzi značky
+     `mesta-skupiny` / `mesta-treneri`; ručne sa do nich nepíše. -->
+<section class="section" id="najdes">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="eyebrow">Pre hráčov</span>
-      <h2>Nájdi trénera kúsok od teba</h2>
-      <p class="lead">Prezri si trénerov v zozname alebo na mape. Cenu za hodinu, hodnotenia aj miesto tréningu vidíš skôr, než niekomu napíšeš.</p>
+      <span class="eyebrow">Čo tu nájdeš</span>
+      <h2>S kým hrať, kde hrať a kto ťa to naučí</h2>
+      <p class="lead">Šport si vyberieš pri registrácii. V appke potom vidíš ľudí, partie a trénerov z tvojho mesta.</p>
     </div>
 
-    <div class="bento">
-      <article class="tile media reveal">
-        <div>
-          <h3>Tréneri na mape tvojho mesta</h3>
-          <p>Filtruj podľa športu. Pri každom trénerovi vidíš cenu za hodinu, hodnotenie aj klub, kde trénuje.</p>
+    <div class="pillars">
+      <article class="pillar" id="spoluhraci">
+        <div class="pillar-media reveal">
+          <div class="phone">
+            <img src="img/app-hraci.webp" alt="Hráči v meste podľa športu so žiadosťou o hru" width="560" height="1217" loading="lazy" decoding="async">
+          </div>
         </div>
-        <div class="phone">
-          <img src="img/app-treneri.webp" alt="Zoznam trénerov s cenou za hodinu, hodnotením a klubom" width="560" height="1217" loading="lazy" decoding="async">
-        </div>
-      </article>
-
-      <article class="tile reveal">
-        <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.4 7-11.4A7 7 0 0 0 5 9.6C5 14.6 12 21 12 21z"/><circle cx="12" cy="9.6" r="2.4"/></svg></div>
-        <h3>Cenník vidíš pred rezerváciou</h3>
-        <p>Cena za jedného, za dvoch aj za celú skupinu je na profile trénera. Nič nedohaduješ cez správy.</p>
-      </article>
-
-      <article class="tile reveal">
-        <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.6" r="5"/><path d="M9 13L7.2 21 12 18l4.8 3L15 13"/></svg></div>
-        <h3>Hodnotí len ten, kto hral</h3>
-        <p>Hviezdičky necháva iba hráč, ktorý u trénera naozaj odtrénoval. Okoloidúci nie.</p>
-      </article>
-
-      <article class="tile media reveal">
-        <div>
-          <h3>Rezervuj termín za minútu</h3>
-          <p>Vyber šport, počet hráčov, deň a čas. Tréner potvrdí a máte dohodnuté.</p>
-        </div>
-        <div class="phone">
-          <img src="img/app-rezervacia.webp" alt="Rezervácia tréningu: výber športu, počtu hráčov, dňa a času" width="520" height="1130" loading="lazy" decoding="async">
-        </div>
-      </article>
-
-      <article class="tile reveal">
-        <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8.2 4.3v9.4L12 21l-8.2-4.3V7.3L12 3z"/><path d="M3.8 7.3L12 11.5l8.2-4.2M12 11.5V21"/></svg></div>
-        <h3>Balíčky 5, 10 a 20 hodín</h3>
-        <p>Zaplatíš naraz a čerpáš presne toľko, koľko tréning trvá. Hodina vyjde lacnejšie než jedna po druhej.</p>
-      </article>
-
-      <article class="tile accent reveal">
-        <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 6.5c0-1.9-2-3-5-3s-5 1.2-5 3 2 2.6 5 3 5 1.1 5 3-2 3-5 3-5-1.1-5-3"/></svg></div>
-        <h3>Karta, QR kód alebo hotovosť</h3>
-        <p>Platíš tak, ako to tréner ponúka. Kartou sa suma strhne až po odtrénovanom tréningu.</p>
-      </article>
-    </div>
-
-    <p class="btn-row"><a class="btn btn-green" href="#stiahnut">Nájdi si trénera</a></p>
-  </div>
-</section>
-
-<!-- ── Spoluhráči ───────────────────────────────────────────
-     Uvítanie appky ponúka tri veci v poradí spoluhráč · partia · tréner,
-     web hovoril len o dvoch. Krátka sekcia, nie ďalšia dlaždica v bente
-     nad ňou: spoluhráč je samostatná odpoveď na „s kým hrať", nie ďalšia
-     vlastnosť trénerov. Snímka je vpravo (`flip`), aby telefóny na stránke
-     striedali strany — v Partiách nižšie stojí vľavo. -->
-<section class="section" id="spoluhraci" style="padding-top:0">
-  <div class="wrap">
-    <div class="showcase flip">
-      <div class="showcase-media reveal">
-        <div class="phone">
-          <img src="img/app-hraci.webp" alt="Hráči v meste podľa športu so žiadosťou o hru" width="560" height="1217" loading="lazy" decoding="async">
-        </div>
-      </div>
-
-      <div>
-        <div class="section-head reveal" style="max-width:36rem">
-          <span class="eyebrow">Spoluhráči</span>
-          <h2>Nájdi spoluhráča na svoj šport</h2>
+        <div class="reveal">
+          <span class="pillar-no grad">01 — Spoluhráč</span>
+          <h3>Nájdi spoluhráča na svoj šport</h3>
           <p class="lead">Vidíš hráčov vo svojom meste podľa športu. Pošleš žiadosť o hru, a keď ju prijme, otvorí sa vám chat.</p>
+          <ul class="ticks">
+            <li><div><b>Hráči podľa športu a mesta</b>Pri každom hráčovi vidíš, čo hráva a na akej úrovni.</div></li>
+            <li><div><b>Žiadosť na konkrétny šport</b>Spoluhráč vie, o čo ide, ešte než odpovie.</div></li>
+            <li><div><b>Vždy vieš, na čom si</b>Keď žiadosť prijme, dohodnete si termín v chate. Keď odmietne, dozvieš sa to tiež a nečakáš naprázdno.</div></li>
+          </ul>
+          <div class="pillar-actions">
+            <a class="btn btn-green" href="#stiahnut">Nájdi spoluhráča</a>
+          </div>
         </div>
-        <div class="feature-list" style="margin-top:28px">
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.4" cy="8.4" r="3.6"/><path d="M3 19.4c0-3.5 2.9-6 6.4-6s6.4 2.5 6.4 6"/><path d="M17.6 6.6h4.4M19.8 4.4v4.4"/></svg></div>
-            <div>
-              <h3>Hráči podľa športu a mesta</h3>
-              <p>Šport si vyberáš hneď pri registrácii, takže v zozname sedí od prvého dňa. Pri každom hráčovi vidíš, čo hráva a na akej úrovni.</p>
-            </div>
-          </article>
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 11.6L20.4 4.2l-7.4 17-1.9-7.7z"/><path d="M11.1 13.5L20.4 4.2"/></svg></div>
-            <div>
-              <h3>Žiadosť na konkrétny šport</h3>
-              <p>Pošleš ju na ten šport, ktorý chceš hrať. Spoluhráč vie, o čo ide, ešte než odpovie.</p>
-            </div>
-          </article>
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.8h16v11.4H9.6L5 20V16.2H4z"/><path d="M8.6 10.4l2 2 4.4-4.4"/></svg></div>
-            <div>
-              <h3>Vždy vieš, na čom si</h3>
-              <p>Keď žiadosť prijme, otvorí sa vám chat a dohodnete si termín. Keď odmietne, dozvieš sa to tiež a nečakáš naprázdno.</p>
-            </div>
-          </article>
+      </article>
+
+      <!-- Hráčske skupiny sú vždy „partia". Pokladňa je to, čo partiu drží
+           pokope — preto má vlastný riadok. -->
+      <article class="pillar flip" id="partie">
+        <div class="pillar-media two reveal">
+          <div class="phone">
+            <img src="img/app-mapa.webp" alt="Partie na mape mesta s najbližším termínom" width="640" height="1391" loading="lazy" decoding="async">
+          </div>
+          <div class="phone">
+            <img src="img/app-partia.webp" alt="Detail partie s najbližším termínom, účasťou a pokladňou" width="560" height="1217" loading="lazy" decoding="async">
+          </div>
         </div>
-        <p class="btn-row"><a class="btn btn-green" href="#stiahnut">Nájdi spoluhráča</a></p>
-      </div>
+        <div class="reveal">
+          <span class="pillar-no grad">02 — Partia</span>
+          <h3>Pridaj sa k partii, alebo si založ vlastnú</h3>
+          <p class="lead">Termíny, účasť, chat aj peniaze za kurt máte pohromade.</p>
+          <ul class="ticks">
+            <li><div><b>Vždy vieš, kto príde</b>Pri každom termíne ťukneš „Prídem" alebo „Neprídem" a podľa počtu rezervuješ kurty.</div></li>
+            <li><div><b>Vyúčtujte si kurt bez hádok</b>Kurt zaplatí jeden, ostatní mu pošlú podiely cez QR ešte v šatni. Pokladňa si pamätá, kto komu dlží, a vyúčtovanie si stiahnete ako PDF.</div></li>
+            <li><div><b>Jeden chat pre celú partiu</b>Nový hráč pošle žiadosť o členstvo a ty ju prijmeš alebo odmietneš.</div></li>
+            <li><div><b>Kredit u trénera</b>Zložíte trénerovi spoločný kredit a cena každého tréningu sa z neho odpočíta.</div></li>
+          </ul>
+          <div class="where">
+            <p class="where-h">Partie, ktoré berú nových</p>
+            <div class="next-cities">
+          <!-- mesta-skupiny:start -->
+          <a class="city-chip" href="/skupiny/kosice/">Košice <span>2</span></a>
+          <!-- mesta-skupiny:end -->
+            </div>
+          </div>
+          <div class="pillar-actions">
+            <a class="btn btn-green" href="#stiahnut">Založiť partiu</a>
+            <a class="go" href="/skupiny/">Všetky partie <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pillar" id="hracom">
+        <div class="pillar-media two reveal">
+          <div class="phone">
+            <img src="img/app-treneri.webp" alt="Zoznam trénerov s cenou za hodinu, hodnotením a klubom" width="560" height="1217" loading="lazy" decoding="async">
+          </div>
+          <div class="phone">
+            <img src="img/app-rezervacia.webp" alt="Rezervácia tréningu: výber športu, počtu hráčov, dňa a času" width="520" height="1130" loading="lazy" decoding="async">
+          </div>
+        </div>
+        <div class="reveal">
+          <span class="pillar-no grad">03 — Tréner</span>
+          <h3>Vyber si trénera a rezervuj termín</h3>
+          <p class="lead">Trénerov vidíš v zozname aj na mape. Cenu za hodinu, hodnotenia aj miesto tréningu poznáš skôr, než niekomu napíšeš.</p>
+          <ul class="ticks">
+            <li><div><b>Cenník vidíš pred rezerváciou</b>Cena za jedného, za dvoch aj za celú skupinu je na profile trénera.</div></li>
+            <li><div><b>Hodnotí len ten, kto hral</b>Hviezdičky necháva iba hráč, ktorý u trénera naozaj odtrénoval.</div></li>
+            <li><div><b>Termín za minútu</b>Vyberieš šport, počet hráčov, deň a čas. Tréner potvrdí a máte dohodnuté.</div></li>
+            <li><div><b>Balíčky 5, 10 a 20 hodín</b>Zaplatíš naraz a čerpáš toľko, koľko tréning trvá. Hodina vyjde lacnejšie.</div></li>
+          </ul>
+          <div class="where">
+            <p class="where-h">Tréneri podľa miest</p>
+            <div class="next-cities">
+          <!-- mesta-treneri:start -->
+          <a class="city-chip" href="/treneri/kosice/">Košice <span>2</span></a>
+          <!-- mesta-treneri:end -->
+            </div>
+          </div>
+          <div class="pillar-actions">
+            <a class="btn btn-green" href="#stiahnut">Nájdi si trénera</a>
+            <a class="go" href="/treneri/">Všetci tréneri <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </article>
     </div>
   </div>
 </section>
 
-<!-- ── Partie ───────────────────────────────────────────────
-     Hráčske skupiny sú vždy „partia". Pokladňa je to, čo partiu drží
-     pokope — preto má vlastnú výhodu, nie riadok v zozname. -->
-<section class="section" id="partie" style="padding-top:0">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="eyebrow">Partie</span>
-      <h2>Nájdi partiu na šport</h2>
-      <p class="lead">Nemáš s kým hrať? Pridaj sa k partii v tvojom meste alebo si založ vlastnú. Termíny, účasť, chat aj peniaze za kurt máte pohromade.</p>
-    </div>
-
-    <div class="showcase">
-      <div class="showcase-media reveal">
-        <div class="phone">
-          <img src="img/app-partia.webp" alt="Detail partie s najbližším termínom, účasťou a pokladňou" width="560" height="1217" loading="lazy" decoding="async">
-        </div>
-      </div>
-
-      <div>
-        <div class="feature-list">
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="5" width="17.6" height="15.8" rx="3.2"/><path d="M8 3v4M16 3v4M3.2 10h17.6"/><path d="M8 15.4l2.4 2.4 4.4-4.4"/></svg></div>
-            <div>
-              <h3>Vždy vieš, kto príde</h3>
-              <p>Pri každom termíne ťukneš „Prídem" alebo „Neprídem". Vidíš, koľko vás bude, a podľa toho rezervuješ kurty.</p>
-            </div>
-          </article>
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.6"/><path d="M7 9.5h4M7 13h7"/><circle cx="17" cy="13" r="1.6"/></svg></div>
-            <div>
-              <h3>Vyúčtujte si kurt bez hádok</h3>
-              <p>Kurt zaplatí Peter, ostatní mu pošlú svoje podiely cez QR ešte v šatni. Pokladňa partie si pamätá, kto komu dlží, a vyúčtovanie si stiahnete ako PDF.</p>
-            </div>
-          </article>
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.8h16v11.4H9.6L5 20V16.2H4z"/></svg></div>
-            <div>
-              <h3>Jeden chat pre celú partiu</h3>
-              <p>Dohodnete sa priamo v appke. Nový hráč pošle žiadosť o členstvo a ty ju prijmeš alebo odmietneš.</p>
-            </div>
-          </article>
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 19.5c0-3.4 2.8-5.8 6.2-5.8s6.2 2.4 6.2 5.8"/><circle cx="17.6" cy="8.6" r="2.6"/><path d="M16.4 13.9c2.8.4 4.8 2.6 4.8 5.6"/></svg></div>
-            <div>
-              <h3>Kredit u trénera</h3>
-              <p>Zložíte trénerovi spoločný kredit a cena každého tréningu sa z neho odpočíta. Po tréningu nikto nič nerieši.</p>
-            </div>
-          </article>
-        </div>
-        <p class="btn-row"><a class="btn btn-green" href="#stiahnut">Založiť partiu</a></p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Mystery boxy ─────────────────────────────────────────────
-     Tmavý pás: snímky zo zbierky sú v tmavom vzhľade appky a na svetlom
+<!-- ── Odmeny ───────────────────────────────────────────────
+     Tmavý panel: snímky zo zbierky sú v tmavom vzhľade appky a na svetlom
      podklade by pôsobili ako cudzí prvok. -->
-<section class="section band" id="odmeny">
+<section class="panel on-dark" id="odmeny">
   <div class="wrap">
     <div class="showcase flip">
       <div class="showcase-media reveal">
         <div class="duo">
           <div class="phone">
-            <img src="img/app-odmena.webp" alt="Mystery boxy v appke: ultra box pripravený na otvorenie" width="520" height="1131" loading="lazy" decoding="async">
+            <img src="img/app-odmena.webp" alt="Mystery boxy v appke: box pripravený na otvorenie" width="520" height="1131" loading="lazy" decoding="async">
           </div>
           <div class="phone">
             <img src="img/app-zbierka.webp" alt="Zbierka avatarov: 17 z 34 postavičiek" width="520" height="1131" loading="lazy" decoding="async">
           </div>
         </div>
       </div>
-
-      <div>
-        <div class="section-head reveal" style="max-width:34rem">
-          <span class="eyebrow">Odmeny</span>
-          <h2>Zbieraj avatarov</h2>
-          <p class="lead">Za každú odohranú hru ti padne mystery box, za platbu kartou ultra box. Vyskočí z neho avatar, od bežných po legendárne.</p>
-        </div>
-        <div class="feature-list" style="margin-top:28px">
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2.4"/><path d="M3 12h18M12 8v12"/><path d="M5 8c0-2.2 1.8-4 4-4 1.6 0 2.4 1 3 2 .6-1 1.4-2 3-2 2.2 0 4 1.8 4 4"/></svg></div>
-            <div>
-              <h3>Mystery box za hru, ultra box za kartu</h3>
-              <p>Box padne hneď po odohranom tréningu, termíne partie aj zápase s kamarátom. Kúpiť sa nedá a čakať naň nemusíš.</p>
-            </div>
-          </article>
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h14v5.2a7 7 0 0 1-14 0z"/><path d="M5 6H3.2v1.4A3.4 3.4 0 0 0 6.6 10.8M19 6h1.8v1.4a3.4 3.4 0 0 1-3.4 3.4"/><path d="M9.6 16.8h4.8L15.4 20H8.6z"/></svg></div>
-            <div>
-              <h3>Žiadny avatar dvakrát</h3>
-              <p>Kým nemáš celú zbierku, z každého boxu ti vyskočí postavička, ktorú ešte nemáš.</p>
-            </div>
-          </article>
-        </div>
+      <div class="reveal">
+        <span class="eyebrow">Odmeny</span>
+        <h2>Zbieraj avatarov</h2>
+        <p class="lead" style="margin-top:16px">Za odohranú hru ti padne mystery box, za platbu kartou ultra box. Vyskočí z neho avatar, od bežných po legendárne.</p>
+        <ul class="ticks">
+            <li><div><b>Box hneď po hre</b>Po odohranom tréningu, termíne partie aj zápase s kamarátom. Kúpiť sa nedá a čakať naň nemusíš.</div></li>
+            <li><div><b>Žiadny avatar dvakrát</b>Kým nemáš celú zbierku, z každého boxu ti vyskočí postavička, ktorú ešte nemáš.</div></li>
+          </ul>
       </div>
     </div>
   </div>
@@ -857,53 +796,26 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
 </section>
 
 <!-- ── Pre trénerov ─────────────────────────────────────────
-     Druhý tmavý pás. Tréner je druhé publikum, nie poznámka pod čiarou:
+     Druhý tmavý panel. Tréner je druhé publikum, nie poznámka pod čiarou:
      bez neho hráčovi appka nemá čo ponúknuť. -->
-<section class="section band" id="trenerom">
+<section class="panel on-dark" id="trenerom">
   <div class="wrap">
     <div class="showcase">
       <div class="showcase-media reveal">
         <div class="phone">
-          <img src="img/app-trener.webp" alt="Prehľad trénera so zostatkom na výber a dnešným tréningom" width="520" height="1130" loading="lazy" decoding="async">
-        </div>
+            <img src="img/app-trener.webp" alt="Prehľad trénera so zostatkom na výber a dnešným tréningom" width="520" height="1130" loading="lazy" decoding="async">
+          </div>
       </div>
-
-      <div>
-        <div class="section-head reveal" style="max-width:36rem">
-          <span class="eyebrow">Pre trénerov</span>
-          <h2>Trénuj. Papiere nechaj na appku.</h2>
-          <p class="lead">Kalendár, žiadosti, cenník aj zárobky máš na jednej obrazovke. Účet je zadarmo a z tréningu ti neberieme províziu.</p>
-        </div>
-        <div class="feature-list" style="margin-top:28px">
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="5" width="17.6" height="15.8" rx="3.2"/><path d="M8 3v4M16 3v4M3.2 10h17.6M7 14h4M13 14h4M7 17h4"/></svg></div>
-            <div>
-              <h3>Žiadosť potvrdíš jedným ťuknutím</h3>
-              <p>Príde ti rovno do prehľadu ku kalendáru. Potvrdíš alebo odmietneš a hráč to vie hneď.</p>
-            </div>
-          </article>
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18.4" cy="17" r="2.2"/></svg></div>
-            <div>
-              <h3>Cenník pre každý šport zvlášť</h3>
-              <p>Zľavy pre skupiny aj doobedné termíny si nastavíš sám. Ceny balíčkov sa dopočítajú za teba.</p>
-            </div>
-          </article>
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 6.5c0-1.9-2-3-5-3s-5 1.2-5 3 2 2.6 5 3 5 1.1 5 3-2 3-5 3-5-1.1-5-3"/></svg></div>
-            <div>
-              <h3>Platby podľa teba, bez provízie</h3>
-              <p>Karta s výplatou na účet, QR kód na tvoj IBAN alebo hotovosť. Koľko si vypýtaš, toľko dostaneš.</p>
-            </div>
-          </article>
-          <article class="feature reveal">
-            <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.4V10M10 19.4V5M16 19.4v-6.8M21 19.4H3"/></svg></div>
-            <div>
-              <h3>Prehľad zárobkov a obsadenosti</h3>
-              <p>Príjem po mesiacoch, najaktívnejší hráči aj hodnotenia. Partia ti môže zložiť kredit a tréningy sa z neho odpočítavajú.</p>
-            </div>
-          </article>
-        </div>
+      <div class="reveal">
+        <span class="eyebrow">Pre trénerov</span>
+        <h2>Trénuj. Papiere nechaj na&nbsp;appku.</h2>
+        <p class="lead" style="margin-top:16px">Kalendár, žiadosti, cenník aj zárobky máš na jednej obrazovke. Účet je zadarmo a z tréningu ti neberieme províziu.</p>
+        <ul class="ticks">
+            <li><div><b>Žiadosť potvrdíš jedným ťuknutím</b>Príde ti rovno do prehľadu ku kalendáru. Potvrdíš alebo odmietneš a hráč to vie hneď.</div></li>
+            <li><div><b>Cenník pre každý šport zvlášť</b>Zľavy pre skupiny aj doobedné termíny si nastavíš sám. Ceny balíčkov sa dopočítajú za teba.</div></li>
+            <li><div><b>Platby podľa teba, bez provízie</b>Karta s výplatou na účet, QR kód na tvoj IBAN alebo hotovosť. Koľko si vypýtaš, toľko dostaneš.</div></li>
+            <li><div><b>Prehľad zárobkov a obsadenosti</b>Príjem po mesiacoch, najaktívnejší hráči aj hodnotenia. Partia ti môže zložiť kredit a tréningy sa z neho odpočítavajú.</div></li>
+          </ul>
         <p class="btn-row"><a class="btn btn-lime" href="#stiahnut">Založ si účet trénera</a></p>
       </div>
     </div>
@@ -920,19 +832,18 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
       <h2>Robíš masáže alebo fyzioterapiu?</h2>
       <p class="lead">Športovci z tvojho mesta ťa nájdu tam, kde hľadajú trénera. Cenník si nastavíš podľa úkonu a klient sa objedná ako na tréning.</p>
     </div>
-
-    <div class="bento">
-      <article class="tile reveal">
+    <div class="trio">
+      <article class="card reveal">
         <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18.4" cy="17" r="2.2"/></svg></div>
         <h3>Cenník podľa úkonu</h3>
         <p>Vstupné vyšetrenie, terapia či poradenstvo. Každé má vlastnú dĺžku a cenu.</p>
       </article>
-      <article class="tile reveal">
+      <article class="card reveal">
         <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.4v5l3.4 2"/></svg></div>
         <h3>Objednávka ako na tréning</h3>
         <p>Klient pošle žiadosť na voľný termín, ty ju jedným ťuknutím potvrdíš.</p>
       </article>
-      <article class="tile reveal">
+      <article class="card reveal">
         <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.4" cy="10.4" r="6.4"/><path d="M19.6 19.6l-4.7-4.7"/></svg></div>
         <h3>Nájdu ťa športovci z okolia</h3>
         <p>V appke aj cez Google. Vtedy, keď ich niečo bolí a hľadajú pomoc blízko.</p>
@@ -941,72 +852,39 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
   </div>
 </section>
 
-<!-- ── Kam ďalej ────────────────────────────────────────────
-     Kto sa nechce hneď rozhodovať, si trénerov aj partie pozrie na webe.
-     Dlaždice miest medzi značkami `mesta-treneri` / `mesta-skupiny` dopĺňa
-     nočný generátor (`scripts/generuj-stranky-trenerov.mjs`), ručne sa do
-     nich nepíše. -->
-<section class="section" id="kam" style="padding-top:0">
-  <div class="wrap">
-    <div class="next-grid reveal">
-      <div class="next-card">
-        <span class="eyebrow" style="margin-bottom:0">Tréneri</span>
-        <h2>Tréneri v tvojom meste</h2>
-        <p>Chceš vedieť, kto trénuje u teba v meste? Cenník, miesto aj hodnotenia si pozrieš hneď tu, bez appky.</p>
-        <div class="next-cities">
-          <!-- mesta-treneri:start -->
-          <a class="city-chip" href="/treneri/kosice/">Košice <span>2</span></a>
-          <!-- mesta-treneri:end -->
-        </div>
-        <a class="next-go" href="/treneri/">Pozri si všetkých trénerov
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-      </div>
-
-      <div class="next-card">
-        <span class="eyebrow" style="margin-bottom:0">Partie</span>
-        <h2>Partie v tvojom meste</h2>
-        <p>Chceš hrávať pravidelne s tou istou partiou? Tieto berú nových. Deň, čas aj úroveň vidíš vopred.</p>
-        <div class="next-cities">
-          <!-- mesta-skupiny:start -->
-          <a class="city-chip" href="/skupiny/kosice/">Košice <span>2</span></a>
-          <!-- mesta-skupiny:end -->
-        </div>
-        <a class="next-go" href="/skupiny/">Pozri si všetky partie
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Platby ───────────────────────────────────────────────
-     Jediné miesto na stránke, kde sa hovorí o peniazoch — tri spôsoby,
-     ako môže hráč trénerovi zaplatiť, vedľa seba. -->
-<section class="section" id="ceny" style="padding-top:0">
+<!-- ── Férové podmienky ─────────────────────────────────────
+     Jediné miesto na stránke, kde sa hovorí o peniazoch: štyri fakty, ktoré
+     sa dajú overiť v appke, a tri spôsoby, ako hráč trénerovi zaplatí.
+     Žiadne počty používateľov ani recenzie — len to, čo je pravda. -->
+<section class="section tight" id="ceny">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="eyebrow">Platby</span>
+      <span class="eyebrow">Férové podmienky</span>
       <h2>Z ceny trénera si neberieme nič</h2>
       <p class="lead">Koľko si tréner vypýta, toľko dostane. Ty si vyberáš len to, ako mu zaplatíš.</p>
     </div>
 
-    <div class="pay-grid reveal">
-      <div class="pay-card lead-card">
+    <div class="facts reveal">
+      <div class="fact"><b class="grad">42</b><span>športov a služieb</span></div>
+      <div class="fact"><b class="grad">0 %</b><span>provízia z ceny trénera</span></div>
+      <div class="fact"><b class="grad">1 minúta</b><span>a máš dohodnutý termín</span></div>
+      <div class="fact"><b class="grad">Zadarmo</b><span>appka aj účet, iOS a Android</span></div>
+    </div>
+
+    <div class="trio reveal">
+      <div class="card lead-card">
         <span class="pay-tag">Bez poplatku</span>
         <h3>Pošli QR prevod</h3>
         <p>Naskenuješ trénerov kód v bankovej appke a peniaze idú rovno na jeho účet.</p>
         <p class="fee"><b>0 € navyše.</b></p>
       </div>
-
-      <div class="pay-card">
+      <div class="card">
         <span class="pay-tag">Poplatok brány</span>
         <h3>Zaplať kartou v appke</h3>
         <p>Suma sa strhne až po tom, čo tréner potvrdí odtrénovaný tréning.</p>
         <p class="fee"><b>5 % + 0,30 €</b> pokrýva platbu kartou, výplatu trénerovi a vrátenie peňazí, keď sa tréning zruší. Z ceny trénera sa nič neodpočíta.</p>
       </div>
-
-      <div class="pay-card">
+      <div class="card">
         <span class="pay-tag">Bez poplatku</span>
         <h3>Zaplať v hotovosti</h3>
         <p>Peniaze dáš trénerovi na mieste a v appke to potvrdíš.</p>
@@ -1016,39 +894,39 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
   </div>
 </section>
 
-<!-- ── Stiahnutie ───────────────────────────────────────────── -->
-<section class="section band" id="stiahnut">
+<!-- ── Stiahnutie ─────────────────────────────────────────────
+     JEDEN QR kód. Dva (iPhone / Android) nútili človeka pri skenovaní
+     vybrať si obchod za seba — a kto to zmýlil, prišel na prázdnu stránku.
+     Tento vedie na /stiahnut/, ktorá si zariadenie rozpozná sama. Kód je
+     vykreslený priamo v HTML ako cesta, nie obrázok z cudzej služby: nič sa
+     nedosťahováva a nikto tretí sa nedozvie, že si si stránku otvoril.
+     Moduly (verzia 3, korekcia M) vyrobil `scripts/qrcode.js` rovnako ako
+     pri stránkach trénerov; okolo nich je štvormodulová tichá zóna, preto
+     viewBox 37 a `translate(4 4)`. Na telefóne sa kód neukazuje — nemá ho
+     kto naskenovať. -->
+<section class="panel on-dark" id="stiahnut">
   <div class="wrap">
     <div class="cta reveal">
-      <h2>Zahraj si ešte tento týždeň</h2>
-      <p class="lead" style="margin-top:16px">Stiahni si appku, nájdi spoluhráča, partiu alebo trénera a dohodni termín. Účet je zadarmo.</p>
-      <div class="btn-row">
-        <a class="btn btn-lime" href="https://apps.apple.com/sk/app/matchball/id6804171137">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.8c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.6.9-.7 0-1.9-.9-3.1-.8-1.6 0-3 .9-3.8 2.4-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3.1-.7 1.4 0 1.8.7 3.1.7 1.3 0 2.1-1.1 2.9-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.6-3.7zM14 5.9c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3z"/></svg>
-          Stiahnuť z App Store
-        </a>
-        <a class="btn btn-ghost" href="https://play.google.com/store/apps/details?id=sk.matchball.app">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.3c-.3.3-.5.8-.5 1.4v16.6c0 .6.2 1.1.5 1.4l.1.1 9.3-9.3v-.2L3.7 2.9l-.1-.1zm12.1 6.2L4.9 2.3l8.9 8.9 1.9-1.9zM17.9 9.7l-2.2-1.3-2.1 2.1 2.1 2.1 2.2-1.3c.7-.4.7-1.2 0-1.6zM4.9 21.7l10.8-6.2-1.9-1.9-8.9 8.1z"/></svg>
-          Stiahnuť z Google Play
-        </a>
+      <div>
+        <h2><span>Šport nás spája.</span> <span class="grad">Pridaj sa.</span></h2>
+        <p class="lead">Stiahni si appku, nájdi spoluhráča, partiu alebo trénera a dohodni termín. Účet je zadarmo.</p>
+        <div class="btn-row">
+          <a class="btn btn-lime" href="https://apps.apple.com/sk/app/matchball/id6804171137">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.8c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.6.9-.7 0-1.9-.9-3.1-.8-1.6 0-3 .9-3.8 2.4-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3.1-.7 1.4 0 1.8.7 3.1.7 1.3 0 2.1-1.1 2.9-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.6-3.7zM14 5.9c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3z"/></svg>
+            Stiahnuť z App Store
+          </a>
+          <a class="btn btn-ghost" href="https://play.google.com/store/apps/details?id=sk.matchball.app">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.3c-.3.3-.5.8-.5 1.4v16.6c0 .6.2 1.1.5 1.4l.1.1 9.3-9.3v-.2L3.7 2.9l-.1-.1zm12.1 6.2L4.9 2.3l8.9 8.9 1.9-1.9zM17.9 9.7l-2.2-1.3-2.1 2.1 2.1 2.1 2.2-1.3c.7-.4.7-1.2 0-1.6zM4.9 21.7l10.8-6.2-1.9-1.9-8.9 8.1z"/></svg>
+            Stiahnuť z Google Play
+          </a>
+        </div>
       </div>
-
-      <!-- JEDEN QR kód. Dva (iPhone / Android) nútili človeka pri skenovaní
-           vybrať si obchod za seba — a kto to zmýlil, prišel na prázdnu
-           stránku. Tento vedie na /stiahnut/, ktorá si zariadenie rozpozná
-           sama. Kód je vykreslený priamo v HTML ako cesta, nie obrázok
-           z cudzej služby: nič sa nedosťahováva a nikto tretí sa nedozvie,
-           že si si stránku otvoril. Moduly (verzia 3, korekcia M) vyrobil
-           `scripts/qrcode.js` rovnako ako pri stránkach trénerov; okolo nich
-           je štvormodulová tichá zóna, preto viewBox 37 a `translate(4 4)`. -->
-      <div class="qr-row">
-        <a class="qr" href="/stiahnut/">
-          <span class="qr-code" aria-hidden="true">
-            <svg viewBox="0 0 37 37" shape-rendering="crispEdges"><path transform="translate(4 4)" d="M0 0h7v1h-7zM9 0h2v1h-2zM12 0h1v1h-1zM15 0h2v1h-2zM18 0h1v1h-1zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM10 1h2v1h-2zM13 1h2v1h-2zM16 1h2v1h-2zM20 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h4v1h-4zM13 2h1v1h-1zM15 2h1v1h-1zM19 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM10 3h3v1h-3zM16 3h2v1h-2zM20 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM10 4h1v1h-1zM12 4h1v1h-1zM15 4h6v1h-6zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM9 5h2v1h-2zM15 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM8 7h2v1h-2zM11 7h2v1h-2zM14 7h3v1h-3zM19 7h2v1h-2zM0 8h1v1h-1zM6 8h1v1h-1zM8 8h2v1h-2zM12 8h1v1h-1zM17 8h3v1h-3zM21 8h2v1h-2zM25 8h3v1h-3zM2 9h1v1h-1zM4 9h1v1h-1zM7 9h2v1h-2zM11 9h3v1h-3zM16 9h5v1h-5zM23 9h2v1h-2zM26 9h2v1h-2zM4 10h3v1h-3zM8 10h1v1h-1zM10 10h1v1h-1zM13 10h5v1h-5zM21 10h3v1h-3zM1 11h2v1h-2zM4 11h2v1h-2zM7 11h2v1h-2zM10 11h4v1h-4zM15 11h2v1h-2zM24 11h2v1h-2zM2 12h1v1h-1zM5 12h4v1h-4zM12 12h2v1h-2zM16 12h1v1h-1zM19 12h1v1h-1zM22 12h2v1h-2zM28 12h1v1h-1zM2 13h4v1h-4zM8 13h2v1h-2zM11 13h2v1h-2zM15 13h1v1h-1zM19 13h2v1h-2zM22 13h3v1h-3zM27 13h2v1h-2zM2 14h3v1h-3zM6 14h1v1h-1zM10 14h2v1h-2zM15 14h1v1h-1zM17 14h2v1h-2zM21 14h1v1h-1zM24 14h3v1h-3zM0 15h2v1h-2zM4 15h1v1h-1zM10 15h1v1h-1zM20 15h1v1h-1zM23 15h2v1h-2zM26 15h1v1h-1zM28 15h1v1h-1zM1 16h1v1h-1zM3 16h2v1h-2zM6 16h2v1h-2zM9 16h1v1h-1zM15 16h3v1h-3zM20 16h1v1h-1zM23 16h1v1h-1zM25 16h2v1h-2zM0 17h3v1h-3zM8 17h4v1h-4zM13 17h4v1h-4zM19 17h2v1h-2zM22 17h3v1h-3zM26 17h3v1h-3zM0 18h4v1h-4zM5 18h5v1h-5zM11 18h1v1h-1zM15 18h1v1h-1zM17 18h1v1h-1zM19 18h1v1h-1zM21 18h2v1h-2zM24 18h2v1h-2zM28 18h1v1h-1zM0 19h1v1h-1zM4 19h2v1h-2zM7 19h1v1h-1zM10 19h1v1h-1zM13 19h1v1h-1zM16 19h1v1h-1zM18 19h1v1h-1zM21 19h1v1h-1zM24 19h1v1h-1zM0 20h1v1h-1zM2 20h5v1h-5zM10 20h3v1h-3zM14 20h4v1h-4zM20 20h5v1h-5zM26 20h3v1h-3zM8 21h1v1h-1zM14 21h2v1h-2zM17 21h2v1h-2zM20 21h1v1h-1zM24 21h2v1h-2zM0 22h7v1h-7zM9 22h1v1h-1zM11 22h2v1h-2zM15 22h1v1h-1zM18 22h3v1h-3zM22 22h1v1h-1zM24 22h3v1h-3zM0 23h1v1h-1zM6 23h1v1h-1zM11 23h1v1h-1zM14 23h3v1h-3zM19 23h2v1h-2zM24 23h1v1h-1zM28 23h1v1h-1zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM13 24h2v1h-2zM16 24h1v1h-1zM19 24h7v1h-7zM27 24h2v1h-2zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM9 25h3v1h-3zM13 25h4v1h-4zM18 25h1v1h-1zM21 25h1v1h-1zM25 25h2v1h-2zM28 25h1v1h-1zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM11 26h5v1h-5zM18 26h10v1h-10zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h2v1h-2zM16 27h1v1h-1zM21 27h1v1h-1zM23 27h4v1h-4zM28 27h1v1h-1zM0 28h7v1h-7zM8 28h2v1h-2zM12 28h2v1h-2zM17 28h1v1h-1zM19 28h1v1h-1zM21 28h1v1h-1zM23 28h1v1h-1zM26 28h1v1h-1z"/></svg>
-          </span>
-          <span class="qr-label">Naskenuj telefónom — otvorí správny&nbsp;obchod.</span>
-        </a>
-      </div>
+      <a class="qr" href="/stiahnut/">
+        <span class="qr-code" aria-hidden="true">
+          <svg viewBox="0 0 37 37" shape-rendering="crispEdges"><path transform="translate(4 4)" d="M0 0h7v1h-7zM9 0h2v1h-2zM12 0h1v1h-1zM15 0h2v1h-2zM18 0h1v1h-1zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM10 1h2v1h-2zM13 1h2v1h-2zM16 1h2v1h-2zM20 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h4v1h-4zM13 2h1v1h-1zM15 2h1v1h-1zM19 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM10 3h3v1h-3zM16 3h2v1h-2zM20 3h1v1h-1zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM10 4h1v1h-1zM12 4h1v1h-1zM15 4h6v1h-6zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM9 5h2v1h-2zM15 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM8 7h2v1h-2zM11 7h2v1h-2zM14 7h3v1h-3zM19 7h2v1h-2zM0 8h1v1h-1zM6 8h1v1h-1zM8 8h2v1h-2zM12 8h1v1h-1zM17 8h3v1h-3zM21 8h2v1h-2zM25 8h3v1h-3zM2 9h1v1h-1zM4 9h1v1h-1zM7 9h2v1h-2zM11 9h3v1h-3zM16 9h5v1h-5zM23 9h2v1h-2zM26 9h2v1h-2zM4 10h3v1h-3zM8 10h1v1h-1zM10 10h1v1h-1zM13 10h5v1h-5zM21 10h3v1h-3zM1 11h2v1h-2zM4 11h2v1h-2zM7 11h2v1h-2zM10 11h4v1h-4zM15 11h2v1h-2zM24 11h2v1h-2zM2 12h1v1h-1zM5 12h4v1h-4zM12 12h2v1h-2zM16 12h1v1h-1zM19 12h1v1h-1zM22 12h2v1h-2zM28 12h1v1h-1zM2 13h4v1h-4zM8 13h2v1h-2zM11 13h2v1h-2zM15 13h1v1h-1zM19 13h2v1h-2zM22 13h3v1h-3zM27 13h2v1h-2zM2 14h3v1h-3zM6 14h1v1h-1zM10 14h2v1h-2zM15 14h1v1h-1zM17 14h2v1h-2zM21 14h1v1h-1zM24 14h3v1h-3zM0 15h2v1h-2zM4 15h1v1h-1zM10 15h1v1h-1zM20 15h1v1h-1zM23 15h2v1h-2zM26 15h1v1h-1zM28 15h1v1h-1zM1 16h1v1h-1zM3 16h2v1h-2zM6 16h2v1h-2zM9 16h1v1h-1zM15 16h3v1h-3zM20 16h1v1h-1zM23 16h1v1h-1zM25 16h2v1h-2zM0 17h3v1h-3zM8 17h4v1h-4zM13 17h4v1h-4zM19 17h2v1h-2zM22 17h3v1h-3zM26 17h3v1h-3zM0 18h4v1h-4zM5 18h5v1h-5zM11 18h1v1h-1zM15 18h1v1h-1zM17 18h1v1h-1zM19 18h1v1h-1zM21 18h2v1h-2zM24 18h2v1h-2zM28 18h1v1h-1zM0 19h1v1h-1zM4 19h2v1h-2zM7 19h1v1h-1zM10 19h1v1h-1zM13 19h1v1h-1zM16 19h1v1h-1zM18 19h1v1h-1zM21 19h1v1h-1zM24 19h1v1h-1zM0 20h1v1h-1zM2 20h5v1h-5zM10 20h3v1h-3zM14 20h4v1h-4zM20 20h5v1h-5zM26 20h3v1h-3zM8 21h1v1h-1zM14 21h2v1h-2zM17 21h2v1h-2zM20 21h1v1h-1zM24 21h2v1h-2zM0 22h7v1h-7zM9 22h1v1h-1zM11 22h2v1h-2zM15 22h1v1h-1zM18 22h3v1h-3zM22 22h1v1h-1zM24 22h3v1h-3zM0 23h1v1h-1zM6 23h1v1h-1zM11 23h1v1h-1zM14 23h3v1h-3zM19 23h2v1h-2zM24 23h1v1h-1zM28 23h1v1h-1zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM13 24h2v1h-2zM16 24h1v1h-1zM19 24h7v1h-7zM27 24h2v1h-2zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM9 25h3v1h-3zM13 25h4v1h-4zM18 25h1v1h-1zM21 25h1v1h-1zM25 25h2v1h-2zM28 25h1v1h-1zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM11 26h5v1h-5zM18 26h10v1h-10zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h2v1h-2zM16 27h1v1h-1zM21 27h1v1h-1zM23 27h4v1h-4zM28 27h1v1h-1zM0 28h7v1h-7zM8 28h2v1h-2zM12 28h2v1h-2zM17 28h1v1h-1zM19 28h1v1h-1zM21 28h1v1h-1zM23 28h1v1h-1zM26 28h1v1h-1z"/></svg>
+        </span>
+        <span class="qr-label">Naskenuj telefónom — otvorí správny&nbsp;obchod.</span>
+      </a>
     </div>
   </div>
 </section>
@@ -1058,17 +936,17 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <a class="brand" href="#top" style="font-size:1.2rem">
+        <a class="brand" href="#top">
           <img class="mark" src="logo-m.webp" alt="" width="192" height="192" loading="lazy" decoding="async">
-          <span>Matchball</span>
+          <span>Match<b>ball</b></span>
         </a>
-        <p class="foot-about">Matchball spája hráčov, trénerov a partie. Nájdi spoluhráča, partiu alebo trénera na svoj šport v tvojom meste. 42 športov a služieb, zadarmo pre hráčov aj trénerov.</p>
+        <p class="foot-slogan on-dark">Šport nás spája. <span class="grad">My spájame vás.</span></p>
+        <p class="foot-about">Nájdi spoluhráča, partiu alebo trénera na svoj šport v tvojom meste. 42 športov a služieb, zadarmo pre hráčov aj trénerov.</p>
       </div>
       <div>
         <h3 class="foot-h">Stránka</h3>
-        <!-- Lišta má odteraz tri položky, pätička má úplný zoznam sekcií —
-             vrátane tých, ktoré z lišty vypadli. Kto hľadá „Pre hráčov" alebo
-             sekciu o spoluhráčoch, nájde ju tu. -->
+        <!-- Lišta má tri položky, pätička úplný zoznam sekcií — vrátane tých,
+             ktoré v lište nie sú. -->
         <div class="foot-links">
           <a href="/video/">Video</a>
           <a href="#hracom">Pre hráčov</a>
@@ -1092,7 +970,7 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
       </div>
     </div>
     <div class="foot-bottom">
-      <span>Matchball — Martin Mucha · Košice, Slovensko · IČO 57 799 032</span>
+      <span>Matchball — Martin Mucha · Košice, Slovensko · IČO&nbsp;57&nbsp;799&nbsp;032</span>
       <span>© <span id="year">2026</span> Matchball</span>
     </div>
   </div>
