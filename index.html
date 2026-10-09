@@ -291,6 +291,31 @@ p{margin:0}
 .duo .phone:first-child{transform:rotate(-3deg)}
 .duo .phone:last-child{transform:rotate(3deg)}
 
+/* ── Video ──────────────────────────────────────────────────
+   Zvislé video v tom istom tvare ako snímky v rámoch telefónov, ale BEZ
+   bezelu: vo videu samotnom už telefóny sú a rám v ráme by sa bil. Kým
+   človek neťukne, je to len obrázok s tlačidlom — video sa nesťahuje. */
+.clip{
+  position:relative;width:100%;max-width:292px;margin-inline:auto;
+  border-radius:30px;overflow:hidden;background:var(--ink);
+  box-shadow:var(--shadow-lift);
+}
+.clip video{display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;background:var(--ink)}
+.clip-play{
+  position:absolute;inset:0;width:100%;border:0;padding:0;cursor:pointer;
+  display:grid;place-items:center;background:linear-gradient(180deg,rgba(7,26,19,0) 45%,rgba(7,26,19,.38));
+  --focus:var(--lime);
+}
+.clip-play[hidden]{display:none}
+.clip-play span{
+  width:76px;height:76px;border-radius:50%;display:grid;place-items:center;
+  background:var(--lime);color:#06210F;box-shadow:0 14px 34px -10px rgba(0,0,0,.6);
+  transition:transform .3s var(--ease);
+}
+.clip-play:hover span{transform:scale(1.07)}
+.clip-play svg{margin-left:4px}
+.clip-play:focus-visible{outline-offset:-6px;border-radius:30px}
+
 /* ── Športy ─────────────────────────────────────────────────── */
 .sport-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px}
 .sport-cat{
@@ -401,6 +426,7 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
   .showcase{grid-template-columns:1fr;gap:34px}
   .showcase.flip .showcase-media{order:0}
   .showcase-media .phone{max-width:248px}
+  .clip{max-width:272px}
   .next-grid{grid-template-columns:1fr}
   .pay-grid{grid-template-columns:1fr}
   .foot-grid{grid-template-columns:1fr 1fr;gap:28px}
@@ -551,10 +577,44 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
   </div>
 </header>
 
+<!-- ── Video ────────────────────────────────────────────────
+     Hneď pod hero: kto nechce čítať celú stránku, dostane ju za 36 sekúnd.
+     Video je vľavo, lebo telefóny v hero stoja vpravo a v ďalších sekciách sa
+     strany striedajú. NEPREHRÁVA sa samo a `preload="none"` znamená, že sa
+     ani nezačne sťahovať (4,8 MB) — až po ťuknutí. Bez JavaScriptu ostane
+     obyčajné video s ovládaním; tlačidlo cez poster odkrýva až skript.
+     Samostatná stránka s tým istým videom je `/video/` (odkaz do mailov
+     a príspevkov). -->
+<section class="section" id="ukazka">
+  <div class="wrap">
+    <div class="showcase">
+      <div class="showcase-media reveal">
+        <div class="clip">
+          <video id="clip" src="/video/matchball.mp4" poster="/video/poster.jpg" width="720" height="1280"
+            muted playsinline controls preload="none"
+            aria-label="Video: Matchball za 36 sekúnd. Bez zvuku."></video>
+          <button class="clip-play" id="clipPlay" type="button" aria-label="Prehrať video" hidden>
+            <span><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.9l12.3-7.4a1 1 0 0 0 0-1.8L8.5 3.7A1 1 0 0 0 7 4.6z"/></svg></span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-head reveal" style="max-width:34rem">
+          <span class="eyebrow">Video</span>
+          <h2>Pozri, ako to funguje</h2>
+          <p class="lead">Celý Matchball za 36 sekúnd. Ako si nájdeš spoluhráča, partiu aj trénera a čo z toho má tréner.</p>
+        </div>
+        <p class="btn-row reveal"><a class="btn btn-green" href="/stiahnut/">Stiahnuť appku</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── Pre hráčov ───────────────────────────────────────────
      Bento: dve dlaždice so snímkou (tréneri, rezervácia) a k nim textové
      dlaždice s tým, čo appka naozaj vie. -->
-<section class="section" id="hracom">
+<section class="section" id="hracom" style="padding-top:0">
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Pre hráčov</span>
@@ -1004,6 +1064,7 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
              vrátane tých, ktoré z lišty vypadli. Kto hľadá „Pre hráčov" alebo
              sekciu o spoluhráčoch, nájde ju tu. -->
         <div class="foot-links">
+          <a href="#ukazka">Video</a>
           <a href="#hracom">Pre hráčov</a>
           <a href="#spoluhraci">Spoluhráči</a>
           <a href="#partie">Partie</a>
@@ -1052,6 +1113,39 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
       });
     });
   });
+
+  /* ── Video: sťahuje sa a hrá až po ťuknutí ─────────────────
+     Kým človek neťukne, video nemá natívne ovládanie (inak by pod naším
+     tlačidlom svietilo druhé). Po ťuknutí sa tlačidlo skryje, ovládanie sa
+     vráti a video sa rozbehne. `video_play` a `video_complete` odídu raz. */
+  var clip = document.getElementById('clip');
+  var clipPlay = document.getElementById('clipPlay');
+  if (clip && clipPlay) {
+    var clipHral = false;
+    var clipDohral = false;
+    var clipOdkry = function () { clipPlay.hidden = true; clip.controls = true; };
+    clip.controls = false;
+    clipPlay.hidden = false;
+    clipPlay.addEventListener('click', function () {
+      clipOdkry();
+      try {
+        var p = clip.play();
+        if (p && p.catch) p.catch(function () { /* ostane ovládanie videa */ });
+      } catch (e) { /* to isté */ }
+      clip.focus();
+    });
+    clip.addEventListener('playing', function () {
+      clipOdkry();
+      if (clipHral) return;
+      clipHral = true;
+      if (window.mb) window.mb('video_play', { miesto: 'home', auto: false });
+    });
+    clip.addEventListener('ended', function () {
+      if (clipDohral) return;
+      clipDohral = true;
+      if (window.mb) window.mb('video_complete', { miesto: 'home' });
+    });
+  }
 
   /* ── Hlavička: tieň po odrolovaní ──────────────────────── */
   var nav = document.getElementById('nav');

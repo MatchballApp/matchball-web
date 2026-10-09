@@ -2776,6 +2776,9 @@ ${[
     // Univerzálna stránka na stiahnutie. Statická, takže `lastmod` má taký istý
     // ako domovská — iný dátum by generátor nemal odkiaľ vziať.
     polozka(`${WEB_ORIGIN}/stiahnut/`, najnovsi, '0.8'),
+    // Stránka s propagačným videom (odkaz z mailov a príspevkov). Tiež
+    // statická, takže dátum má z toho istého zdroja.
+    polozka(`${WEB_ORIGIN}/video/`, najnovsi, '0.7'),
     ...mesta.map((m) => polozka(`${WEB_ORIGIN}/treneri/${m.slug}/`, najnovsi, '0.8')),
     ...sportyStranky.map((s) => polozka(`${WEB_ORIGIN}/treneri/${s.slug}/`, najnovsi, '0.75')),
     ...sportyStranky.flatMap((s) => s.mesta.map((m) =>
