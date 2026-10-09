@@ -29,6 +29,7 @@
 <meta property="og:url" content="https://matchballapp.com/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://matchballapp.com/">
+<link rel="preload" as="image" href="/video/poster.jpg" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -198,8 +199,9 @@ p{margin:0}
 }
 
 /* ── Hero ───────────────────────────────────────────────────
-   Jeden titulok, jedna myšlienka, dve tlačidlá. Telefóny sú CSS rámy
-   so skutočnými snímkami z appky — žiadne cudzie mockupy. */
+   Jeden titulok, jedna myšlienka, dve tlačidlá. Vpravo beží video — zvislý
+   zaoblený obdĺžnik BEZ bezelu telefónu: telefóny sú už vo videu samotnom
+   a rám v ráme by sa bil. */
 .hero{position:relative;overflow:hidden;padding:clamp(120px,15vw,168px) 0 clamp(56px,7vw,88px)}
 .hero::before{
   content:"";position:absolute;width:min(760px,120%);aspect-ratio:1;right:-14%;top:-24%;
@@ -215,10 +217,41 @@ p{margin:0}
 .hero-note b{color:var(--lime-soft);font-weight:600}
 .hero .btn-row{margin-top:30px}
 
-.hero-phones{position:relative;display:flex;justify-content:center;align-items:flex-end;min-height:clamp(380px,46vw,560px)}
-.hero-phones .phone{width:min(258px,58vw)}
-.hero-phones .phone.back{position:absolute;left:2%;bottom:8%;width:min(208px,46vw);transform:rotate(-8deg);z-index:1}
-.hero-phones .phone.front{position:relative;transform:rotate(2.5deg);z-index:2}
+.hero-video{position:relative;display:flex;justify-content:center;align-items:center;min-height:clamp(380px,46vw,560px)}
+.hero-clip{
+  position:relative;width:min(306px,74vw);border-radius:32px;overflow:hidden;background:#0B1511;
+  box-shadow:0 2px 6px rgba(0,0,0,.4),0 34px 70px -26px rgba(0,0,0,.8),0 0 90px -18px rgba(81,224,65,.3);
+}
+.hero-clip::after{content:"";position:absolute;inset:0;border-radius:32px;border:1px solid rgba(255,255,255,.16);pointer-events:none}
+.hero-clip video{display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;background:#0B1511}
+.hero-clip.js video{cursor:pointer}
+/* Dve tlačidlá na videu: zvuk (hlavné, pri prvom zobrazení s textom) vľavo
+   dole, pauza (menšie) vpravo dole. Sklo nad videom, nie plná farba —
+   hlavná akcia hero ostáva tlačidlo do obchodu. */
+.hero-clip-btn{
+  position:absolute;bottom:12px;z-index:1;height:44px;min-width:44px;border:0;padding:0;border-radius:999px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;color:#fff;background:rgba(7,26,19,.58);
+  font:inherit;font-size:.92rem;font-weight:600;line-height:1;white-space:nowrap;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  transition:background .25s var(--ease),opacity .25s var(--ease);
+}
+.hero-clip-btn[hidden]{display:none}
+.hero-clip-btn:hover,.hero-clip-btn:focus-visible{background:rgba(7,26,19,.8)}
+.hero-clip-btn:focus-visible{border-radius:999px}
+.hero-clip-sound{left:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.hero-clip-sound.with-text{padding:0 16px 0 13px}
+.hero-clip-sound:not(.with-text) .t{display:none}
+.hero-clip-sound .i-on{display:none}
+.hero-clip-sound[aria-pressed="true"] .i-on{display:block}
+.hero-clip-sound[aria-pressed="true"] .i-off{display:none}
+.hero-clip-sound[aria-pressed="true"]{background:var(--lime);color:#06210F;box-shadow:none}
+.hero-clip-toggle{right:12px;bottom:16px;height:36px;min-width:36px;opacity:.8}
+/* Viditeľný kruh má 36 px, plocha na ťuknutie 44 px. */
+.hero-clip-toggle::before{content:"";position:absolute;inset:-4px}
+.hero-clip-toggle:hover,.hero-clip-toggle:focus-visible{opacity:1}
+.hero-clip-toggle .i-play{display:none;margin-left:2px}
+.hero-clip-toggle.paused .i-play{display:block}
+.hero-clip-toggle.paused .i-pause{display:none}
 
 .stats{
   position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:18px;
@@ -291,30 +324,6 @@ p{margin:0}
 .duo .phone:first-child{transform:rotate(-3deg)}
 .duo .phone:last-child{transform:rotate(3deg)}
 
-/* ── Video ──────────────────────────────────────────────────
-   Zvislé video v tom istom tvare ako snímky v rámoch telefónov, ale BEZ
-   bezelu: vo videu samotnom už telefóny sú a rám v ráme by sa bil. Kým
-   človek neťukne, je to len obrázok s tlačidlom — video sa nesťahuje. */
-.clip{
-  position:relative;width:100%;max-width:292px;margin-inline:auto;
-  border-radius:30px;overflow:hidden;background:var(--ink);
-  box-shadow:var(--shadow-lift);
-}
-.clip video{display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;background:var(--ink)}
-.clip-play{
-  position:absolute;inset:0;width:100%;border:0;padding:0;cursor:pointer;
-  display:grid;place-items:center;background:linear-gradient(180deg,rgba(7,26,19,0) 45%,rgba(7,26,19,.38));
-  --focus:var(--lime);
-}
-.clip-play[hidden]{display:none}
-.clip-play span{
-  width:76px;height:76px;border-radius:50%;display:grid;place-items:center;
-  background:var(--lime);color:#06210F;box-shadow:0 14px 34px -10px rgba(0,0,0,.6);
-  transition:transform .3s var(--ease);
-}
-.clip-play:hover span{transform:scale(1.07)}
-.clip-play svg{margin-left:4px}
-.clip-play:focus-visible{outline-offset:-6px;border-radius:30px}
 
 /* ── Športy ─────────────────────────────────────────────────── */
 .sport-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px}
@@ -426,7 +435,6 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
   .showcase{grid-template-columns:1fr;gap:34px}
   .showcase.flip .showcase-media{order:0}
   .showcase-media .phone{max-width:248px}
-  .clip{max-width:272px}
   .next-grid{grid-template-columns:1fr}
   .pay-grid{grid-template-columns:1fr}
   .foot-grid{grid-template-columns:1fr 1fr;gap:28px}
@@ -434,9 +442,7 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
 @media (max-width:820px){
   .hero-grid{grid-template-columns:1fr;gap:38px}
   .hero-sub{max-width:none}
-  .hero-phones{min-height:0;margin-top:8px}
-  .hero-phones .phone.back{display:none}
-  .hero-phones .phone.front{transform:none}
+  .hero-video{min-height:0;margin-top:8px}
   .stats{grid-template-columns:repeat(2,1fr);gap:22px}
 }
 @media (max-width:620px){
@@ -532,7 +538,9 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
 
 <!-- ── Hero ─────────────────────────────────────────────────
      Jedna myšlienka, jeden titulok, dve tlačidlá do obchodov. Vpravo
-     skutočné snímky z appky (mapa partií vpredu, tréneri za ňou). -->
+     video (Martin, 9. 10.: úplne hore namiesto dvoch snímok a nech beží
+     samo). Na mobile stojí POD textom a tlačidlami, aby nadpis aj tlačidlo
+     na stiahnutie ostali na prvej obrazovke; video spod okraja vykúka. -->
 <header class="hero band" id="top">
   <div class="wrap">
     <div class="hero-grid">
@@ -558,12 +566,26 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
         <p class="hero-note"><b>Zadarmo</b> pre hráčov aj trénerov. Z ceny trénera si neberieme ani cent.</p>
       </div>
 
-      <div class="hero-phones">
-        <div class="phone back">
-          <img src="img/app-treneri.webp" alt="Zoznam trénerov v Košiciach s cenou za hodinu a hodnotením" width="560" height="1217" fetchpriority="high" decoding="async">
-        </div>
-        <div class="phone front">
-          <img src="img/app-mapa.webp" alt="Mapa partií v meste so značkami podľa športu" width="640" height="1391" fetchpriority="high" decoding="async">
+      <!-- Ľahšia verzia videa (540×960, 2,9 MB, so zvukom) len pre hero; plná
+           je na `/video/`. Bez `autoplay` a bez `controls`: spúšťa ho skript
+           dole, vždy STLMENÉ (inak ho prehliadač nepustí) a nie pri
+           `prefers-reduced-motion`. Zvuk si človek zapne tlačidlom alebo
+           ťuknutím na video — priamo tu, bez odchodu inam. Bez JavaScriptu
+           ostane obrázok. -->
+      <div class="hero-video">
+        <div class="hero-clip" id="heroClipBox">
+          <video id="heroClip" src="/video/matchball-hero.mp4" poster="/video/poster.jpg" width="540" height="960"
+            muted playsinline loop preload="metadata" disablepictureinpicture
+            aria-label="Video: Matchball za 36 sekúnd"></video>
+          <button class="hero-clip-btn hero-clip-sound with-text" id="heroClipSound" type="button" aria-label="Zapnúť zvuk" aria-pressed="false" hidden>
+            <svg class="i-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="m16 9.5 5 5M21 9.5l-5 5"/></svg>
+            <svg class="i-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>
+            <span class="t">Zapnúť zvuk</span>
+          </button>
+          <button class="hero-clip-btn hero-clip-toggle paused" id="heroClipToggle" type="button" aria-label="Prehrať video" hidden>
+            <svg class="i-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2"/></svg>
+            <svg class="i-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.9l12.3-7.4a1 1 0 0 0 0-1.8L8.5 3.7A1 1 0 0 0 7 4.6z"/></svg>
+          </button>
         </div>
       </div>
     </div>
@@ -577,44 +599,10 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
   </div>
 </header>
 
-<!-- ── Video ────────────────────────────────────────────────
-     Hneď pod hero: kto nechce čítať celú stránku, dostane ju za 36 sekúnd.
-     Video je vľavo, lebo telefóny v hero stoja vpravo a v ďalších sekciách sa
-     strany striedajú. NEPREHRÁVA sa samo a `preload="none"` znamená, že sa
-     ani nezačne sťahovať (4,8 MB) — až po ťuknutí. Bez JavaScriptu ostane
-     obyčajné video s ovládaním; tlačidlo cez poster odkrýva až skript.
-     Samostatná stránka s tým istým videom je `/video/` (odkaz do mailov
-     a príspevkov). -->
-<section class="section" id="ukazka">
-  <div class="wrap">
-    <div class="showcase">
-      <div class="showcase-media reveal">
-        <div class="clip">
-          <video id="clip" src="/video/matchball.mp4" poster="/video/poster.jpg" width="720" height="1280"
-            muted playsinline controls preload="none"
-            aria-label="Video: Matchball za 36 sekúnd. Bez zvuku."></video>
-          <button class="clip-play" id="clipPlay" type="button" aria-label="Prehrať video" hidden>
-            <span><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.9l12.3-7.4a1 1 0 0 0 0-1.8L8.5 3.7A1 1 0 0 0 7 4.6z"/></svg></span>
-          </button>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-head reveal" style="max-width:34rem">
-          <span class="eyebrow">Video</span>
-          <h2>Pozri, ako to funguje</h2>
-          <p class="lead">Celý Matchball za 36 sekúnd. Ako si nájdeš spoluhráča, partiu aj trénera a čo z toho má tréner.</p>
-        </div>
-        <p class="btn-row reveal"><a class="btn btn-green" href="/stiahnut/">Stiahnuť appku</a></p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ── Pre hráčov ───────────────────────────────────────────
      Bento: dve dlaždice so snímkou (tréneri, rezervácia) a k nim textové
      dlaždice s tým, čo appka naozaj vie. -->
-<section class="section" id="hracom" style="padding-top:0">
+<section class="section" id="hracom">
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Pre hráčov</span>
@@ -1064,7 +1052,7 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
              vrátane tých, ktoré z lišty vypadli. Kto hľadá „Pre hráčov" alebo
              sekciu o spoluhráčoch, nájde ju tu. -->
         <div class="foot-links">
-          <a href="#ukazka">Video</a>
+          <a href="/video/">Video</a>
           <a href="#hracom">Pre hráčov</a>
           <a href="#spoluhraci">Spoluhráči</a>
           <a href="#partie">Partie</a>
@@ -1114,36 +1102,110 @@ footer .foot-h{color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spa
     });
   });
 
-  /* ── Video: sťahuje sa a hrá až po ťuknutí ─────────────────
-     Kým človek neťukne, video nemá natívne ovládanie (inak by pod naším
-     tlačidlom svietilo druhé). Po ťuknutí sa tlačidlo skryje, ovládanie sa
-     vráti a video sa rozbehne. `video_play` a `video_complete` odídu raz. */
-  var clip = document.getElementById('clip');
-  var clipPlay = document.getElementById('clipPlay');
-  if (clip && clipPlay) {
-    var clipHral = false;
-    var clipDohral = false;
-    var clipOdkry = function () { clipPlay.hidden = true; clip.controls = true; };
-    clip.controls = false;
-    clipPlay.hidden = false;
-    clipPlay.addEventListener('click', function () {
-      clipOdkry();
+  /* ── Video v hero: beží samo a stlmené, zvuk zapína človek ───
+     Rozbehne sa až po načítaní stránky a keď je hero na obrazovke — vždy
+     stlmené, inak ho prehliadač nepustí. Zvuk zapne tlačidlo alebo ťuknutie
+     na video; vtedy ide video od začiatku, aby hudba sedela so strihom.
+     Keď hero odíde z obrazovky, video zastane A stlmí sa (hudba nesmie hrať
+     mimo záberu); po návrate pokračuje stlmené. Skrytá karta = pauza.
+     Kto si ho zastavil tlačidlom, tomu sa samo znova nepustí. Pri
+     `prefers-reduced-motion` sa samo nespustí vôbec.
+     `video_play` odíde raz pri prvom skutočnom rozbehnutí (`playing`),
+     `video_sound_on` raz pri prvom zapnutí zvuku, `video_complete` raz pri
+     prvom pretočení slučky — pri `loop` udalosť `ended` nepríde, preto sa
+     sleduje skok času z konca na začiatok. */
+  var hc = document.getElementById('heroClip');
+  var hcBtn = document.getElementById('heroClipToggle');
+  var hcZvuk = document.getElementById('heroClipSound');
+  if (hc && hcBtn && hcZvuk) {
+    var hcPoslat = function (u, v) { if (window.mb) window.mb(u, v); };
+    var hcRucne = false;      // posledné spustenie prišlo od človeka
+    var hcStop = reduce;      // človek (alebo jeho nastavenie) nechce, aby bežalo
+    var hcVidno = false;
+    var hcHral = false;
+    var hcDohral = false;
+    var hcZvukPoslany = false;
+    var hcCas = 0;
+    var hcStav = function () {
+      var stoji = hc.paused;
+      hcBtn.classList.toggle('paused', stoji);
+      hcBtn.setAttribute('aria-label', stoji ? 'Prehrať video' : 'Pozastaviť video');
+      var hra = !hc.muted;
+      hcZvuk.setAttribute('aria-pressed', hra ? 'true' : 'false');
+      hcZvuk.setAttribute('aria-label', hra ? 'Vypnúť zvuk' : 'Zapnúť zvuk');
+    };
+    var hcPusti = function () {
       try {
-        var p = clip.play();
-        if (p && p.catch) p.catch(function () { /* ostane ovládanie videa */ });
-      } catch (e) { /* to isté */ }
-      clip.focus();
+        var p = hc.play();
+        // Odmietnuté spustenie (šetrič dát, nastavenie prehliadača, zvuk bez
+        // ťuknutia): skús ešte raz stlmené, inak ostane obrázok a tlačidlá.
+        if (p && p.catch) p.catch(function () {
+          if (!hc.muted) { hc.muted = true; hcPusti(); return; }
+          hcStav();
+        });
+      } catch (e) { hcStav(); }
+    };
+    var hcPrepniZvuk = function () {
+      hcZvuk.classList.remove('with-text');   // text len do prvého ťuknutia
+      if (hc.muted) {
+        hc.muted = false;
+        hcCas = 0;
+        try { hc.currentTime = 0; } catch (e) { /* ešte bez metadát */ }
+        hcStop = false;
+        if (!hcHral) hcRucne = true;
+        hcPusti();
+        if (!hcZvukPoslany) { hcZvukPoslany = true; hcPoslat('video_sound_on', { miesto: 'hero' }); }
+      } else {
+        hc.muted = true;
+      }
+      hcStav();
+    };
+    document.getElementById('heroClipBox').classList.add('js');
+    hc.muted = true;
+    hcBtn.hidden = false;
+    hcZvuk.hidden = false;
+    hcStav();
+    hcZvuk.addEventListener('click', hcPrepniZvuk);
+    hc.addEventListener('click', hcPrepniZvuk);
+    hcBtn.addEventListener('click', function () {
+      if (hc.paused) { hcStop = false; if (!hcHral) hcRucne = true; hcPusti(); }
+      else { hcStop = true; hc.pause(); }
     });
-    clip.addEventListener('playing', function () {
-      clipOdkry();
-      if (clipHral) return;
-      clipHral = true;
-      if (window.mb) window.mb('video_play', { miesto: 'home', auto: false });
+    hc.addEventListener('play', hcStav);
+    hc.addEventListener('pause', hcStav);
+    hc.addEventListener('volumechange', hcStav);
+    hc.addEventListener('playing', function () {
+      hcStav();
+      if (hcHral) return;
+      hcHral = true;
+      hcPoslat('video_play', { miesto: 'hero', auto: !hcRucne });
     });
-    clip.addEventListener('ended', function () {
-      if (clipDohral) return;
-      clipDohral = true;
-      if (window.mb) window.mb('video_complete', { miesto: 'home' });
+    var hcKoniec = function () {
+      if (hcDohral) return;
+      hcDohral = true;
+      hcPoslat('video_complete', { miesto: 'hero' });
+    };
+    hc.addEventListener('timeupdate', function () {
+      var t = hc.currentTime;
+      var d = hc.duration;
+      if (d && hcCas > d - 1.5 && t < 1.5) hcKoniec();
+      hcCas = t;
+    });
+    hc.addEventListener('ended', hcKoniec);
+
+    var hcSleduj = function () {
+      if (!('IntersectionObserver' in window)) { if (!hcStop) hcPusti(); return; }
+      new IntersectionObserver(function (zaznamy) {
+        hcVidno = zaznamy[zaznamy.length - 1].isIntersecting;
+        if (hcVidno) { if (!hcStop && hc.paused && !document.hidden) hcPusti(); }
+        else { hc.pause(); hc.muted = true; hcStav(); }
+      }, { threshold: 0.2 }).observe(hc);
+    };
+    if (document.readyState === 'complete') hcSleduj();
+    else window.addEventListener('load', hcSleduj);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) hc.pause();
+      else if (hcVidno && !hcStop && hc.paused) hcPusti();
     });
   }
 

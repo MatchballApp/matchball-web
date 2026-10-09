@@ -62,11 +62,22 @@ p.lead{color:var(--fg)}
    video na celú šírku vytlačilo tlačidlo na stiahnutie pod okraj obrazovky,
    a kvôli tomu tlačidlu táto stránka existuje. `aspect-ratio` drží miesto
    ešte pred načítaním, takže stránka pod videom neposkočí. */
-.ram{width:min(100%,380px,calc(60vh * 9 / 16));margin:1.2rem auto 0;
+.ram{position:relative;width:min(100%,380px,calc(60vh * 9 / 16));margin:1.2rem auto 0;
   border-radius:26px;overflow:hidden;background:var(--ink);
   box-shadow:0 2px 6px rgba(7,26,19,.07),0 28px 56px -20px rgba(7,26,19,.34)}
 @supports (height:1svh){.ram{width:min(100%,380px,calc(60svh * 9 / 16))}}
 .ram video{display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;background:var(--ink)}
+
+/* Video sa samo pustí len stlmené. Tlačidlo hore na videu (dole je natívne
+   ovládanie) zvuk zapne a pustí video od začiatku; kým zvuk hrá, je skryté —
+   hlasitosť potom drží ovládanie videa. */
+.zvuk{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:1;
+  display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 20px 0 16px;
+  border:0;border-radius:999px;background:var(--lime);color:#06210F;cursor:pointer;
+  font-family:inherit;font-size:1rem;font-weight:700;line-height:1;white-space:nowrap;
+  box-shadow:0 10px 26px -10px rgba(0,0,0,.7)}
+.zvuk[hidden]{display:none}
+.zvuk:focus-visible{outline-color:#fff;border-radius:999px}
 
 .slogan{margin:1.3rem 0 1rem;color:var(--fg);font-size:1.22rem;font-weight:700;
   letter-spacing:-.02em;line-height:1.25}
@@ -153,12 +164,18 @@ html.ios #other,html.android #other{display:none}
   <p class="lead">Spoluhráč, partia aj tréner nablízko.</p>
 
   <!-- Bez atribútu `autoplay`: prehrávanie spúšťa skript nižšie, aby ho vedel
-       vynechať pri `prefers-reduced-motion`. Video nemá zvukovú stopu; `muted`
-       je tu preto, aby ho prehliadače pustili aj bez ťuknutia. -->
+       vynechať pri `prefers-reduced-motion`. Video má hudbu; `muted` je tu
+       preto, aby ho prehliadače pustili aj bez ťuknutia. Zvuk zapína
+       tlačidlo na videu (odkrýva ho skript), bez JavaScriptu natívne
+       ovládanie. -->
   <div class="ram">
     <video id="video" src="/video/matchball.mp4" poster="/video/poster.jpg"
       width="720" height="1280" muted playsinline controls preload="metadata"
-      aria-label="Video: Matchball za 36 sekúnd. Bez zvuku, prepis je pod tlačidlami."></video>
+      aria-label="Video: Matchball za 36 sekúnd. Prepis je pod tlačidlami."></video>
+    <button class="zvuk" id="zvuk" type="button" aria-pressed="false" hidden>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>
+      Zapnúť zvuk
+    </button>
   </div>
 
   <p class="slogan">Šport nás spája. My spájame vás.</p>
@@ -242,6 +259,33 @@ html.ios #other,html.android #other{display:none}
     dopozerane = true;
     poslat('video_complete', { miesto: 'video' });
   });
+
+  // Zvuk: tlačidlo je vidno, kým je video stlmené. Zapnutie pustí video od
+  // začiatku, nech hudba sedí so strihom. Potom už stránka zvuk sama
+  // nestlmí — vypnúť ho môže len človek ovládaním videa. `video_sound_on`
+  // odíde raz, aj keď si zvuk zapol natívnym ovládaním.
+  var zvuk = document.getElementById('zvuk');
+  var zvukPoslany = false;
+  var zvukStav = function () {
+    var hra = !v.muted && v.volume > 0;
+    if (zvuk) zvuk.hidden = hra;
+    if (hra && !zvukPoslany) { zvukPoslany = true; poslat('video_sound_on', { miesto: 'video' }); }
+  };
+  v.addEventListener('volumechange', zvukStav);
+  if (zvuk) {
+    zvuk.hidden = false;
+    zvuk.addEventListener('click', function () {
+      v.muted = false;
+      if (!v.volume) v.volume = 1;
+      try { v.currentTime = 0; } catch (e) { /* ešte bez metadát */ }
+      try {
+        var p = v.play();
+        if (p && p.catch) p.catch(function () { /* ostane ovládanie videa */ });
+      } catch (e) { /* to isté */ }
+      zvukStav();
+      v.focus();
+    });
+  }
 
   var menejPohybu = false;
   try { menejPohybu = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* starý prehliadač */ }
