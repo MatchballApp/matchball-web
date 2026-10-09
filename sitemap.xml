@@ -31,6 +31,11 @@
     <priority>0.75</priority>
   </url>
   <url>
+    <loc>https://matchballapp.com/treneri/florbal/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
     <loc>https://matchballapp.com/treneri/fitnes/</loc>
     <lastmod>2026-10-09</lastmod>
     <priority>0.75</priority>
@@ -41,7 +46,17 @@
     <priority>0.75</priority>
   </url>
   <url>
+    <loc>https://matchballapp.com/treneri/box-a-kickbox/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
     <loc>https://matchballapp.com/treneri/stolny-tenis/kosice/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/florbal/kosice/</loc>
     <lastmod>2026-10-09</lastmod>
     <priority>0.7</priority>
   </url>
@@ -56,6 +71,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://matchballapp.com/treneri/box-a-kickbox/kosice/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://matchballapp.com/skupiny/</loc>
     <lastmod>2026-09-24</lastmod>
     <priority>0.8</priority>
@@ -66,6 +86,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://matchballapp.com/t/igor-cur/</loc>
+    <lastmod>2026-09-29</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://matchballapp.com/t/dominika-hrabovska/</loc>
     <lastmod>2026-10-09</lastmod>
     <priority>0.7</priority>
@@ -73,6 +98,11 @@
   <url>
     <loc>https://matchballapp.com/t/martin-mucha/</loc>
     <lastmod>2026-09-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/t/peter-vrba/</loc>
+    <lastmod>2026-10-08</lastmod>
     <priority>0.7</priority>
   </url>
 </urlset>
