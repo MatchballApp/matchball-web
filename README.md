@@ -117,7 +117,7 @@ Generátor z neho stavia `SPORT_ORDER`/`SPORT_NAZOV`/`SPORT_GENITIV`/`SPORT_SLUG
 aj zoznam služieb (`SPORT_DRUH`); cenník služby (fyzioterapia a pod.) číta
 z `pricing_by_sport[<kód>].items`, nie z hodinových pásiem.
 
-Maskoti skupín v `avatary/` sú zmenšené kópie `src/assets/avatars/` z repa
+Maskoti skupín v `avatary/` sú zmenšené kópie (320 px) `src/assets/avatars/` z repa
 appky (224 px, JPEG). Generátor ich nesťahuje — sú v repe natrvalo a odkazuje
 sa na ne podľa `avatar_id`. Keď v appke pribudne nový maskot, treba jeho
 obrázok doniesť sem, inak karta skupiny ukáže logo.
