@@ -228,6 +228,81 @@ footer a{display:inline-block;padding:11px 4px}
 
   document.getElementById(isAndroid ? 'android' : isIOS ? 'ios' : 'other').hidden = false;
 
+  // ── Pozvánka cez App Store (migrácia 477 v repe appky) ───────────────────
+  // App Store na rozdiel od Play kód appke neodovzdá. Stránka preto serveru
+  // povie „pozvánka KOD bola otvorená z takéhoto iPhonu" a appka sa pri prvom
+  // spustení spýta, či tam pre ňu niečo čaká — kód sa v registrácii doplní
+  // sám, bez návratu sem. Server si na 24 hodín nechá hash IP adresy (nie
+  // adresu) a znaky nižšie; páruje len pri jednoznačnej zhode.
+  //
+  // Len iPhone: Android má istú cestu cez `referrer` v odkaze na Play.
+  // „Appku už mám" a kód na opísanie ostávajú ako záloha (iná sieť medzi
+  // ťuknutím a otvorením appky, iCloud Private Relay).
+  //
+  // ZNAKY ZARIADENIA musia byť znak po znaku tie isté, aké skladá appka
+  // (`src/services/referral.ts`, `deviceSignature`):
+  //   ios|<kratšia>x<dlhšia strana displeja v bodoch>|<jazyk>|<posun pásma v min>
+  //   napr.  ios|393x852|sk|-120
+  //   • displej: `screen.width/height` (v Safari na iOS sú to body), menšie prvé,
+  //   • jazyk: `navigator.language`, len hlavná časť malými (`sk-SK` → `sk`),
+  //   • pásmo: `new Date().getTimezoneOffset()`.
+  // Zmena tu bez zmeny v appke = nespáruje sa nikto.
+  function znakyZariadenia() {
+    try {
+      var a = Math.round(Math.min(screen.width, screen.height));
+      var b = Math.round(Math.max(screen.width, screen.height));
+      var jazyk = String(navigator.language || '').split(/[-_]/)[0].toLowerCase();
+      var posun = Math.round(new Date().getTimezoneOffset());
+      var znaky = 'ios|' + a + 'x' + b + '|' + jazyk + '|' + posun;
+      return /^ios\|\d{3,4}x\d{3,4}\|[a-z]{2,3}\|-?\d{1,3}$/.test(znaky) ? znaky : '';
+    } catch (e) { return ''; }
+  }
+
+  // Číslo TOHTO otvorenia stránky: načítanie aj ťuknutie na obchod sú na
+  // serveri jeden riadok. Žije len v pamäti stránky, nikam sa neukladá.
+  function cisloOtvorenia() {
+    var s = '';
+    try {
+      var p = new Uint8Array(12);
+      (window.crypto || window.msCrypto).getRandomValues(p);
+      for (var i = 0; i < p.length; i++) s += ('0' + p[i].toString(16)).slice(-2);
+    } catch (e) {
+      while (s.length < 24) s += Math.random().toString(36).slice(2);
+      s = s.replace(/[^a-z0-9]/g, '').slice(0, 24);
+    }
+    return s;
+  }
+
+  var znaky = isIOS && /^[A-Za-z0-9]{6}$/.test(ref)
+    && !/bot|crawl|spider|headless|lighthouse|preview/i.test(ua) ? znakyZariadenia() : '';
+  var otvorenie = znaky ? cisloOtvorenia() : '';
+
+  // Verejný (anon) kľúč produkčného projektu — ten istý, čo nesie appka.
+  // Funkcia nič nevracia a chyby sa zahadzujú: pozvánka musí fungovať aj bez
+  // nej. `keepalive`, aby volanie prežilo odchod do App Store.
+  function zapisOtvorenie() {
+    if (!znaky || !window.fetch) return;
+    try {
+      fetch('https://hpfcyriuitwbwtluaxbu.supabase.co/rest/v1/rpc/record_invite_click', {
+        method: 'POST',
+        keepalive: true,
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'sb_publishable_Ywd12xRPKBMQ8a6V7uyLhQ_nvmTabEU'
+        },
+        body: JSON.stringify({ p_code: ref, p_device: znaky, p_click: otvorenie, p_source: zdroj || null })
+      }).catch(function () { /* ticho */ });
+    } catch (e) { /* ticho */ }
+  }
+
+  zapisOtvorenie();
+  // Druhýkrát pri ťuknutí na obchod: človek mohol medzitým prejsť z Wi-Fi na
+  // dáta a server si pri tom istom čísle otvorenia odtlačok len osvieži.
+  // Odkaz sa nemení a nič sa nezdržiava — do obchodu ide tak ako predtým.
+  [].forEach.call(document.querySelectorAll('#ios a.btn:not(.open-app)'), function (a) {
+    a.addEventListener('click', zapisOtvorenie);
+  });
+
   // ── Androidová čakačka (edge funkcia `waitlist`, migrácia 308) ───────────
   var form = document.getElementById('waitForm');
   if (!form) return;
