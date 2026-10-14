@@ -29,7 +29,7 @@
 <meta property="og:url" content="https://matchballapp.com/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://matchballapp.com/">
-<link rel="preload" as="image" href="/video/poster-9x14.jpg" fetchpriority="high">
+<link rel="preload" as="image" href="/video/poster-9x14.jpg?v=2" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -601,7 +601,7 @@ footer .foot-h{color:#fff;margin:0 0 14px;text-transform:uppercase;letter-spacin
         </div>
       </div>
 
-      <!-- Ľahšia verzia videa (720×1120, 3,2 MB, so zvukom) len pre hero; plná
+      <!-- Ľahšia verzia videa (720×1120, 2,3 MB, so zvukom) len pre hero; plná
            je na `/video/`. Obe sú orezané z 9:16 na 9:14: preč je prázdny
            horný pás, ktorý zvislé video potrebuje len na Instagrame. Bez `autoplay` a bez `controls`: spúšťa ho skript
            dole, vždy STLMENÉ (inak ho prehliadač nepustí) a nie pri
@@ -610,7 +610,7 @@ footer .foot-h{color:#fff;margin:0 0 14px;text-transform:uppercase;letter-spacin
            ostane obrázok. -->
       <div class="hero-video">
         <div class="hero-clip" id="heroClipBox">
-          <video id="heroClip" src="/video/matchball-hero-9x14.mp4" poster="/video/poster-9x14.jpg" width="720" height="1120"
+          <video id="heroClip" src="/video/matchball-hero-9x14.mp4?v=2" poster="/video/poster-9x14.jpg?v=2" width="720" height="1120"
             muted playsinline loop preload="metadata" disablepictureinpicture
             aria-label="Video: Matchball za 36 sekúnd"></video>
           <button class="hero-clip-btn hero-clip-sound with-text" id="heroClipSound" type="button" aria-label="Zapnúť zvuk" aria-pressed="false" hidden>
