@@ -411,7 +411,7 @@ footer .brand{font-size:1.2rem;color:#fff}
   .grid-groups.solo{margin-bottom:64px}
 }
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Partie","url":"https://matchballapp.com/skupiny/","numberOfItems":2,"itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"SportsEvent","name":"Sunday Running Club","url":"https://matchballapp.com/skupiny/kosice/","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode","location":{"@type":"Place","name":"Park Anicka","address":{"@type":"PostalAddress","addressLocality":"Košice"}},"startDate":"2026-10-18T08:00:00+00:00","organizer":{"@type":"Person","name":"Martin"}}},{"@type":"ListItem","position":2,"item":{"@type":"SportsEvent","name":"Ja sam","url":"https://matchballapp.com/skupiny/kosice/","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode","location":{"@type":"Place","name":"Košice","address":{"@type":"PostalAddress","addressLocality":"Košice"}},"organizer":{"@type":"Person","name":"Andrej"}}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Partie","url":"https://matchballapp.com/skupiny/","numberOfItems":4,"itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"SportsEvent","name":"Sunday Running Club","url":"https://matchballapp.com/skupiny/kosice/","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode","location":{"@type":"Place","name":"Park Anicka","address":{"@type":"PostalAddress","addressLocality":"Košice"}},"startDate":"2026-10-18T08:00:00+00:00","organizer":{"@type":"Person","name":"Martin"}}},{"@type":"ListItem","position":2,"item":{"@type":"SportsEvent","name":"Ja sam","url":"https://matchballapp.com/skupiny/kosice/","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode","location":{"@type":"Place","name":"Košice","address":{"@type":"PostalAddress","addressLocality":"Košice"}},"organizer":{"@type":"Person","name":"Andrej"}}},{"@type":"ListItem","position":3,"item":{"@type":"SportsEvent","name":"Volleyball · Bratislava","url":"https://matchballapp.com/skupiny/bratislava/","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode","location":{"@type":"Place","name":"Bratislava","address":{"@type":"PostalAddress","addressLocality":"Bratislava"}},"organizer":{"@type":"Person","name":"ccllbx"}}},{"@type":"ListItem","position":4,"item":{"@type":"SportsEvent","name":"Koralsport","url":"https://matchballapp.com/skupiny/poprad/","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode","location":{"@type":"Place","name":"Matejovce","address":{"@type":"PostalAddress","addressLocality":"Poprad"}},"startDate":"2026-10-16T16:00:00+00:00","organizer":{"@type":"Person","name":"Slavomír"}}}]}</script>
 <script src="/m.js" defer></script>
 </head>
 <body>
@@ -463,7 +463,17 @@ footer .brand{font-size:1.2rem;color:#fff}
     <p class="lead">Hľadáš partiu na šport? Tieto hrávajú pravidelne a berú nových hráčov. Vyber si mesto a pozri sa, kedy hrajú.</p>
   </header>
 
-  
+  <div class="filters">
+    <div class="frow">
+      <span class="flabel" id="f-sport">Šport</span>
+      <div class="fchips" role="group" aria-labelledby="f-sport" id="filter-sport">
+        <button class="fpill" type="button" data-sport="" aria-current="true">Všetky <span class="n">4</span></button>
+        <button class="fpill" type="button" data-sport="badminton"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.2" r="1.6"></circle><path d="M12 6v3M8.2 20.5L10.6 9M15.8 20.5L13.4 9M5.2 17L10 9M18.8 17L14 9"></path></svg>Bedminton <span class="n">1</span></button>
+        <button class="fpill" type="button" data-sport="volleyball"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"></circle><path d="M12 3.4v17.2M4 8.6h16M4 15.4h16"></path></svg>Volejbal <span class="n">1</span></button>
+        <button class="fpill" type="button" data-sport="running"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5.4" r="2"></circle><path d="M12 8v5.4M12 13.4l-4 7M12 13.4l4 7M8.4 10l3.6 1.6 3.6-3"></path></svg>Beh <span class="n">2</span></button>
+      </div>
+    </div>
+  </div>
   <section class="city-groups">
     <h2>Košice <span>2 partie</span></h2>
     <div class="grid-groups">
@@ -494,6 +504,50 @@ footer .brand{font-size:1.2rem;color:#fff}
         </div>
         
         <p class="group-org"><img src="/avatary/mc1.jpg" alt="" width="224" height="224" loading="lazy">Organizuje Andrej</p>
+        <div class="group-foot">
+          <div class="group-spots"><b>3 členovia</b><span>pridá sa, kto chce</span></div>
+          <a class="btn btn-green btn-sm" href="#pridat-sa">Pridať sa</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="city-groups">
+    <h2>Bratislava <span>1 partia</span></h2>
+    <div class="grid-groups">
+      <article class="group-card" data-sport="volleyball">
+        <p class="group-sport">Volejbal · Všetky úrovne</p>
+        <div class="group-head">
+          <img class="group-avatar" src="/avatary/mc1.jpg" alt="" width="224" height="224" loading="lazy">
+          <div>
+            <h3>Volleyball · Bratislava</h3>
+            
+          </div>
+        </div>
+        
+        <p class="group-org"><img src="/avatary/mc1.jpg" alt="" width="224" height="224" loading="lazy">Organizuje ccllbx</p>
+        <div class="group-foot">
+          <div class="group-spots"><b>1 člen</b><span>pridá sa, kto chce</span></div>
+          <a class="btn btn-green btn-sm" href="#pridat-sa">Pridať sa</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="city-groups">
+    <h2>Poprad <span>1 partia</span></h2>
+    <div class="grid-groups">
+      <article class="group-card" data-sport="badminton">
+        <p class="group-sport">Bedminton · Všetky úrovne</p>
+        <div class="group-head">
+          <img class="group-avatar" src="/avatary/mc1.jpg" alt="" width="224" height="224" loading="lazy">
+          <div>
+            <h3>Koralsport</h3>
+            <p class="group-when">Matejovce · Pondelok a piatok 18:00–20:00</p>
+          </div>
+        </div>
+        
+        <p class="group-org"><img src="/avatary/mc1.jpg" alt="" width="224" height="224" loading="lazy">Organizuje Slavomír</p>
         <div class="group-foot">
           <div class="group-spots"><b>3 členovia</b><span>pridá sa, kto chce</span></div>
           <a class="btn btn-green btn-sm" href="#pridat-sa">Pridať sa</a>
@@ -572,6 +626,25 @@ footer .brand{font-size:1.2rem;color:#fff}
     </div>
   </div>
 </footer>
-
+<script>
+(function(){
+  'use strict';
+  var lista = document.getElementById('filter-sport');
+  if (!lista) return;
+  var cipy = [].slice.call(lista.querySelectorAll('.fpill'));
+  var karty = [].slice.call(document.querySelectorAll('.group-card'));
+  var sekcie = [].slice.call(document.querySelectorAll('.city-groups'));
+  lista.addEventListener('click', function(e){
+    var cip = e.target.closest('.fpill');
+    if (!cip) return;
+    var sport = cip.getAttribute('data-sport');
+    cipy.forEach(function(c){
+      if (c === cip) c.setAttribute('aria-current', 'true'); else c.removeAttribute('aria-current');
+    });
+    karty.forEach(function(k){ k.hidden = !!sport && k.getAttribute('data-sport') !== sport; });
+    sekcie.forEach(function(s){ s.hidden = !s.querySelector('.group-card:not([hidden])'); });
+  });
+})();
+</script>
 </body>
 </html>
