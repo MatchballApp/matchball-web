@@ -93,25 +93,60 @@ footer :focus-visible{outline-color:var(--lime)}
 <main>
 <nav class="jazyky" aria-label="Jazyk"><a href="./privacy.sk.html">Slovensky</a><a href="./privacy.cs.html">Česky</a><a href="./privacy.en.html" aria-current="page">English</a></nav>
 <h1>Privacy Policy</h1>
-<p class="updated">Last updated: 10 October 2026</p>
+<p class="updated">Last updated: 16 October 2026</p>
 <h2>Data controller</h2>
-<p>The controller is Matchball, Martin Mucha, Košice, Slovakia, company ID 57 799 032, contact support@matchballapp.com. We process your personal data in accordance with the GDPR (EU) 2016/679.</p>
+<p>The controller is Matchball, Martin Mucha, sole trader, Jilemnického 1142/8, 040 01 Košice, Slovakia, company ID 57 799 032, contact support@matchballapp.com. We process your personal data in accordance with the GDPR (EU) 2016/679.</p>
 <h2>What we collect</h2>
-<p>Name, email, date of birth, gender, country, profile photo (or chosen avatar) and details of your bookings, reviews and messages. For coaches also city, pricing, years of experience, licence number and training location. We do not collect phone numbers. When you open an invite on matchballapp.com on an iPhone, we store a fingerprint (hash) of your IP address — not the address itself — together with your screen size, language and time zone, so the app can recognise the invite after installation and you do not have to type the code; we delete them after 24 hours and use them for nothing else.</p>
+<p>Name, email, date of birth, gender, country, profile photo (or chosen avatar) and details of your bookings, reviews and messages. For coaches also city, pricing, years of experience, licence number and training location. For coaches also company ID, tax ID, address and IBAN (for direct payments) and the verification documents they upload. Also photos you send in a private chat or group, records of rewards (mystery boxes) and invites, and credit records in groups. We do not collect phone numbers. When you open an invite on matchballapp.com on an iPhone, we store a fingerprint (hash) of your IP address — not the address itself — together with your screen size, language and time zone, so the app can recognise the invite after installation and you do not have to type the code; we delete them after 24 hours and use them for nothing else.</p>
 <h2>Purpose</h2>
 <p>We use your data to connect players with coaches, process payments, enable communication, keep the service safe and meet our legal obligations.</p>
+<h2>Legal basis and retention</h2>
+<p>For each purpose we give the legal basis under Art. 6 GDPR and the retention period.</p>
+<p>Account, profile, bookings, chat and payments → performance of a contract (Art. 6(1)(b)) → while you have an account.</p>
+<p>Payment records and accounting → legal obligation (point c) → 10 years.</p>
+<p>Coaches’ tax and identification data (company ID, tax ID, address, IBAN) and DAC7 reporting → legal obligation (point c) → 10 years.</p>
+<p>Coach verification (licence, documents) → legitimate interest in safety and trust (point f) → document file 30 days after the verification decision; the record of the outcome while you have an account.</p>
+<p>Photo checks, reports and moderation → legitimate interest and legal obligation under the Digital Services Act (points f, c) → a profile photo is visible only to its author until decided; report records while you have an account.</p>
+<p>Phone notifications → performance of a contract (training reminders, messages) → while you have an account.</p>
+<p>Location → consent (point a) → not stored.</p>
+<p>Usage statistics (PostHog) → consent (point a), withdrawable in Settings → until you withdraw consent or delete the account.</p>
+<p>Crash reports (Sentry) → legitimate interest in service stability (point f) → as long as needed to fix the bug.</p>
+<p>Recognising an invite on iPhone → legitimate interest (point f) → 24 hours.</p>
+<p>Invite and game rewards (mystery boxes) → performance of a contract and legitimate interest in preventing abuse (points b, f) → while you have an account.</p>
+<p>Community chats → performance of a contract (point b) → messages 180 days.</p>
+<p>Chat photos → performance of a contract (point b) → until the message is deleted, at most 1 year.</p>
+<p>Credit in groups → performance of a contract and legitimate interest (points b, f) → while the group exists; see Backups.</p>
+<p>Public coach profile with reviews → performance of a contract and legitimate interest (points b, f) → while you have an account.</p>
 <h2>Location</h2>
 <p>If you allow it, we use your approximate device location to show nearby coaches and local weather. We do not store your location or track you in the background. You can revoke the permission in your phone settings at any time.</p>
 <h2>Notifications</h2>
-<p>If you allow notifications, we store a device token so we can send you training reminders and messages. They are delivered by Expo via the Apple Push Notification service (iPhone) and Google Firebase Cloud Messaging (Android).</p>
+<p>If you allow notifications, we store a device token (push token) so we can send you training reminders and messages. They are delivered by Expo via the Apple Push Notification service (iPhone) and Google Firebase Cloud Messaging (Android). You can turn notifications off in your phone settings at any time.</p>
 <h2>Payments</h2>
 <p>Payments are processed by Stripe Payments Europe. Card details never reach us — Stripe stores them. Coaches complete identity verification (KYC) directly with Stripe. If a coach opts for direct payment, we also store their bank account IBAN and show it to the player at booking so they can make the transfer.</p>
 <h2>Tax reporting (DAC7)</h2>
 <p>As a platform we are required by the DAC7 directive to report coaches’ identification and tax details, along with their Matchball earnings, to the tax authority once a year. This data is kept separate from the public profile and concerns coaches only.</p>
 <h2>Who we share with</h2>
-<p>Supabase (database and files, EU), Stripe (payments), Expo (notifications), Sentry (crash reports — we send only an account identifier, never your name or email), PostHog (anonymous usage statistics, EU servers — which screens and features you use, with an account identifier, never your name, email, messages or payment details; you can turn it off in Settings; on the matchballapp.com website we count visits and link taps without cookies and without any identifier), Google (sign-in, if you use it, the map on Android and automated screening of your profile photo for inappropriate content), Apple (sign-in, if you use it, and weather forecasts — only the coordinates of the training location are sent), the Slovak register of individuals in sport (when a coach verifies a coaching licence, the IDFO identifier they entered is sent there) and the tax authority as required by DAC7. We do not sell your data or use it for advertising.</p>
+<p>Supabase (database and files, EU), Stripe (payments), Expo (notifications), Sentry (crash reports — we send only an account identifier, never your name or email), PostHog (“Usage statistics”, only with your consent, EU servers — which screens and features you use, pseudonymously, i.e. with an account identifier, never your name, email, messages or payment details; you can withdraw consent in Settings; on the matchballapp.com website we count visits and link taps without cookies and without any identifier), Google (sign-in, if you use it, the map on Android, notifications on Android and automated screening of your profile photo and chat photos for inappropriate content via Google Vision SafeSearch), Apple (sign-in, if you use it, and weather forecasts — only the coordinates of the training location are sent), the Slovak register of individuals in sport (when a coach verifies a coaching licence, the IDFO identifier they entered is sent there) and the tax authority as required by DAC7. GitHub (website hosting and private backup), Expo (also for building and updating the app). We do not sell your data or use it for advertising.</p>
+<h2>Transfers outside the EU</h2>
+<p>The database and files (Supabase), statistics (PostHog), crash reports (Sentry) and payments (Stripe Payments Europe) are in the EU. Some providers may also process your data in the USA: Expo/EAS (notifications, app updates), Google (Vision for photo checks, Firebase Cloud Messaging, Google Play, sign-in), Apple (APNs, Sign in with Apple, weather), Stripe and GitHub (website hosting and backup). Transfers to the USA rely on the EU-US Data Privacy Framework where the provider is certified under it, and otherwise on the European Commission’s Standard Contractual Clauses (SCC).</p>
+<h2>Community chats</h2>
+<p>Community chats (All Slovakia / All Czechia and your city chat) are visible to all their members. We add you to the country and city chat automatically based on the country and city in your profile; members see your name and profile photo next to your messages. You can leave a community at any time. Messages in community chats are deleted after 180 days; photos cannot be sent in them. Communities are moderated by a Matchball administrator.</p>
+<h2>Chat photos</h2>
+<p>You can send photos in private chats and in groups. We store them in private storage and only members of that conversation can see them. Every photo is automatically checked for inappropriate content before it is sent (Google Vision SafeSearch); a photo that fails the check is not sent and is deleted. An administrator does not see a photo unless someone reports it. We delete the photo together with a deleted message and at the latest one year after it was sent.</p>
+<h2>Coach documents</h2>
+<p>Documents for coach verification (e.g. a coaching licence) are uploaded to private storage; you and the Matchball administrator who decides on verification can see them. We delete the document file 30 days after the verification decision (or earlier if you delete your account); only a record that verification took place and its outcome remains.</p>
+<h2>Credit in groups</h2>
+<p>A group can keep a shared credit (who paid in and who paid what). Entries (amounts, dates, member names) are visible to group members. Matchball does not process money through the credit; it only records it. Besides the database we back it up once a day (see Backups).</p>
+<h2>Public coach profile and reviews</h2>
+<p>A coach profile (name, photo, city, sports, pricing, reviews) is public, including on matchballapp.com, and may appear in search engines. For reviews, the public page shows the reviewer’s first name and the first letter of the surname (e.g. “Peter N.”), their photo and the text. An anonymous review is shown in the app without the author’s name and is not shown on the public web page. Player reviews are visible to coaches only.</p>
+<h2>Automated checks</h2>
+<p>A profile photo is automatically checked for inappropriate content after upload (Google Vision SafeSearch). Until a decision, only its author can see it. If the check fails or is unsure, a person (administrator) decides. A chat photo is checked before sending; if it fails, it is not sent and you can send another. We make no other decision about you solely by automated means.</p>
+<h2>Rewards and invites</h2>
+<p>When you invite a friend and they complete registration, you both get an in-game reward (mystery boxes). For that we record who invited whom (invite code) and the rewards you received. Rewards cannot be purchased and have no monetary value.</p>
+<h2>Backups</h2>
+<p>The main database runs on the provider’s infrastructure in the EU (Supabase). We back up group credit with our own daily export (amounts, dates and member names, not emails or photos); a backup is kept mostly for 60 days. After you delete your account your name may remain in older credit backups until they expire; on request we remove it from them.</p>
 <h2>How long we keep it</h2>
-<p>Account data until you delete your account. Payment records and tax data for 10 years, as accounting law requires. When you delete your account, your personal data, photos and documents are erased. Messages you sent and reviews you wrote stay with the other person under the name “Deleted user”.</p>
+<p>Account data until you delete your account. Payment records and tax data for 10 years, as accounting law requires. When you delete your account, your personal data, photos and documents are erased. Messages you sent and reviews you wrote stay with the other person under the name “Deleted user”. Retention periods for each purpose are listed in Legal basis and retention.</p>
 <h2>Age</h2>
 <p>Matchball is for people aged 16 and over. A parent books training for a child from their own account.</p>
 <h2>Your rights</h2>
