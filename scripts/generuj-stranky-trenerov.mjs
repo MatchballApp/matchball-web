@@ -3174,26 +3174,26 @@ async function nacitajSkupiny(url, key) {
 /**
  * Mestá, ktoré majú v appke chat (`conversations.kind = 'community'`,
  * `community_key = 'city:<kľúč>'`; vzniká pri piatich ľuďoch, migrácia 502).
- * Číta sa len kľúč — žiadne správy ani členovia. Pri chybe sa stránka mesta
+ * Číta sa kľúč a počet členov — žiadne správy ani mená. Pri chybe sa stránka mesta
  * vygeneruje s textom „chat sa otvorí pri piatich ľuďoch", beh nepadne.
  */
 async function nacitajChatyMiest(url, key) {
   try {
-    const res = await fetch(`${url.replace(/\/+$/, '')}/rest/v1/conversations?kind=eq.community&select=community_key`, {
+    const res = await fetch(`${url.replace(/\/+$/, '')}/rest/v1/conversations?kind=eq.community&select=community_key,conversation_members(count)`, {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
     });
     if (!res.ok) {
       console.warn(`  ! chaty miest: HTTP ${res.status} — stránky miest budú bez chatu`);
-      return new Set();
+      return new Map();
     }
     const data = await res.json();
-    return new Set((Array.isArray(data) ? data : [])
-      .map((r) => String(r.community_key || ''))
-      .filter((k) => k.startsWith('city:'))
-      .map((k) => slugify(k.slice(5))));
+    // Mesto → počet ľudí v chate (súhrnné číslo, žiadne mená).
+    return new Map((Array.isArray(data) ? data : [])
+      .filter((r) => String(r.community_key || '').startsWith('city:'))
+      .map((r) => [slugify(String(r.community_key).slice(5)), Number(r.conversation_members?.[0]?.count) || 0]));
   } catch (e) {
     console.warn(`  ! chaty miest zlyhali: ${e && e.message ? e.message : e}`);
-    return new Set();
+    return new Map();
   }
 }
 
@@ -3335,7 +3335,7 @@ async function main() {
 
   let treneri;
   let skupinySurove = [];
-  let chatyMiest = new Set();
+  let chatyMiest = new Map();
   if (fixture) {
     console.log(`Fixture: ${fixture}`);
     treneri = JSON.parse(fs.readFileSync(path.resolve(fixture), 'utf8'));
@@ -3711,7 +3711,25 @@ ${[
   }
 
   // ── Dlaždice miest na hlavnej stránke ────────────────────────────────────
+  // Zoznamy športov na hlavnej stránke — z katalógu appky, nech sa nerozídu
+  // (17. 10. 2026 tam chýbali venčenie, turistika a paintball).
+  const FARBA_KATEGORIE = { racket: '#1E9E52', team: '#1378ED', fitness: '#51E041', individual: '#F5B700', health: '#C2334B' };
+  const zoznamySportov = SPORT_KATALOG.categories.slice().sort((a, b) => a.sort - b.sort).map((k, i) =>
+    `      <div class="sport-list" id="sporty-${i}" hidden><span class="dot" style="background:${FARBA_KATEGORIE[k.code] || '#1E9E52'}"></span><b>${esc(k.sk)}</b>${
+      SPORT_ORDER.filter((s) => SPORT_KATEGORIA[s] === k.code).map((s) => `<span class="sport-item">${esc(SPORT_NAZOV[s])}</span>`).join('')}</div>`).join('\n');
+  // Chat mesta vedie na stránku mesta — mesto bez nej (chat bez trénera aj
+  // partie) sa nevypisuje, odkaz by viedol na 404.
+  const chatyNaIndex = mestaHub.filter((m) => chatyMiest.has(m.slug))
+    .map((m) => ({ slug: m.slug, name: m.name, count: chatyMiest.get(m.slug) }))
+    .sort((a, b) => b.count - a.count);
+
   if (dopisMestaDoIndexu({
+    'sporty-zoznam': zoznamySportov,
+    'mesta-chaty': dlaziceMiest(
+      chatyNaIndex,
+      '/mesta/',
+      'Prvý chat mesta sa otvorí, keď vás v meste bude päť.',
+    ),
     'mesta-treneri': dlaziceMiest(
       mesta.map(({ slug, name, count }) => ({ slug, name, count })),
       '/treneri/',
@@ -3726,7 +3744,7 @@ ${[
 
   console.log(`Tréneri: ${platni.length} · mestá: ${mesta.length} · zapísaných súborov: ${zmenene}`);
   console.log(`Skupiny: ${skupiny.length} · mestá so skupinami: ${mestaSkupin.length}`);
-  console.log(`Stránky miest: ${mestaHub.map((m) => m.slug).join(', ')} · s chatom: ${[...chatyMiest].join(', ') || '—'}`);
+  console.log(`Stránky miest: ${mestaHub.map((m) => m.slug).join(', ')} · s chatom: ${[...chatyMiest.keys()].join(', ') || '—'}`);
   if (zmazaniTreneri.length) console.log(`Zmazané stránky trénerov: ${zmazaniTreneri.join(', ')}`);
   if (zmazaneMesta.length) console.log(`Zmazané stránky miest: ${zmazaneMesta.join(', ')}`);
   if (zmazaneMestaSkupin.length) console.log(`Zmazané stránky miest so skupinami: ${zmazaneMestaSkupin.join(', ')}`);

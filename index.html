@@ -659,9 +659,19 @@ footer .foot-h{color:#fff;margin:0 0 14px;text-transform:uppercase;letter-spacin
             <li><div><b>Hráči podľa športu a mesta</b>Pri každom hráčovi vidíš, čo hráva a na akej úrovni.</div></li>
             <li><div><b>Žiadosť na konkrétny šport</b>Spoluhráč vie, o čo ide, ešte než odpovie.</div></li>
             <li><div><b>Vždy vieš, na čom si</b>Keď žiadosť prijme, dohodnete si termín v chate. Keď odmietne, dozvieš sa to tiež a nečakáš naprázdno.</div></li>
+            <li><div><b>Chat tvojho mesta</b>Keď vás v meste je päť, otvorí sa spoločný chat. Napíšeš, čo hráš a kedy, a ozvú sa ľudia z okolia.</div></li>
           </ul>
+          <div class="where">
+            <p class="where-h">Mestá s vlastným chatom</p>
+            <div class="next-cities">
+          <!-- mesta-chaty:start -->
+          <a class="city-chip" href="/mesta/kosice/">Košice <span>41</span></a>
+          <!-- mesta-chaty:end -->
+            </div>
+          </div>
           <div class="pillar-actions">
             <a class="btn btn-green" href="#stiahnut">Nájdi spoluhráča</a>
+            <a class="go" href="/mesta/">Šport podľa miest <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           </div>
         </div>
       </article>
@@ -721,7 +731,7 @@ footer .foot-h{color:#fff;margin:0 0 14px;text-transform:uppercase;letter-spacin
             <li><div><b>Cenník vidíš pred rezerváciou</b>Cena za jedného, za dvoch aj za celú skupinu je na profile trénera.</div></li>
             <li><div><b>Hodnotí len ten, kto hral</b>Hviezdičky necháva iba hráč, ktorý u trénera naozaj odtrénoval.</div></li>
             <li><div><b>Termín za minútu</b>Vyberieš šport, počet hráčov, deň a čas. Tréner potvrdí a máte dohodnuté.</div></li>
-            <li><div><b>Balíčky 5, 10 a 20 hodín</b>Zaplatíš naraz a čerpáš toľko, koľko tréning trvá. Hodina vyjde lacnejšie.</div></li>
+            <li><div><b>Balíčky 5, 10 a 20 hodín</b>Zaplatíš naraz a čerpáš toľko, koľko tréning trvá. Keď tréner dá na balíček zľavu, hodina vyjde lacnejšie.</div></li>
           </ul>
           <div class="where">
             <p class="where-h">Tréneri podľa miest</p>
@@ -772,9 +782,11 @@ footer .foot-h{color:#fff;margin:0 0 14px;text-transform:uppercase;letter-spacin
   </div>
 </section>
 
-<!-- ── 42 športov ───────────────────────────────────────────
-     Nie zoznam 42 mien, ale jedna veta a päť kategórií. Kto svoj šport
-     nenájde, má odkaz priamo v tej vete. -->
+<!-- ── Športy ───────────────────────────────────────────────
+     Nie zoznam 45 mien, ale jedna veta a päť kategórií. Kto svoj šport
+     nenájde, má odkaz priamo v tej vete. Zoznamy v kategóriách dopĺňa
+     generátor z katalógu appky (scripts/sport-katalog.json), aby sa web
+     s appkou nerozišiel. -->
 <section class="section" id="sporty">
   <div class="wrap">
     <div class="section-head reveal">
@@ -792,11 +804,13 @@ footer .foot-h{color:#fff;margin:0 0 14px;text-transform:uppercase;letter-spacin
         <button class="sport-cat" type="button" aria-expanded="false" aria-controls="sporty-4"><span class="dot" style="background:#C2334B"></span><b>Zdravie a služby</b><span>fyzioterapia, masáže</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
     </div>
     <div class="sport-lists">
+      <!-- sporty-zoznam:start -->
       <div class="sport-list" id="sporty-0" hidden><span class="dot" style="background:#1E9E52"></span><b>Raketové</b><span class="sport-item">Tenis</span><span class="sport-item">Bedminton</span><span class="sport-item">Padel</span><span class="sport-item">Squash</span><span class="sport-item">Stolný tenis</span><span class="sport-item">Pickleball</span></div>
-      <div class="sport-list" id="sporty-1" hidden><span class="dot" style="background:#1378ED"></span><b>Loptové a tímové</b><span class="sport-item">Futbal</span><span class="sport-item">Futsal</span><span class="sport-item">Volejbal</span><span class="sport-item">Plážový volejbal</span><span class="sport-item">Basketbal</span><span class="sport-item">Hádzaná</span><span class="sport-item">Florbal</span><span class="sport-item">Hokej</span><span class="sport-item">Nohejbal</span></div>
+      <div class="sport-list" id="sporty-1" hidden><span class="dot" style="background:#1378ED"></span><b>Loptové a tímové</b><span class="sport-item">Futbal</span><span class="sport-item">Futsal</span><span class="sport-item">Volejbal</span><span class="sport-item">Plážový volejbal</span><span class="sport-item">Basketbal</span><span class="sport-item">Hádzaná</span><span class="sport-item">Florbal</span><span class="sport-item">Hokej</span><span class="sport-item">Nohejbal</span><span class="sport-item">Paintball</span></div>
       <div class="sport-list" id="sporty-2" hidden><span class="dot" style="background:#51E041"></span><b>Fitnes a telo</b><span class="sport-item">Fitnes</span><span class="sport-item">Funkčný tréning</span><span class="sport-item">Skupinové cvičenie</span><span class="sport-item">Kondičná príprava</span><span class="sport-item">Joga</span><span class="sport-item">Pilates</span><span class="sport-item">Box a kickbox</span><span class="sport-item">Bojové umenia</span><span class="sport-item">Sebaobrana</span><span class="sport-item">Tanec</span></div>
-      <div class="sport-list" id="sporty-3" hidden><span class="dot" style="background:#F5B700"></span><b>Individuálne a outdoor</b><span class="sport-item">Beh</span><span class="sport-item">Cyklistika</span><span class="sport-item">Plávanie</span><span class="sport-item">Triatlon</span><span class="sport-item">Lezenie</span><span class="sport-item">Lyžovanie</span><span class="sport-item">Snowboard</span><span class="sport-item">Golf</span><span class="sport-item">Korčuľovanie</span><span class="sport-item">Jazdectvo</span><span class="sport-item">Šach</span><span class="sport-item">Šípky</span></div>
+      <div class="sport-list" id="sporty-3" hidden><span class="dot" style="background:#F5B700"></span><b>Individuálne a outdoor</b><span class="sport-item">Beh</span><span class="sport-item">Cyklistika</span><span class="sport-item">Turistika</span><span class="sport-item">Venčenie</span><span class="sport-item">Plávanie</span><span class="sport-item">Triatlon</span><span class="sport-item">Lezenie</span><span class="sport-item">Lyžovanie</span><span class="sport-item">Snowboard</span><span class="sport-item">Golf</span><span class="sport-item">Korčuľovanie</span><span class="sport-item">Jazdectvo</span><span class="sport-item">Šach</span><span class="sport-item">Šípky</span></div>
       <div class="sport-list" id="sporty-4" hidden><span class="dot" style="background:#C2334B"></span><b>Zdravie a služby</b><span class="sport-item">Fyzioterapia</span><span class="sport-item">Masáže</span><span class="sport-item">Výživové poradenstvo</span><span class="sport-item">Športová psychológia</span><span class="sport-item">Servis výstroja</span></div>
+          <!-- sporty-zoznam:end -->
     </div>
   </div>
 </section>
@@ -818,11 +832,11 @@ footer .foot-h{color:#fff;margin:0 0 14px;text-transform:uppercase;letter-spacin
         <p class="lead" style="margin-top:16px">Kalendár, žiadosti, cenník aj zárobky máš na jednej obrazovke. Účet je zadarmo a z tréningu ti neberieme províziu.</p>
         <ul class="ticks">
             <li><div><b>Žiadosť potvrdíš jedným ťuknutím</b>Príde ti rovno do prehľadu ku kalendáru. Potvrdíš alebo odmietneš a hráč to vie hneď.</div></li>
-            <li><div><b>Cenník pre každý šport zvlášť</b>Zľavy pre skupiny aj doobedné termíny si nastavíš sám. Ceny balíčkov sa dopočítajú za teba.</div></li>
+            <li><div><b>Cenník pre každý šport zvlášť</b>Zľavy pre skupiny aj doobedné termíny si nastavíš sám. Pri balíčkoch si zvolíš, či a akú zľavu dáš.</div></li>
             <li><div><b>Platby podľa teba, bez provízie</b>Karta s výplatou na účet, QR kód na tvoj IBAN alebo hotovosť. Koľko si vypýtaš, toľko dostaneš.</div></li>
             <li><div><b>Prehľad zárobkov a obsadenosti</b>Príjem po mesiacoch, najaktívnejší hráči aj hodnotenia. Partia ti môže zložiť kredit a tréningy sa z neho odpočítavajú.</div></li>
           </ul>
-        <p class="btn-row"><a class="btn btn-lime" href="#stiahnut">Založ si účet trénera</a></p>
+        <p class="btn-row"><a class="btn btn-lime" href="#stiahnut">Založ si účet trénera</a> <a class="btn btn-ghost" href="/pre-trenerov/">Viac pre trénerov</a></p>
       </div>
     </div>
   </div>
