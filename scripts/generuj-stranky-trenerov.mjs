@@ -639,7 +639,9 @@ const PISMO = `<link rel="preconnect" href="https://fonts.googleapis.com">
  * hráč je ten, kto stránku otvoril.
  *
  * Preto sa tu odteraz aktívna položka aj ZVÝRAZŇUJE: dve z troch vedú na tieto
- * stránky, takže je čo zvýrazniť. `kde` je 'treneri' | 'skupiny' | null.
+ * stránky, takže je čo zvýrazniť. `kde` je 'mesta' | 'treneri' | 'skupiny' |
+ * 'pre-trenerov' | null. Od 17. 10. 2026 vedie každá položka na vlastnú
+ * stránku — „Pre trénerov" predtým skákalo na sekciu hlavnej stránky.
  * Stránka trénera (`/t/<slug>/`) patrí pod Trénerov — drobčeková navigácia nad
  * ňou začína tou istou položkou.
  */
@@ -653,18 +655,20 @@ function hlavicka(kde = null) {
       <span>Match<b>ball</b></span>
     </a>
     <div class="nav-links">
+      <a href="/mesta/"${akt('mesta')}>Mestá</a>
       <a href="/treneri/"${akt('treneri')}>Tréneri</a>
       <a href="/skupiny/"${akt('skupiny')}>Partie</a>
-      <a href="/#trenerom">Pre trénerov</a>
+      <a href="/pre-trenerov/"${akt('pre-trenerov')}>Pre trénerov</a>
     </div>
     <a class="btn btn-lime btn-sm nav-cta" href="/stiahnut/">Stiahnuť</a>
     <button class="nav-burger" id="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenu"><span></span></button>
   </nav>
 </div>
 <div class="mobile-menu" id="mobileMenu">
+  <a href="/mesta/"${aktM('mesta')}>Mestá</a>
   <a href="/treneri/"${aktM('treneri')}>Tréneri</a>
   <a href="/skupiny/"${aktM('skupiny')}>Partie</a>
-  <a href="/#trenerom">Pre trénerov</a>
+  <a href="/pre-trenerov/"${aktM('pre-trenerov')}>Pre trénerov</a>
   <a class="btn btn-lime" href="/stiahnut/">Stiahnuť appku</a>
 </div>
 <script>
@@ -700,7 +704,7 @@ const PATICKA = `<footer>
           <a href="/#hracom">Pre hráčov</a>
           <a href="/#spoluhraci">Spoluhráči</a>
           <a href="/#partie">Partie</a>
-          <a href="/#trenerom">Pre trénerov</a>
+          <a href="/pre-trenerov/">Pre trénerov</a>
           <a href="/#sluzby">Zdravie a služby</a>
           <a href="/#ceny">Platby</a>
         </div>
@@ -708,6 +712,7 @@ const PATICKA = `<footer>
       <div>
         <h4 class="foot-h">Zoznamy a kontakt</h4>
         <div class="foot-links">
+          <a href="/mesta/">Šport podľa miest</a>
           <a href="/treneri/">Tréneri podľa miest</a>
           <a href="/skupiny/">Partie podľa miest</a>
           <a href="/stiahnut/">Stiahnuť appku</a>
@@ -1315,7 +1320,7 @@ function strankaTrenera(coach, ctx) {
   const title = `${coach.name} – ${sportOznacenie}, ${coach.city} | Matchball`;
   const popisCasti = [
     `${coach.name} — ${cinnost.toLowerCase()} v meste ${coach.city}.`,
-    coach.training_location ? `Kde: ${coach.training_location}.` : '',
+    miestoTrenera(coach) ? `Kde: ${miestoAMesto(coach)}.` : '',
     `Cena ${c.lacnejsiePasmo ? 'od ' : ''}${suma(c.odCena, cur).replace('\u00a0', ' ')}${sluzba ? '' : ' za hodinu'}.`,
     `${sluzba ? 'Objednanie' : 'Rezervácia'} a platba kartou v appke Matchball.`,
   ].filter(Boolean);
@@ -1332,7 +1337,7 @@ function strankaTrenera(coach, ctx) {
     address: { '@type': 'PostalAddress', addressLocality: coach.city, addressCountry: cur === 'CZK' ? 'CZ' : 'SK' },
     ...(maFotku ? { image: `${WEB_ORIGIN}${fotka}` } : {}),
     ...(coach.bio ? { description: String(coach.bio).slice(0, 600) } : {}),
-    ...(coach.training_location ? { workLocation: { '@type': 'Place', name: coach.training_location } } : {}),
+    ...(miestoTrenera(coach) ? { workLocation: { '@type': 'Place', name: miestoTrenera(coach) } } : {}),
     ...(jazyky.length ? { knowsLanguage: jazyky } : {}),
     ...(pocetHodnoteni > 0 && rating > 0 ? {
       aggregateRating: {
@@ -1435,7 +1440,7 @@ ${hlavicka('treneri')}
     </div>
 
     <div class="hero-body">
-      ${coach.training_location ? `<div class="club-line">${IKONA.pin}${esc(coach.training_location)}, ${esc(coach.city)}</div>` : ''}
+      ${miestoTrenera(coach) ? `<div class="club-line">${IKONA.pin}${esc(miestoAMesto(coach))}</div>` : ''}
       <div class="pills" style="margin-top:14px">${sportyKodmi.map((k) => sportPillHtml(k, 'pill pill-soft pill-sport')).join('')}</div>
       ${coach.verified ? `<div class="verified">${IKONA.fajka}Overený ${esc(poskytovatel)}</div>` : ''}
       <div class="stats n${staty.length}" style="--n:${staty.length}">
@@ -1456,11 +1461,11 @@ ${hlavicka('treneri')}
       ${zameranie.length ? `<p class="sub">Zameranie</p><div class="pills">${zameranie.map((z) => `<span class="pill pill-soft">${esc(z)}</span>`).join('')}</div>` : ''}
       ${jazyky.length ? `<p class="sub">Jazyky</p><div class="pills">${jazyky.map((j) => `<span class="pill">${esc(j)}</span>`).join('')}</div>` : ''}
       ${pracovnyCas ? `<p class="sub">${sluzba ? 'Kedy ordinujem' : 'Kedy trénujem'}</p><div class="pills"><span class="pill">${pracovnyCas}</span></div>` : ''}
-      ${coach.training_location ? `<p class="sub" id="miesto">${sluzba ? 'Kde ma nájdeš' : 'Kde trénujem'}</p>
+      ${miestoTrenera(coach) ? `<p class="sub" id="miesto">${sluzba ? 'Kde ma nájdeš' : 'Kde trénujem'}</p>
       <div class="place">
         <div class="place-map"><div class="pinwrap">${IKONA.pin}</div></div>
         <div class="place-body">
-          <div class="name">${esc(coach.training_location)}</div>
+          <div class="name">${esc(miestoTrenera(coach))}</div>
           <div class="addr">${esc(coach.city)}</div>
           ${kurt ? `<div class="tag">${IKONA.fajka}${esc(kurt)}</div>` : ''}
         </div>
@@ -1901,8 +1906,8 @@ function kartaTrenera(coach) {
 
   const metaCasti = [];
   if (pocetH > 0 && rating > 0) metaCasti.push(`<span class="hv" aria-hidden="true">★</span> <b>${hodnotenie(rating)}</b> (${pocetH})`);
-  metaCasti.push(esc(coach.city));
-  if (coach.training_location) metaCasti.push(esc(coach.training_location));
+  // „NTC · Košice" — rovnaký tvar ako v appke (`miestoAMesto`).
+  metaCasti.push(esc(miestoAMesto(coach)));
 
   // Triedenie a filter beží v prehliadači nad týmito atribútmi — bez servera
   // a bez toho, aby sa čokoľvek dopytovalo pri načítaní stránky.
@@ -2564,6 +2569,554 @@ const SKRIPT_SKUPIN = `(function(){
 })();`;
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  Mestá — jedna stránka na mesto (`mesta/<mesto>/`) a ich zoznam (`mesta/`)
+//
+//  Martin, 17. 10. 2026: stránky „šport + mesto" už sú (`treneri/<šport>/<mesto>/`),
+//  ale pri deviatich trénerov majú väčšinou po jednom človeku a Google také tenké
+//  stránky neukazuje. Stránka mesta spojí všetko, čo v meste je — trénerov,
+//  partie, chat mesta a športy — a odpovie na otázky, ktoré ľudia píšu do
+//  vyhľadávača („koľko stojí tréner v Košiciach"). Rastie sama, ako pribúdajú
+//  tréneri a partie; nové mesto vznikne pri prvom trénerovi alebo partii.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** „v Košiciach" — šiesty pád miest, kde Matchball je; inak „v meste X". */
+const V_MESTE = {
+  'bratislava': 'v Bratislave', 'kosice': 'v Košiciach', 'presov': 'v Prešove', 'zilina': 'v Žiline',
+  'nitra': 'v Nitre', 'banska-bystrica': 'v Banskej Bystrici', 'trnava': 'v Trnave', 'trencin': 'v Trenčíne',
+  'martin': 'v Martine', 'poprad': 'v Poprade', 'prievidza': 'v Prievidzi', 'zvolen': 'vo Zvolene',
+  'povazska-bystrica': 'v Považskej Bystrici', 'michalovce': 'v Michalovciach', 'nove-zamky': 'v Nových Zámkoch',
+  'spisska-nova-ves': 'v Spišskej Novej Vsi', 'komarno': 'v Komárne', 'humenne': 'v Humennom',
+  'levice': 'v Leviciach', 'bardejov': 'v Bardejove', 'liptovsky-mikulas': 'v Liptovskom Mikuláši',
+  'ruzomberok': 'v Ružomberku', 'piestany': 'v Piešťanoch', 'topolcany': 'v Topoľčanoch',
+  'trebisov': 'v Trebišove', 'cadca': 'v Čadci', 'dubnica-nad-vahom': 'v Dubnici nad Váhom',
+  'rimavska-sobota': 'v Rimavskej Sobote', 'partizanske': 'v Partizánskom', 'vranov-nad-toplou': 'vo Vranove nad Topľou',
+  'senec': 'v Senci', 'pezinok': 'v Pezinku', 'malacky': 'v Malackách', 'kezmarok': 'v Kežmarku',
+  'stara-lubovna': 'v Starej Ľubovni', 'roznava': 'v Rožňave', 'sabinov': 'v Sabinove', 'svidnik': 'vo Svidníku',
+  'snina': 'v Snine', 'levoca': 'v Levoči', 'spisske-vlachy': 'v Spišských Vlachoch', 'gelnica': 'v Gelnici',
+  'moldava-nad-bodvou': 'v Moldave nad Bodvou', 'krompachy': 'v Krompachoch', 'stropkov': 'v Stropkove',
+  'praha': 'v Prahe', 'brno': 'v Brne', 'ostrava': 'v Ostrave', 'olomouc': 'v Olomouci', 'plzen': 'v Plzni',
+};
+
+function vMeste(mesto) {
+  return V_MESTE[mesto.slug] || `v meste ${mesto.name}`;
+}
+
+// ── Miesto trénera — prepis `src/utils/coachPlace.ts` z appky ──────────────
+//
+// „<miesto> · <mesto>": „NTC · Košice", „Dojo Fit · Poprad". Mesto zo stĺpca
+// `city`, z textu miesta sa vyhodí, aby nebolo dvakrát („Košice · Košic").
+// Pri zmene v appke treba prepísať aj toto.
+
+function normMiesto(s) {
+  return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}
+function bezInterpunkcie(s) {
+  return s.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+}
+function levenshtein(a, b) {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[b.length];
+}
+function toIsteMesto(text, mesto) {
+  if (!text || !mesto) return false;
+  if (text === mesto) return true;
+  if (text.length >= 4 && mesto.startsWith(text) && mesto.length - text.length <= 2) return true;
+  const limit = mesto.length >= 6 ? 2 : 1;
+  return Math.abs(text.length - mesto.length) <= limit && levenshtein(text, mesto) <= limit;
+}
+function bezMestaVCasti(cast, slovaMesta) {
+  const slova = cast.split(/\s+/).filter(Boolean);
+  const n = slovaMesta.length;
+  const mesto = slovaMesta.join(' ');
+  for (let i = 0; i + n <= slova.length; i++) {
+    const okno = slova.slice(i, i + n).map((w) => normMiesto(bezInterpunkcie(w))).join(' ');
+    if (toIsteMesto(okno, mesto)) return [...slova.slice(0, i), ...slova.slice(i + n)].join(' ');
+  }
+  return cast;
+}
+function orezOddelovace(s) {
+  return s.replace(/^[\s\-–—/·.,:;]+|[\s\-–—/·,:;]+$/g, '').trim();
+}
+
+/** Len miesto bez mesta („NTC"), alebo null, keď tréner napísal len mesto. */
+function miestoTrenera(coach) {
+  const p = String(coach.training_location || '').replace(/\s+/g, ' ').trim();
+  const c = String(coach.city || '').replace(/\s+/g, ' ').trim();
+  if (!p) return null;
+  if (!c) return p;
+  if (toIsteMesto(normMiesto(p), normMiesto(c))) return null;
+  const slovaMesta = normMiesto(c).split(' ');
+  const casti = p.split(',').map((cast) => orezOddelovace(bezMestaVCasti(cast.trim(), slovaMesta))).filter(Boolean);
+  return casti.length ? casti.join(', ') : null;
+}
+
+/** „NTC · Košice", alebo len „Košice". */
+function miestoAMesto(coach) {
+  const m = miestoTrenera(coach);
+  return m ? `${m} · ${coach.city}` : String(coach.city || '');
+}
+
+const CSS_MESTO = `.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 40px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-md);padding:14px 16px;
+  box-shadow:var(--shadow-soft)}
+.stat b{display:block;font-size:1.6rem;font-weight:800;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.86rem}
+.blok{margin-bottom:48px}
+.blok-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.blok-head h2{font-size:1.45rem}
+.blok-head a{color:var(--green);font-weight:600;white-space:nowrap}
+.blok .grid-coaches,.blok .grid-groups{margin-bottom:0}
+.chat-mesta{background:var(--ink);color:var(--on-dark);border-radius:var(--radius-xl);padding:30px 24px;
+  margin-bottom:48px;position:relative;overflow:hidden;display:grid;gap:22px}
+.chat-mesta::after{content:"";position:absolute;width:360px;height:360px;right:-150px;top:-170px;border-radius:50%;
+  background:var(--grad-on-dark);opacity:.16;filter:blur(40px)}
+.chat-mesta>*{position:relative;z-index:1}
+.chat-mesta .eyebrow{color:var(--lime)}
+.chat-mesta h2{color:#fff}
+.chat-mesta p{color:var(--on-dark-muted);margin-top:10px}
+.chat-mesta .btn{margin-top:20px}
+.chat-mesta ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.chat-mesta li{display:flex;gap:12px;align-items:flex-start;background:var(--ink-3);border-radius:var(--radius-md);
+  padding:13px 15px;color:var(--on-dark);font-size:.95rem;line-height:1.45}
+.chat-mesta li svg{width:20px;height:20px;flex:0 0 20px;color:var(--lime);margin-top:1px}
+.sporty-mesta{display:flex;flex-wrap:wrap;gap:10px}
+.faq{display:grid;gap:10px}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-md);padding:16px 20px}
+.faq summary{font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--green);font-weight:700}
+.faq details[open] summary::after{content:"–"}
+.faq details p{color:var(--muted);margin-top:10px}
+.mesta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:48px}
+.mesto-karta{display:block;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
+  padding:20px 22px;box-shadow:var(--shadow-soft);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.mesto-karta:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+.mesto-karta h3{font-size:1.3rem}
+.mesto-karta p{color:var(--muted);margin-top:6px;font-size:.94rem}
+.mesto-karta .sp{color:var(--green);font-weight:600;font-size:.86rem;margin-top:12px}
+
+@media (min-width:900px){
+  .stats{gap:16px;margin-bottom:56px}
+  .stat{padding:18px 22px}
+  .stat b{font-size:2rem}
+  .stat span{font-size:.95rem}
+  .blok{margin-bottom:64px}
+  .blok-head h2{font-size:1.8rem}
+  .chat-mesta{grid-template-columns:1.3fr 1fr;align-items:center;padding:40px 44px;margin-bottom:64px}
+  .mesta-grid{gap:20px;margin-bottom:64px}
+}`;
+
+/** Spodná výzva s obchodmi — `#pridat-sa`, lebo tam vedie „Pridať sa" z karty partie. */
+function vyzvaStiahnut(nadpis, veta) {
+  return `<section class="cta-dark" id="pridat-sa">
+    <div class="cta-dark-text">
+      <h2>${esc(nadpis)}</h2>
+      <p class="lead">${esc(veta)}</p>
+    </div>
+    <div class="cta-dark-actions">
+      <a class="btn btn-lime" href="${APP_STORE}">${IKONA.apple}Stiahnuť pre iPhone</a>
+      <a class="btn btn-ghost" href="${PLAY_STORE}">${IKONA.play}Stiahnuť pre Android</a>
+    </div>
+  </section>`;
+}
+
+/** Hlava dokumentu spoločná pre nové stránky (mestá, pre trénerov). */
+function hlavaDokumentu({ title, popis, url, ogNadpis, css, ld }) {
+  return `<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(popis)}">
+<link rel="canonical" href="${url}">
+${FAVICONY}
+<meta property="og:type" content="website">
+<meta property="og:url" content="${url}">
+<meta property="og:title" content="${esc(ogNadpis)} | Matchball">
+<meta property="og:description" content="${esc(popis)}">
+<meta property="og:image" content="${OG_OBRAZOK}">
+<meta property="og:locale" content="sk_SK">
+<meta name="twitter:card" content="summary_large_image">
+${PISMO}
+<style>
+${CSS_ZAKLAD}
+${css}
+</style>
+${(Array.isArray(ld) ? ld : [ld]).filter(Boolean).map((x) => `<script type="application/ld+json">${json(x)}</script>`).join('\n')}
+<script src="/m.js" defer></script>
+</head>`;
+}
+
+function faqHtml(otazky) {
+  return `<div class="faq">
+      ${otazky.map(([q, a], i) => `<details${i === 0 ? ' open' : ''}><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('\n      ')}
+    </div>`;
+}
+
+function faqLd(otazky) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: otazky.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+  };
+}
+
+/** Rozpätie cien trénerov v meste („18 až 25 €"), alebo null. */
+function rozpatieCien(coaches) {
+  const ceny = coaches
+    .filter((c) => !jeSluzba(sportyOf(c)))
+    .map((c) => ({ cena: cennik(c, sportyOf(c)).odCena, cur: c.currency === 'CZK' ? 'CZK' : 'EUR' }))
+    .filter((x) => Number.isFinite(x.cena) && x.cena > 0);
+  if (!ceny.length) return null;
+  const cur = ceny[0].cur;
+  const zMeny = ceny.filter((x) => x.cur === cur).map((x) => x.cena);
+  const min = Math.min(...zMeny);
+  const max = Math.max(...zMeny);
+  return min === max ? suma(min, cur) : `${suma(min, cur).replace(/\s*(€|Kč|CZK)$/, '')} až ${suma(max, cur)}`;
+}
+
+function strankaMesta({ mesto, coaches, skupiny, maChat }) {
+  const url = `${WEB_ORIGIN}/mesta/${mesto.slug}/`;
+  const kde = vMeste(mesto);
+  const nT = coaches.length;
+  const nS = skupiny.length;
+  const sportyKody = SPORT_ORDER.filter((k) => coaches.some((c) => c.sports.includes(k)) || skupiny.some((g) => g.sport === k));
+  const nSp = sportyKody.length;
+  const nadpis = `Šport ${kde}`;
+  const title = `Šport ${kde}: tréneri a partie | Matchball`;
+  const casti = [];
+  if (nT) casti.push(`${nT} ${pocet(nT, 'tréner', 'tréneri', 'trénerov')}`);
+  if (nS) casti.push(pocetSkupin(nS));
+  const popis = `${casti.join(' a ')} ${kde}${nSp ? ` — ${sportyKody.slice(0, 4).map((k) => SPORT_NAZOV[k].toLowerCase()).join(', ')}${nSp > 4 ? ' a ďalšie' : ''}` : ''}. Nájdi trénera, partiu alebo ľudí na šport v appke Matchball, zadarmo.`;
+
+  const ceny = rozpatieCien(coaches);
+  const otazky = [];
+  if (ceny) otazky.push([`Koľko stojí tréner ${kde}?`, `Tréneri na Matchballe ${kde} berú ${ceny} za hodinu. Pri balíčku tréningov môže tréner dať zľavu. Platíš priamo trénerovi QR prevodom alebo v hotovosti, prípadne kartou v appke.`]);
+  otazky.push([`Ako nájdem ${kde} niekoho na šport?`, `Stiahni si Matchball, vyber šport a mesto. Uvidíš trénerov, partie aj ľudí, ktorí hrajú to isté${maChat ? `, a môžeš napísať do chatu ${mesto.name}` : ''}. Všetko je zadarmo.`]);
+  otazky.push(['Môžem založiť vlastnú partiu?', `Áno. V appke ťukni na Zorganizuj, vyber šport, miesto a čas. Kto sa chce pridať, pošle žiadosť a ty ho prijmeš.`]);
+
+  const sep = '<span class="sep" aria-hidden="true">›</span>';
+  const statky = [
+    nT ? `<div class="stat"><b>${nT}</b><span>${pocet(nT, 'tréner', 'tréneri', 'trénerov')}</span></div>` : '',
+    nS ? `<div class="stat"><b>${nS}</b><span>${pocet(nS, 'partia', 'partie', 'partií')}</span></div>` : '',
+    nSp ? `<div class="stat"><b>${nSp}</b><span>${pocet(nSp, 'šport', 'športy', 'športov')}</span></div>` : '',
+  ].filter(Boolean);
+
+  const chat = maChat
+    ? `<section class="chat-mesta">
+    <div>
+      <p class="eyebrow">Chat ${esc(mesto.name)}</p>
+      <h2>Hľadáš, s kým si zahrať?</h2>
+      <p>V appke je chat pre celé mesto. Napíš, čo hráš a kedy máš čas, a ľudia ${esc(kde)} sa ti ozvú.</p>
+      <a class="btn btn-lime" href="#pridat-sa">Pridaj sa do chatu</a>
+    </div>
+    <ul>
+      <li>${IKONA.sprava}<span>Napíš, aký šport hľadáš a kedy môžeš.</span></li>
+      <li>${IKONA.kalendar}<span>Organizátor partie oznámi termín jedným ťuknutím.</span></li>
+      <li>${IKONA.fajka}<span>Upozornenia si zapneš, len keď chceš.</span></li>
+    </ul>
+  </section>`
+    : `<section class="chat-mesta">
+    <div>
+      <p class="eyebrow">Chat ${esc(mesto.name)}</p>
+      <h2>Chat mesta sa otvorí pri piatich ľuďoch</h2>
+      <p>Keď bude ${esc(kde)} v appke päť ľudí, vznikne chat pre celé mesto. Pozvi kamarátov, s ktorými hrávaš.</p>
+      <a class="btn btn-lime" href="#pridat-sa">Stiahnuť appku</a>
+    </div>
+  </section>`;
+
+  const sportOdkaz = (k) => {
+    const href = coaches.some((c) => c.sports.includes(k))
+      ? `/treneri/${SPORT_SLUG[k]}/${mesto.slug}/`
+      : `/skupiny/${mesto.slug}/`;
+    return `<a class="fpill" href="${href}">${ikonaPreSport(k)}${esc(SPORT_NAZOV[k])}</a>`;
+  };
+
+  const ld = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: nadpis,
+      url,
+      about: { '@type': 'City', name: mesto.name },
+      hasPart: [
+        ...coaches.map((c) => ({ '@type': 'WebPage', url: `${WEB_ORIGIN}/t/${c.slug}/`, name: c.name })),
+      ],
+    },
+    faqLd(otazky),
+  ];
+
+  return `${hlavaDokumentu({ title, popis, url, ogNadpis: nadpis, css: `${CSS_ZOZNAM}\n${CSS_SKUPINY}\n${CSS_MESTO}`, ld })}
+<body>
+<a class="skip" href="#obsah">Preskočiť na obsah</a>
+${hlavicka('mesta')}
+
+<main id="obsah" class="wrap">
+  <nav class="crumbs" aria-label="Drobčeková navigácia">
+    <a href="/">Matchball</a>
+    ${sep}
+    <a href="/mesta/">Mestá</a>
+    ${sep}
+    <span class="now" aria-current="page">${esc(mesto.name)}</span>
+  </nav>
+  <header class="sec-head">
+    <p class="eyebrow">${esc(mesto.name)}</p>
+    <h1>${esc(nadpis)}</h1>
+    <p class="lead">Tréneri, partie a ľudia, s ktorými si zahráš. Všetko ${esc(kde)} na jednom mieste.</p>
+  </header>
+
+  ${statky.length ? `<div class="stats">
+    ${statky.join('\n    ')}
+  </div>` : ''}
+
+  ${nT ? `<section class="blok">
+    <div class="blok-head"><h2>Tréneri ${esc(kde)}</h2><a href="/treneri/${mesto.slug}/">${nT > 3 ? `Všetkých ${nT}` : 'Zoznam'} →</a></div>
+    <div class="grid-coaches">
+      ${coaches.slice(0, 3).map(kartaTrenera).join('\n      ')}
+    </div>
+  </section>` : ''}
+
+  ${nS ? `<section class="blok">
+    <div class="blok-head"><h2>Partie ${esc(kde)}</h2><a href="/skupiny/${mesto.slug}/">${nS > 3 ? `Všetky ${nS}` : 'Zoznam'} →</a></div>
+    <div class="grid-groups">
+      ${skupiny.slice(0, 3).map(kartaSkupiny).join('\n      ')}
+    </div>
+  </section>` : ''}
+
+  ${chat}
+
+  ${nSp >= 2 ? `<section class="blok">
+    <div class="blok-head"><h2>Podľa športu</h2></div>
+    <div class="sporty-mesta">
+      ${sportyKody.map(sportOdkaz).join('\n      ')}
+    </div>
+  </section>` : ''}
+
+  <section class="blok">
+    <div class="blok-head"><h2>Časté otázky</h2></div>
+    ${faqHtml(otazky)}
+  </section>
+
+  ${vyzvaStiahnut('Zahraj si ešte tento týždeň.', 'Matchball je zadarmo pre hráčov aj trénerov. Stiahni si ho a nájdi, s kým si zahráš.')}
+</main>
+
+${PATICKA}
+</body>
+</html>
+`;
+}
+
+function strankaZoznamuMiest(mestaHub) {
+  const url = `${WEB_ORIGIN}/mesta/`;
+  const nadpis = 'Mestá';
+  const popis = `Tréneri a partie podľa miest: ${mestaHub.slice(0, 5).map((m) => m.name).join(', ')}${mestaHub.length > 5 ? ' a ďalšie' : ''}. Nájdi, s kým si zahráš, v appke Matchball.`;
+  const karta = (m) => {
+    const casti = [];
+    if (m.coaches.length) casti.push(`${m.coaches.length} ${pocet(m.coaches.length, 'tréner', 'tréneri', 'trénerov')}`);
+    if (m.skupiny.length) casti.push(pocetSkupin(m.skupiny.length));
+    const sporty = SPORT_ORDER.filter((k) => m.coaches.some((c) => c.sports.includes(k)) || m.skupiny.some((g) => g.sport === k));
+    return `<a class="mesto-karta" href="/mesta/${m.slug}/">
+      <h3>${esc(m.name)}</h3>
+      <p>${esc(casti.join(' · '))}</p>
+      ${sporty.length ? `<p class="sp">${esc(sporty.slice(0, 3).map((k) => SPORT_NAZOV[k]).join(' · '))}${sporty.length > 3 ? ` a ${sporty.length - 3} ďalšie` : ''}</p>` : ''}
+    </a>`;
+  };
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: nadpis,
+    url,
+    numberOfItems: mestaHub.length,
+    itemListElement: mestaHub.map((m, i) => ({ '@type': 'ListItem', position: i + 1, url: `${WEB_ORIGIN}/mesta/${m.slug}/`, name: m.name })),
+  };
+  return `${hlavaDokumentu({ title: 'Šport podľa miest: tréneri a partie | Matchball', popis, url, ogNadpis: nadpis, css: `${CSS_ZOZNAM}\n${CSS_MESTO}`, ld })}
+<body>
+<a class="skip" href="#obsah">Preskočiť na obsah</a>
+${hlavicka('mesta')}
+
+<main id="obsah" class="wrap">
+  <nav class="crumbs" aria-label="Drobčeková navigácia">
+    <a href="/">Matchball</a>
+    <span class="sep" aria-hidden="true">›</span>
+    <span class="now" aria-current="page">Mestá</span>
+  </nav>
+  <header class="sec-head">
+    <p class="eyebrow">Mestá</p>
+    <h1>Šport vo tvojom meste</h1>
+    <p class="lead">Vyber si mesto a pozri sa, kto tam trénuje a ktoré partie hrajú. Tvoje mesto tu nie je? Pribudne s prvým trénerom alebo partiou.</p>
+  </header>
+
+  <div class="mesta-grid">
+    ${mestaHub.map(karta).join('\n    ')}
+  </div>
+
+  ${vyzvaStiahnut('Založ prvú partiu vo svojom meste.', 'V appke za minútu: šport, miesto a čas. Ďalší ťa nájdu sami.')}
+</main>
+
+${PATICKA}
+</body>
+</html>
+`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Pre trénerov — `pre-trenerov/`
+//
+//  Kam vedie „Pre trénerov" v hlavičke (predtým sekcia hlavnej stránky). Peniaze
+//  v poradí, v akom ich tréneri naozaj prijímajú (Martin, 17. 10. 2026): väčšina
+//  hráčov platí trénerovi priamo — QR prevodom alebo v hotovosti, bez poplatku.
+//  Poplatok za službu (5 % + 0,30 €) platí len hráč, ktorý chce platiť kartou,
+//  Apple Pay či Google Pay; tréner dostane celú svoju cenu aj vtedy.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CSS_PRE_TRENEROV = `.hero-t{display:grid;gap:28px;padding:10px 0 48px}
+.hero-t .lead{margin-top:16px}
+.hero-t .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.btn-light{background:#fff;color:var(--fg);border:1.5px solid var(--line)}
+.btn-light:hover{border-color:rgba(30,158,82,.35)}
+.telefon{background:var(--ink);border-radius:36px;padding:12px;box-shadow:var(--shadow-lift);width:100%;max-width:300px;justify-self:center}
+.telefon .scr{background:var(--paper);border-radius:26px;padding:16px 14px;display:grid;gap:9px}
+.telefon .r{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:.86rem;line-height:1.35}
+.telefon .r b{display:block;font-weight:600}
+.telefon .r span{color:var(--muted)}
+.telefon .r.z{background:var(--green);border-color:var(--green);color:#fff}
+.telefon .r.z span{color:#E9F5ED}
+.vyhody{display:grid;gap:14px}
+.vyhoda{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow-soft)}
+.vyhoda .ik{width:44px;height:44px;border-radius:14px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin-bottom:14px}
+.vyhoda .ik svg{width:22px;height:22px}
+.vyhoda p{color:var(--muted);margin-top:8px;font-size:.95rem}
+.platby{background:var(--ink);color:var(--on-dark);border-radius:var(--radius-xl);padding:30px 24px;margin-bottom:48px;
+  display:grid;gap:22px;position:relative;overflow:hidden}
+.platby::after{content:"";position:absolute;width:360px;height:360px;right:-150px;top:-170px;border-radius:50%;
+  background:var(--grad-on-dark);opacity:.16;filter:blur(40px)}
+.platby>*{position:relative;z-index:1}
+.platby .eyebrow{color:var(--lime)}
+.platby .velka{font-size:clamp(3rem,10vw,4.6rem);font-weight:800;line-height:1;letter-spacing:-.04em;
+  background:var(--grad-on-dark);-webkit-background-clip:text;background-clip:text;color:transparent}
+.platby .pod{color:var(--on-dark-muted);margin-top:10px}
+.platby h2{color:#fff}
+.platby ul{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:12px}
+.platby li{display:flex;gap:12px;align-items:flex-start;line-height:1.45}
+.platby li svg{width:20px;height:20px;flex:0 0 20px;color:var(--lime);margin-top:2px}
+.platby li span{color:var(--on-dark-muted)}
+.platby li b{color:#fff;font-weight:600}
+
+@media (min-width:900px){
+  .hero-t{grid-template-columns:1.25fr 1fr;align-items:center;gap:40px;padding-bottom:64px}
+  .vyhody{grid-template-columns:repeat(3,1fr);gap:20px}
+  .platby{grid-template-columns:1fr 1.5fr;align-items:center;padding:44px 48px;margin-bottom:64px}
+}`;
+
+function strankaPreTrenerov({ pocetTrenerov, pocetMiest }) {
+  const url = `${WEB_ORIGIN}/pre-trenerov/`;
+  const nadpis = 'Noví klienti bez provízie';
+  const popis = 'Trénuješ? Matchball ti nájde nových klientov zadarmo: profil v appke aj na webe, rezervácie bez písania, platby QR, v hotovosti alebo kartou. Žiadny mesačný poplatok ani provízia.';
+  const otazky = [
+    ['Koľko ma to stojí?', 'Nič. Matchball si od teba neberie mesačný poplatok ani províziu. Hráči ti väčšinou platia priamo, QR prevodom alebo v hotovosti. Ak chce hráč platiť kartou, Apple Pay alebo Google Pay, zaplatí poplatok za službu on a ty dostaneš celú svoju cenu.'],
+    ['Kedy mi prídu peniaze za platbu kartou?', 'Platba kartou ti príde na účet do týždňa po odohratom tréningu. Výplaty si zapneš v appke cez Stripe. QR prevod a hotovosť idú rovno tebe.'],
+    ['Musím mať licenciu?', 'Nie. Trénovať môžeš aj bez nej. S licenciou alebo certifikátom dostaneš značku Overený tréner.'],
+    ['Môžem trénovať skupiny?', 'Áno. Nastavíš cenu pre 1, 2, 3 aj viac ľudí a každý zaplatí svoj podiel.'],
+    ['Musím mať nastavené výplaty?', 'Nie. Bez nich prijímaš QR prevod a hotovosť. S výplatami ti hráči môžu zaplatiť kartou priamo v appke a kúpiť si balíček tréningov.'],
+  ];
+  const ld = [
+    { '@context': 'https://schema.org', '@type': 'WebPage', name: 'Pre trénerov', url, description: popis },
+    faqLd(otazky),
+  ];
+  const kde = pocetTrenerov > 0 && pocetMiest > 1
+    ? `Tréneri na Matchballe sú už v ${pocetMiest} mestách.`
+    : '';
+
+  return `${hlavaDokumentu({ title: 'Pre trénerov: noví klienti bez provízie | Matchball', popis, url, ogNadpis: 'Pre trénerov', css: `${CSS_ZOZNAM}\n${CSS_MESTO}\n${CSS_PRE_TRENEROV}`, ld })}
+<body>
+<a class="skip" href="#obsah">Preskočiť na obsah</a>
+${hlavicka('pre-trenerov')}
+
+<main id="obsah" class="wrap">
+  <nav class="crumbs" aria-label="Drobčeková navigácia">
+    <a href="/">Matchball</a>
+    <span class="sep" aria-hidden="true">›</span>
+    <span class="now" aria-current="page">Pre trénerov</span>
+  </nav>
+
+  <section class="hero-t">
+    <div>
+      <p class="eyebrow">Pre trénerov</p>
+      <h1>${esc(nadpis)}</h1>
+      <p class="lead">Hráči ťa nájdu v appke aj na Google a rezervujú si termín bez písania. Platia ti priamo, alebo kartou v appke. ${esc(kde)}</p>
+      <div class="row">
+        <a class="btn btn-green" href="#pridat-sa">Začni zadarmo</a>
+        <a class="btn btn-light" href="/treneri/">Pozri trénerov</a>
+      </div>
+    </div>
+    <div class="telefon" aria-hidden="true"><div class="scr">
+      <div class="r z"><b>Nová rezervácia</b><span>Tenis · sobota 9:00</span></div>
+      <div class="r"><b>Platba</b><span>QR prevod · priamo tebe</span></div>
+      <div class="r"><b>Balíček 10 tréningov</b><span>so zľavou, ktorú určíš ty</span></div>
+      <div class="r"><b>Hodnotenie po tréningu</b><span>Hráči ťa odporučia ďalším</span></div>
+    </div></div>
+  </section>
+
+  <section class="blok">
+    <div class="blok-head"><h2>Čo ti Matchball dá</h2></div>
+    <div class="vyhody">
+      <div class="vyhoda"><div class="ik">${IKONA.pin}</div><h3>Nájdu ťa</h3><p>Profil v appke a vlastná stránka na webe s cenníkom. Odkaz si dáš do bia na Instagrame.</p></div>
+      <div class="vyhoda"><div class="ik">${IKONA.kalendar}</div><h3>Rezervácie bez písania</h3><p>Hráč vidí tvoje voľné časy a rezervuje sám. Pripomienky a zrušenia rieši appka.</p></div>
+      <div class="vyhoda"><div class="ik">${IKONA.sprava}</div><h3>Stáli hráči</h3><p>V Mojich hráčoch vidíš, kto s tebou trénuje. Píšete si v appke a pozveš ich na ďalší termín.</p></div>
+    </div>
+  </section>
+
+  <section class="kroky">
+    <h2>Ako začať</h2>
+    <ol>
+      <li><b>Vyplň profil</b><p>Šport, cena, kde trénuješ a kedy máš čas. Zaberie to 5 minút.</p></li>
+      <li><b>Over sa</b><p>Nahraj licenciu alebo certifikát a dostaneš značku Overený tréner. Nie je to povinné.</p></li>
+      <li><b>Prijímaj rezervácie</b><p>Hráči z tvojho mesta ťa uvidia v appke aj na webe.</p></li>
+    </ol>
+  </section>
+
+  <section class="platby">
+    <div>
+      <p class="eyebrow">Koľko to stojí</p>
+      <div class="velka">0 €</div>
+      <p class="pod">Žiadny mesačný poplatok ani provízia.</p>
+    </div>
+    <div>
+      <h2>Ako ti hráči zaplatia</h2>
+      <ul>
+        <li>${IKONA.fajka}<span><b>QR prevodom alebo v hotovosti.</b> Peniaze idú rovno tebe, bez poplatku. Takto platí väčšina hráčov.</span></li>
+        <li>${IKONA.fajka}<span><b>Kartou, Apple Pay alebo Google Pay v appke</b>, ak hráč chce. Poplatok za službu (5 % + 0,30 €) platí hráč, ty dostaneš celú svoju cenu.</span></li>
+        <li>${IKONA.fajka}<span><b>Balíčky tréningov</b> si hráč kúpi vopred. Zľavu na balíček určíš ty.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="blok">
+    <div class="blok-head"><h2>Časté otázky</h2></div>
+    ${faqHtml(otazky)}
+  </section>
+
+  ${vyzvaStiahnut('Pridaj sa k trénerom na Matchballe.', 'Stiahni si appku, prepni sa na trénera a vyplň profil. Je to zadarmo.')}
+</main>
+
+${PATICKA}
+</body>
+</html>
+`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  Dáta
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -2615,6 +3168,32 @@ async function nacitajSkupiny(url, key) {
     console.warn(`  ! RPC public_sparring_groups zlyhalo: ${e && e.message ? e.message : e}`);
     console.warn('    Stránka skupín bude prázdna.');
     return [];
+  }
+}
+
+/**
+ * Mestá, ktoré majú v appke chat (`conversations.kind = 'community'`,
+ * `community_key = 'city:<kľúč>'`; vzniká pri piatich ľuďoch, migrácia 502).
+ * Číta sa len kľúč — žiadne správy ani členovia. Pri chybe sa stránka mesta
+ * vygeneruje s textom „chat sa otvorí pri piatich ľuďoch", beh nepadne.
+ */
+async function nacitajChatyMiest(url, key) {
+  try {
+    const res = await fetch(`${url.replace(/\/+$/, '')}/rest/v1/conversations?kind=eq.community&select=community_key`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` },
+    });
+    if (!res.ok) {
+      console.warn(`  ! chaty miest: HTTP ${res.status} — stránky miest budú bez chatu`);
+      return new Set();
+    }
+    const data = await res.json();
+    return new Set((Array.isArray(data) ? data : [])
+      .map((r) => String(r.community_key || ''))
+      .filter((k) => k.startsWith('city:'))
+      .map((k) => slugify(k.slice(5))));
+  } catch (e) {
+    console.warn(`  ! chaty miest zlyhali: ${e && e.message ? e.message : e}`);
+    return new Set();
   }
 }
 
@@ -2756,6 +3335,7 @@ async function main() {
 
   let treneri;
   let skupinySurove = [];
+  let chatyMiest = new Set();
   if (fixture) {
     console.log(`Fixture: ${fixture}`);
     treneri = JSON.parse(fs.readFileSync(path.resolve(fixture), 'utf8'));
@@ -2770,6 +3350,7 @@ async function main() {
     }
     treneri = await nacitajZoSupabase(url, key);
     skupinySurove = await nacitajSkupiny(url, key);
+    chatyMiest = await nacitajChatyMiest(url, key);
   }
 
   // Bez slugu niet adresy; bez mena a mesta niet čo ukázať.
@@ -3007,6 +3588,25 @@ async function main() {
       }))) zmenene++;
   }
 
+  // ── Mestá ────────────────────────────────────────────────────────────────
+  // Stránka mesta vzniká tam, kde je aspoň jeden tréner alebo jedna partia.
+  const hubMap = new Map();
+  for (const m of mesta) hubMap.set(m.slug, { slug: m.slug, name: m.name, coaches: m.coaches, skupiny: [] });
+  for (const m of mestaSkupin) {
+    if (!hubMap.has(m.slug)) hubMap.set(m.slug, { slug: m.slug, name: m.name, coaches: [], skupiny: [] });
+    hubMap.get(m.slug).skupiny = m.skupiny;
+  }
+  const mestaHub = [...hubMap.values()]
+    .sort((a, b) => (b.coaches.length + b.skupiny.length) - (a.coaches.length + a.skupiny.length)
+      || a.name.localeCompare(b.name, 'sk'));
+  for (const m of mestaHub) {
+    if (zapis(path.join('mesta', m.slug, 'index.html'),
+      strankaMesta({ mesto: m, coaches: m.coaches, skupiny: m.skupiny, maChat: chatyMiest.has(m.slug) }))) zmenene++;
+  }
+  if (zapis(path.join('mesta', 'index.html'), strankaZoznamuMiest(mestaHub))) zmenene++;
+  if (zapis(path.join('pre-trenerov', 'index.html'),
+    strankaPreTrenerov({ pocetTrenerov: platni.length, pocetMiest: mesta.length }))) zmenene++;
+
   // ── Sitemap ──────────────────────────────────────────────────────────────
   const den = (iso) => {
     const t = Date.parse(iso || '');
@@ -3029,6 +3629,9 @@ async function main() {
 ${[
     polozka(`${WEB_ORIGIN}/`, najnovsi, '1.0'),
     polozka(`${WEB_ORIGIN}/treneri/`, najnovsi, '0.9'),
+    polozka(`${WEB_ORIGIN}/mesta/`, najnovsi, '0.9'),
+    ...mestaHub.map((m) => polozka(`${WEB_ORIGIN}/mesta/${m.slug}/`, najnovsi, '0.9')),
+    polozka(`${WEB_ORIGIN}/pre-trenerov/`, najnovsi, '0.8'),
     // Univerzálna stránka na stiahnutie. Statická, takže `lastmod` má taký istý
     // ako domovská — iný dátum by generátor nemal odkiaľ vziať.
     polozka(`${WEB_ORIGIN}/stiahnut/`, najnovsi, '0.8'),
@@ -3087,6 +3690,9 @@ ${[
     zmazaneMesta.push(...zmazane.map((m) => `${s.slug}/${m}`));
   }
 
+  const zmazaneHuby = zmazNezive(path.join(ROOT, 'mesta'), new Set(mestaHub.map((m) => m.slug)));
+  zmazaneMesta.push(...zmazaneHuby.map((m) => `mesta/${m}`));
+
   // `foto/` nie je mesto: sú v ňom fotky partií (pod id). Upratovanie by ho
   // zmazalo hneď po stiahnutí — stalo sa 20. 9. 2026, karta odkazovala na
   // súbor, ktorý na webe nebol.
@@ -3120,6 +3726,7 @@ ${[
 
   console.log(`Tréneri: ${platni.length} · mestá: ${mesta.length} · zapísaných súborov: ${zmenene}`);
   console.log(`Skupiny: ${skupiny.length} · mestá so skupinami: ${mestaSkupin.length}`);
+  console.log(`Stránky miest: ${mestaHub.map((m) => m.slug).join(', ')} · s chatom: ${[...chatyMiest].join(', ') || '—'}`);
   if (zmazaniTreneri.length) console.log(`Zmazané stránky trénerov: ${zmazaniTreneri.join(', ')}`);
   if (zmazaneMesta.length) console.log(`Zmazané stránky miest: ${zmazaneMesta.join(', ')}`);
   if (zmazaneMestaSkupin.length) console.log(`Zmazané stránky miest so skupinami: ${zmazaneMestaSkupin.join(', ')}`);
