@@ -211,8 +211,11 @@ footer a{display:inline-block;padding:11px 4px}
     // nie je, Safari na to odpovie chybovým oknom a to je horšie než nič.
     // Cez triedu, nie cez id: tú istú dvojicu má odteraz iOS aj Android a
     // `getElementById` by obslúžil vždy len ten prvý.
+    // `p=1` = kód parťáka (Matchball 534): kto appku má, je s majiteľom kódu
+    // hneď parťák. Na Androide sa odkaz z fotoaparátu otvára tu, v prehliadači.
+    var partak = /[?&]p=1(&|$)/.test(location.search);
     otvorAppku('mecbal://invite?ref=' + encodeURIComponent(ref)
-      + (zdroj ? '&z=' + zdroj : ''));
+      + (zdroj ? '&z=' + zdroj : '') + (partak ? '&p=1' : ''));
     // Bez kódu by tá veta klamala — vracať sa netreba, keď nie je čo doplniť.
     [].forEach.call(document.querySelectorAll('.back-hint'), function (el) { el.hidden = false; });
   } else {
