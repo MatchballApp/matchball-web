@@ -2385,9 +2385,10 @@ function strankaSkupin({ mesto, mestaPodla, maTrenerov }) {
       ? `V meste ${mesto.name} zatiaľ partiu nemáme. Založ svoju v appke a nechaj ju nájsť ďalších hráčov.`
       : 'Partie tu zatiaľ len vznikajú. Založ svoju v appke a nechaj ju nájsť ďalších hráčov.');
 
-  // Skupina nemá vlastnú adresu, takže položkou zoznamu je samotný termín —
-  // `SportsEvent` je jediný typ, ktorý o dni, mieste a kapacite vie povedať
-  // pravdu. `url` ukazuje na zoznam mesta, kde skupina naozaj stojí.
+  // Skupina nemá vlastnú adresu, takže položkou zoznamu je jej najbližší
+  // termín — `SportsEvent` je jediný typ, ktorý o dni, mieste a kapacite vie
+  // povedať pravdu. Bez termínu je to `SportsTeam` (nižšie). `url` ukazuje na
+  // zoznam mesta, kde skupina naozaj stojí.
   const ld = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -2409,9 +2410,27 @@ function strankaSkupin({ mesto, mestaPodla, maTrenerov }) {
           address: { '@type': 'PostalAddress', addressLocality: g.city },
         },
       };
-      if (g.next_starts_at) ev.startDate = g.next_starts_at;
-      if (Number(g.capacity) > 0) ev.maximumAttendeeCapacity = Number(g.capacity);
       if (g.organizer_first_name) ev.organizer = { '@type': 'Person', name: g.organizer_first_name };
+      // Udalosť bez dátumu Google odmieta („Chýbajúce pole startDate“, Search
+      // Console 20. 10. 2026). Partia bez naplánovaného termínu preto nie je
+      // `SportsEvent`, ale `SportsTeam` — tím, ktorý hrá, len zatiaľ nevie kedy.
+      if (!g.next_starts_at) {
+        const tim = { '@type': 'SportsTeam', name: g.name, url: ev.url, location: ev.location };
+        if (SPORT_NAZOV[g.sport]) tim.sport = SPORT_NAZOV[g.sport];
+        if (ev.organizer) tim.founder = ev.organizer;
+        return { '@type': 'ListItem', position: i + 1, item: tim };
+      }
+      ev.startDate = g.next_starts_at;
+      // Koniec z dĺžky pravidelného termínu (recurrence start/end v minútach),
+      // keď ju partia má — Google ho odporúča.
+      const r = g.recurrence;
+      const dlzka = r && Number.isFinite(Number(r.end_min)) && Number.isFinite(Number(r.start_min))
+        ? Number(r.end_min) - Number(r.start_min) : 0;
+      const zaciatok = Date.parse(g.next_starts_at);
+      if (dlzka > 0 && Number.isFinite(zaciatok)) ev.endDate = new Date(zaciatok + dlzka * 60_000).toISOString();
+      ev.eventStatus = 'https://schema.org/EventScheduled';
+      if (SPORT_NAZOV[g.sport]) ev.sport = SPORT_NAZOV[g.sport];
+      if (Number(g.capacity) > 0) ev.maximumAttendeeCapacity = Number(g.capacity);
       return { '@type': 'ListItem', position: i + 1, item: ev };
     }),
   };
