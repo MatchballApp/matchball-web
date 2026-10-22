@@ -50,7 +50,7 @@ Akcie ostávajú zelené ako v appke (`#15803D`, na tmavom limetka `#51E041`).
 ### Video
 
 `video/matchball-hero-9x14.mp4` (720×1120, úvod) a `video/matchball-9x14.mp4`
-(1080×1680, `/video/`) sú orezané zo zvislého 9:16: preč je horných 240 px
+(1080×1680, `/video/`, 38,5 s od 22. 10. 2026) sú orezané zo zvislého 9:16: preč je horných 240 px
 z 1920, prázdny pás pre Instagram. Spodok sa orezať nedá — telefóny vo videu
 siahajú po okraj. Staré 9:16 súbory (`matchball.mp4`, `matchball-hero.mp4`,
 `poster.jpg`) ostávajú pre staré odkazy. Výroba z hotového mp4:
