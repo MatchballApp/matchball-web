@@ -201,7 +201,25 @@ footer a{display:inline-block;padding:11px 4px}
     var zvnutra = false;
     try { zvnutra = (document.referrer || '').indexOf(location.origin + '/') === 0; } catch (e) { /* prísnejšie prostredie referrer zamlčí */ }
     if (!zvnutra) {
-      if (window.mb) window.mb('store_redirect', { obchod: isAndroid ? 'google_play' : 'app_store' });
+      // Prehliadač VNÚTRI Instagramu či Facebooku (24. 10. 2026): https adresa
+      // obchodu sa v ňom často otvorí len ako webová stránka App Store / Play
+      // a človek musí ťukať ešte raz — z reklamy si appku otvorilo ~10 % ľudí.
+      // Tam sa obchod otvára priamo schémou aplikácie obchodu; keď ju prehliadač
+      // nepustí, o chvíľu sa použije https ako doteraz. V Safari a Chrome ostáva
+      // https — tam itms-apps:// vyvolá zbytočné „Otvoriť v App Store?".
+      var vnutri = /Instagram|FBAN|FBAV|FB_IAB|FBIOS|Messenger|TikTok|musical_ly|BytedanceWebview|LinkedInApp|Snapchat/i.test(ua);
+      if (window.mb) window.mb('store_redirect', { obchod: isAndroid ? 'google_play' : 'app_store', vnutri: vnutri ? 1 : 0 });
+      if (vnutri && isIOS) {
+        location.href = APP_STORE.replace(/^https:/, 'itms-apps:');
+        setTimeout(function () { if (!document.hidden) location.replace(APP_STORE); }, 1500);
+        return;
+      }
+      if (vnutri && isAndroid) {
+        var q = PLAY.split('?')[1] || '';
+        location.href = 'intent://details?' + q + '#Intent;scheme=market;package=com.android.vending;S.browser_fallback_url=' + encodeURIComponent(PLAY) + ';end';
+        setTimeout(function () { if (!document.hidden) location.replace(PLAY); }, 1500);
+        return;
+      }
       location.replace(isAndroid ? PLAY : APP_STORE);
       return;
     }
