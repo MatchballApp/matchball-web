@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sparingové skupiny Košice | Matchball</title>
-<meta name="description" content="2 partie v meste Košice, ktoré hrávajú pravidelne a berú nových hráčov. Pozri si deň, čas a úroveň — pridáš sa v appke Matchball.">
+<meta name="description" content="3 partie v meste Košice, ktoré hrávajú pravidelne a berú nových hráčov. Pozri si deň, čas a úroveň — pridáš sa v appke Matchball.">
 <link rel="canonical" href="https://matchballapp.com/skupiny/kosice/">
 <link rel="icon" href="/favicon-m.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="32x32" href="/icon-m-32.png">
@@ -14,7 +14,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://matchballapp.com/skupiny/kosice/">
 <meta property="og:title" content="Partie — Košice | Matchball">
-<meta property="og:description" content="2 partie v meste Košice, ktoré hrávajú pravidelne a berú nových hráčov. Pozri si deň, čas a úroveň — pridáš sa v appke Matchball.">
+<meta property="og:description" content="3 partie v meste Košice, ktoré hrávajú pravidelne a berú nových hráčov. Pozri si deň, čas a úroveň — pridáš sa v appke Matchball.">
 <meta property="og:image" content="https://matchballapp.com/og-m.jpg">
 <meta property="og:locale" content="sk_SK">
 <meta name="twitter:card" content="summary_large_image">
@@ -411,7 +411,7 @@ footer .brand{font-size:1.2rem;color:#fff}
   .grid-groups.solo{margin-bottom:64px}
 }
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Partie — Košice","url":"https://matchballapp.com/skupiny/kosice/","numberOfItems":2,"itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"SportsEvent","name":"Sunday Running Club","url":"https://matchballapp.com/skupiny/kosice/","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode","location":{"@type":"Place","name":"Park Anicka","address":{"@type":"PostalAddress","addressLocality":"Košice"}},"organizer":{"@type":"Person","name":"Martin"},"startDate":"2026-10-25T09:00:00+00:00","endDate":"2026-10-25T10:00:00.000Z","eventStatus":"https://schema.org/EventScheduled","sport":"Beh"}},{"@type":"ListItem","position":2,"item":{"@type":"SportsTeam","name":"Ja sam","url":"https://matchballapp.com/skupiny/kosice/","location":{"@type":"Place","name":"Košice","address":{"@type":"PostalAddress","addressLocality":"Košice"}},"sport":"Beh","founder":{"@type":"Person","name":"Andrej"}}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Partie — Košice","url":"https://matchballapp.com/skupiny/kosice/","numberOfItems":3,"itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"SportsEvent","name":"Sunday Running Club","url":"https://matchballapp.com/skupiny/kosice/","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode","location":{"@type":"Place","name":"Park Anicka","address":{"@type":"PostalAddress","addressLocality":"Košice"}},"organizer":{"@type":"Person","name":"Martin"},"startDate":"2026-10-25T09:00:00+00:00","endDate":"2026-10-25T10:00:00.000Z","eventStatus":"https://schema.org/EventScheduled","sport":"Beh"}},{"@type":"ListItem","position":2,"item":{"@type":"SportsEvent","name":"Bedminton · Košice","url":"https://matchballapp.com/skupiny/kosice/","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode","location":{"@type":"Place","name":"NTC","address":{"@type":"PostalAddress","addressLocality":"Košice"}},"organizer":{"@type":"Person","name":"Gabriela"},"startDate":"2026-10-27T18:00:00+00:00","eventStatus":"https://schema.org/EventScheduled","sport":"Bedminton"}},{"@type":"ListItem","position":3,"item":{"@type":"SportsTeam","name":"Ja sam","url":"https://matchballapp.com/skupiny/kosice/","location":{"@type":"Place","name":"Košice","address":{"@type":"PostalAddress","addressLocality":"Košice"}},"sport":"Beh","founder":{"@type":"Person","name":"Andrej"}}}]}</script>
 <script src="/m.js" defer></script>
 </head>
 <body>
@@ -467,7 +467,16 @@ footer .brand{font-size:1.2rem;color:#fff}
     <p class="lead">Hľadáš partiu v meste Košice? Tieto hrávajú pravidelne a berú nových. Deň, čas aj úroveň vidíš vopred.</p>
   </header>
 
-  
+  <div class="filters">
+    <div class="frow">
+      <span class="flabel" id="f-sport">Šport</span>
+      <div class="fchips" role="group" aria-labelledby="f-sport" id="filter-sport">
+        <button class="fpill" type="button" data-sport="" aria-current="true">Všetky <span class="n">3</span></button>
+        <button class="fpill" type="button" data-sport="badminton"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.2" r="1.6"></circle><path d="M12 6v3M8.2 20.5L10.6 9M15.8 20.5L13.4 9M5.2 17L10 9M18.8 17L14 9"></path></svg>Bedminton <span class="n">1</span></button>
+        <button class="fpill" type="button" data-sport="running"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5.4" r="2"></circle><path d="M12 8v5.4M12 13.4l-4 7M12 13.4l4 7M8.4 10l3.6 1.6 3.6-3"></path></svg>Beh <span class="n">2</span></button>
+      </div>
+    </div>
+  </div>
   <div class="grid-groups solo">
       <article class="group-card" data-sport="running">
         <p class="group-sport">Beh · Všetky úrovne</p>
@@ -482,6 +491,22 @@ footer .brand{font-size:1.2rem;color:#fff}
         <p class="group-org"><img src="/skupiny/foto/org-ff0a91ff-7c76-4ff8-ac05-3009d78179c6.jpg" alt="" width="224" height="224" loading="lazy">Organizuje Martin</p>
         <div class="group-foot">
           <div class="group-spots"><b>5 členov</b><span>pridá sa, kto chce</span></div>
+          <a class="btn btn-green btn-sm" href="#pridat-sa">Pridať sa</a>
+        </div>
+      </article>
+      <article class="group-card" data-sport="badminton">
+        <p class="group-sport">Bedminton · Všetky úrovne</p>
+        <div class="group-head">
+          <img class="group-avatar" src="/avatary/fc1.jpg" alt="" width="224" height="224" loading="lazy">
+          <div>
+            <h3>Bedminton · Košice</h3>
+            <p class="group-when">NTC</p>
+          </div>
+        </div>
+        <p class="group-desc">Bedminton stvorhra NTC, hravame utorky o 20:30</p>
+        <p class="group-org"><img src="/skupiny/foto/org-0c3d83c5-b808-428c-ae8f-ee65a69708a9.jpg" alt="" width="224" height="224" loading="lazy">Organizuje Gabriela</p>
+        <div class="group-foot">
+          <div class="group-spots"><b>1 člen</b><span>pridá sa, kto chce</span></div>
           <a class="btn btn-green btn-sm" href="#pridat-sa">Pridať sa</a>
         </div>
       </article>
@@ -580,6 +605,25 @@ footer .brand{font-size:1.2rem;color:#fff}
     </div>
   </div>
 </footer>
-
+<script>
+(function(){
+  'use strict';
+  var lista = document.getElementById('filter-sport');
+  if (!lista) return;
+  var cipy = [].slice.call(lista.querySelectorAll('.fpill'));
+  var karty = [].slice.call(document.querySelectorAll('.group-card'));
+  var sekcie = [].slice.call(document.querySelectorAll('.city-groups'));
+  lista.addEventListener('click', function(e){
+    var cip = e.target.closest('.fpill');
+    if (!cip) return;
+    var sport = cip.getAttribute('data-sport');
+    cipy.forEach(function(c){
+      if (c === cip) c.setAttribute('aria-current', 'true'); else c.removeAttribute('aria-current');
+    });
+    karty.forEach(function(k){ k.hidden = !!sport && k.getAttribute('data-sport') !== sport; });
+    sekcie.forEach(function(s){ s.hidden = !s.querySelector('.group-card:not([hidden])'); });
+  });
+})();
+</script>
 </body>
 </html>
