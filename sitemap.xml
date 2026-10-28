@@ -2,232 +2,482 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://matchballapp.com/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/mesta/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/mesta/kosice/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/mesta/poprad/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/mesta/bratislava/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/mesta/komarno/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/mesta/nitra/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/mesta/nove-mesto-nad-vahom/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/mesta/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/mesta/ruzomberok/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/mesta/spisske-vlachy/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/mesta/zilina/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/pre-trenerov/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/stiahnut/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/video/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/kosice/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/poprad/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/komarno/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/nitra/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/nove-mesto-nad-vahom/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/ruzomberok/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/spisske-vlachy/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/zilina/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/bedminton/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.75</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/stolny-tenis/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/futbal/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/futsal/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/volejbal/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/plazovy-volejbal/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/basketbal/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/hadzana/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.75</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/florbal/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.75</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/nohejbal/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.75</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/fitnes/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.75</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/funkcny-trening/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.75</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/skupinove-cvicenie/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/kondicna-priprava/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/joga/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/pilates/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.75</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/box-a-kickbox/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/bojove-umenia/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/sebaobrana/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/beh/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/lyzovanie/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/snowboard/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/korculovanie/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.75</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/sach/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/fyzioterapia/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/masaze/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/vyzivove-poradenstvo/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/sportova-psychologia/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/servis-vystroja/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.75</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/bedminton/kosice/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/bedminton/poprad/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/stolny-tenis/kosice/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/stolny-tenis/nove-mesto-nad-vahom/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/stolny-tenis/spisske-vlachy/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/futbal/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/futsal/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/volejbal/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/plazovy-volejbal/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/basketbal/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/hadzana/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/florbal/kosice/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/florbal/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/florbal/zilina/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/nohejbal/ruzomberok/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/fitnes/kosice/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/fitnes/poprad/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/fitnes/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/funkcny-trening/kosice/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/funkcny-trening/poprad/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/funkcny-trening/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/skupinove-cvicenie/poprad/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/skupinove-cvicenie/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/kondicna-priprava/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/joga/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/pilates/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/box-a-kickbox/kosice/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/box-a-kickbox/nitra/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/box-a-kickbox/poprad/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/box-a-kickbox/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/bojove-umenia/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/sebaobrana/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/beh/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/lyzovanie/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/snowboard/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/korculovanie/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/treneri/sach/komarno/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/fyzioterapia/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/masaze/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/vyzivove-poradenstvo/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/sportova-psychologia/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/treneri/servis-vystroja/prievidza/</loc>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -267,7 +517,12 @@
   </url>
   <url>
     <loc>https://matchballapp.com/t/pavol-svec/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/t/alex-kalina/</loc>
+    <lastmod>2026-10-27</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -282,12 +537,17 @@
   </url>
   <url>
     <loc>https://matchballapp.com/t/frantisek-saroch/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://matchballapp.com/t/jozef-kosturik/</loc>
     <lastmod>2026-10-23</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://matchballapp.com/t/lubos-oppenberger/</loc>
+    <lastmod>2026-10-27</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -302,7 +562,7 @@
   </url>
   <url>
     <loc>https://matchballapp.com/t/miriam/</loc>
-    <lastmod>2026-10-23</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
